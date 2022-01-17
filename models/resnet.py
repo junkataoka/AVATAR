@@ -113,18 +113,16 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
         self.avgpool = nn.AvgPool2d(7)
-        #self.fc = nn.Linear(512 * block.expansion, num_classeses)
-        self.fc1 = nn.Sequential(nn.Linear(512 * block.expansion, num_neurons * block.expansion))
-        # nn.BatchNorm1d(num_neurons * block.expansion),
-        # nn.ReLU(inplace=True))
-        self.bn_l1 = nn.BatchNorm1d(512 * block.expansion)
-        self.bn_l2 = nn.BatchNorm1d(num_neurons * block.expansion)
+        self.fc1 = nn.Sequential(nn.Linear(512 * block.expansion, num_neurons * block.expansion),
+                                 nn.BatchNorm1d(num_neurons * block.expansion),
+                                 nn.ReLU(inplace=True))
+
         self.fc2 = nn.Linear(num_neurons * block.expansion, num_classeses)
         self.domain_classifier = nn.Sequential()
-        self.domain_classifier.add_module('d_fc1', nn.Linear(2048 + 4 * 128, 100))
-        self.domain_classifier.add_module('d_bn1', nn.BatchNorm1d(100))
+        self.domain_classifier.add_module('d_fc1', nn.Linear(2048 + 4 * 128, num_neurons*block.expansion))
+        self.domain_classifier.add_module('d_bn1', nn.BatchNorm1d(num_neurons*block.expansion))
         self.domain_classifier.add_module('d_relu1', nn.ReLU(True))
-        self.domain_classifier.add_module('d_fc2', nn.Linear(100, 2))
+        self.domain_classifier.add_module('d_fc2', nn.Linear(num_neurons*block.expansion, 2))
         self.domain_classifier.add_module('d_softmax', nn.LogSoftmax(dim=1))
 
         for m in self.modules():
@@ -166,8 +164,7 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         y = self.fc1(x)
-        y_relu = self.relu(y)
-        ca = self.fc2(y_relu)
+        ca = self.fc2(y)
         reverse_feature_x = ReverseLayerF.apply(x, alpha)
         reverse_feature_y = ReverseLayerF.apply(y, alpha)
         domain_output = self.domain_classifier(torch.cat([reverse_feature_x, reverse_feature_y], dim=1))

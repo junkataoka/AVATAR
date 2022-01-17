@@ -20,7 +20,7 @@ def opts():
     parser.add_argument('--batch_size', type=int, default=64, help='batch size')
     parser.add_argument('--workers', type=int, default=8, metavar='N', help='number of data loading workers (default: 8)')
     parser.add_argument('--no_da', action='store_true', help='whether to not use data augmentation')
-    parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
+    parser.add_argument('--lr', type=float, default=1e-5, help='learning rate')
     parser.add_argument('--lr_plan', type=str, default='dao', help='learning rate decay plan of step or dao')
     parser.add_argument('--schedule', type=int, nargs='+', default=[80, 120], help='decrease learning rate at these epochs for step decay')
     parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
@@ -76,9 +76,8 @@ def opts():
     args.pretrained = True
     if args.tar.find('amazon') == -1:
         args.init_cen_on_st = True
-    # elif args.src.find('webcam') != -1:
-    #     args.beta = 0.5
-    # args.init_cen_on_st = True
+    elif args.src.find('webcam') != -1:
+        args.beta = 0.5
     args.src_cls = True
     args.src_cen_first = True
     args.learn_embed = True

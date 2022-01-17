@@ -22,12 +22,14 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     model.train()
 
     lam = 2 / (1 + math.exp(-1 * 10 * epoch / args.epochs)) - 1 # penalty parameter
+    alpha_dann = (1+epoch) / args.epochs
     #lam = 1.0
     if args.src_cls:
         weight = lam
     else:
         weight = 1.0
     adjust_learning_rate(optimizer, epoch, args) # adjust learning rate
+
 
     end = time.time()
     # prepare target data
@@ -75,7 +77,8 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     elif args.aug_tar_agree and args.gray_tar_agree:
         loss += weight * (criterion_cons(ca_t, ca_t_dup) + criterion_cons(ca_t, ca_t_gray))
 
-    loss += weight * TarDisClusterLoss(args, epoch, ca_t, target_target, softmax=True)
+    tardis_loss = weight * TarDisClusterLoss(args, epoch, ca_t, target_target, softmax=True)
+    loss += tardis_loss
     d_t_target = torch.ones(d_t.size(0)).long().cuda()
     loss += nll_loss(d_t, d_t_target) / 2
 
@@ -113,12 +116,12 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
                 prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
                 loss += weight * SrcClassifyLoss(args, prob_pred_2, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit)
 
-    if args.mixup:
-        mixup_ratio = torch.rand(1, device="cpu")
-        input_mixup_var = input_source_var * (1-mixup_ratio) + input_target_var * mixup_ratio
-        f_mu, f_mu_2, ca_mu, d_mu = model(input_mixup_var, alpha=lam)
-        loss += MixUpLoss(args, ca_mu, target_source, ca_t.argmax(1).detach(), mixup_ratio, index, src_cs, lam, fit=args.src_fit)
-        # d_mu_target = mixup_ratio.expand(d_mu.size(0)).long().cuda()
+    # if args.mixup:
+    #     mixup_ratio = torch.rand(1, device="cpu")
+    #     input_mixup_var = input_source_var * (1-mixup_ratio) + input_target_var * mixup_ratio
+    #     f_mu, f_mu_2, ca_mu, d_mu = model(input_mixup_var, alpha=lam)
+    #     loss += MixUpLoss(args, ca_mu, target_source, ca_t.argmax(1).detach(), mixup_ratio, index, src_cs, lam, fit=args.src_fit)
+    #     d_mu_target = mixup_ratio.expand(d_mu.size(0)).long().cuda()
         # loss += nll_loss(d_mu, d_mu_target)
 
     losses.update(loss.data.item(), input_target.size(0))
@@ -666,11 +669,12 @@ def adjust_learning_rate(optimizer, epoch, args):
         lr = args.lr / math.pow((1 + 10 * epoch / args.epochs), 0.75)
     for param_group in optimizer.param_groups:
        if param_group['name'] == 'conv':
-           param_group['lr'] = lr * 0.1
-       elif param_group['name'] == 'ca_cl':
            param_group['lr'] = lr
+       elif param_group['name'] == 'ca_cl':
+           param_group['lr'] = lr * 10
        else:
-           raise ValueError('The required parameter group does not exist.')
+           param_group['lr'] = lr * 10
+        #    raise ValueError('The required parameter group does not exist.')
 
 
 def accuracy(output, target, topk=(1,)):

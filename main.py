@@ -26,6 +26,7 @@ from data.prepare_data import generate_dataloader # prepare the data and dataloa
 from utils.consensus_loss import ConsensusLoss
 import time
 import gc
+import neptune.new as neptune
 
 args = opts()
 
@@ -41,6 +42,9 @@ def main():
     # define model
     model = Model_Construct(args)
     print(model)
+    run = neptune.init(project = "junkataoka/SRDC",
+                       api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIwOTE0MGFjYy02NzMwLTRkODQtYTU4My1lNjk0YWEzODM3MGIifQ==")
+
     model = torch.nn.DataParallel(model).cuda() # define multiple GPUs
 
     # define learnable cluster centers
@@ -204,9 +208,11 @@ def main():
         if test_flag:
             # record the best prec1 and save checkpoint
             log = open(os.path.join(args.log, 'log.txt'), 'a')
+            run["metrics/current_acc"].log(prec1)
             if prec1 > best_prec1:
                 best_prec1 = prec1
                 cond_best_test_prec1 = 0
+                run["metrics/best_acc"].log(best_prec1)
                 log.write('\n                                                                                 best val acc till now: %3f' % best_prec1)
             if test_acc > best_test_prec1:
                 best_test_prec1 = test_acc

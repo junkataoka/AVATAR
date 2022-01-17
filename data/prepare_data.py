@@ -98,8 +98,8 @@ def generate_dataloader(args):
       			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
       	])
 
-    if args.randaug:
-      data_transform_train.transforms.insert(0, RandAugment(n=3, m=7))
+    # if args.randaug:
+    #   data_transform_train.transforms.insert(0, RandAugment(n=1, m=2))
 
     source_train_dataset = ImageFolder(root=traindir, transform=data_transform_train)
     source_test_dataset = ImageFolder(root=traindir, transform=data_transform_test)
