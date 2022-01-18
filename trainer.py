@@ -10,7 +10,7 @@ import gc
 import ipdb
 import torch.nn as nn
 
-def train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, criterion_cons, optimizer, itern, epoch, new_epoch_flag, src_cs, args):
+def train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, criterion_cons, optimizer, itern, epoch, new_epoch_flag, src_cs, args, run):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     top1_source = AverageMeter()
@@ -63,7 +63,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
         input_target_gray_var = Variable(input_target_gray)
 
     # model forward on target
-    f_t, f_t_2, ca_t, d_t = model(input_target_var, alpha=lam)
+    f_t, f_t_2, ca_t, d_t = model(input_target_var, alpha=1)
     if args.aug_tar_agree:
         _, _, ca_t_dup, d_t_dup = model(input_target_dup_var, alpha=lam)
     if args.gray_tar_agree:
@@ -77,17 +77,24 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     elif args.aug_tar_agree and args.gray_tar_agree:
         loss += weight * (criterion_cons(ca_t, ca_t_dup) + criterion_cons(ca_t, ca_t_gray))
 
-    tardis_loss = weight * TarDisClusterLoss(args, epoch, ca_t, target_target, softmax=True)
+    tardis_loss = weight * TarDisClusterLoss(args, epoch, ca_t, target_target, em=(args.cluster_method=="em"))
+    run["metrics/tardis_loss"].log(tardis_loss)
     loss += tardis_loss
     d_t_target = torch.ones(d_t.size(0)).long().cuda()
-    loss += nll_loss(d_t, d_t_target) / 2
+    d_t_loss = weight * nll_loss(d_t, d_t_target) / 2
+    loss += d_t_loss
+    run["metrics/d_t_loss"].log(tardis_loss)
 
     if args.learn_embed:
         prob_pred = (1 + (f_t.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-        loss += weight * TarDisClusterLoss(args, epoch, prob_pred, target_target, softmax=args.embed_softmax)
+        tar_dis_loss_f1 = weight * TarDisClusterLoss(args, epoch, prob_pred, target_target, softmax=args.embed_softmax)
+        loss += tar_dis_loss_f1
+        run["metrics/tar_dis_loss_f1"].log(tar_dis_loss_f1)
         if not args.no_second_embed:
             prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-            loss += weight * TarDisClusterLoss(args, epoch, prob_pred_2, target_target, softmax=args.embed_softmax)
+            tar_dis_loss_f2 = weight * TarDisClusterLoss(args, epoch, prob_pred_2, target_target, softmax=args.embed_softmax)
+            loss += tar_dis_loss_f2
+            run["metrics/tar_dis_loss_f2"].log(tar_dis_loss_f2)
 
     if args.src_cls:
         # prepare source data
@@ -101,28 +108,44 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
         target_source_var = Variable(target_source)
 
         # model forward on source
-        f_s, f_s_2, ca_s, d_s = model(input_source_var, alpha=lam)
+        f_s, f_s_2, ca_s, d_s = model(input_source_var, alpha=1)
         prec1_s = accuracy(ca_s.data, target_source, topk=(1,))[0]
         top1_source.update(prec1_s.item(), input_source.size(0))
 
-        loss += SrcClassifyLoss(args, ca_s, target_source, index, src_cs, lam, fit=args.src_fit)
+        src_dis_loss = weight * SrcClassifyLoss(args, ca_s, target_source, index, src_cs, lam, fit=args.src_fit)
+        loss += src_dis_loss
+        run["metrics/src_dis_loss"].log(src_dis_loss)
+
         d_s_target = torch.zeros(d_s.size(0)).long().cuda()
-        loss += nll_loss(d_s, d_s_target) / 2
+        d_s_loss = weight * nll_loss(d_s, d_s_target) / 2
+        run["metrics/d_s_loss"].log(d_s_loss)
+        loss += d_s_loss
 
         if args.learn_embed:
             prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-            loss += weight * SrcClassifyLoss(args, prob_pred, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit)
+            src_dis_loss_f1 = weight * SrcClassifyLoss(args, prob_pred, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit)
+            run["metrics/src_dis_loss_f1"].log(src_dis_loss_f1)
+            loss += src_dis_loss_f1
+
             if not args.no_second_embed:
                 prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-                loss += weight * SrcClassifyLoss(args, prob_pred_2, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit)
+                src_dis_loss_f2 = weight * SrcClassifyLoss(args, prob_pred_2, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit)
+                loss += src_dis_loss_f2
+                run["metrics/src_dis_loss_f2"].log(src_dis_loss_f2)
 
-    # if args.mixup:
-    #     mixup_ratio = torch.rand(1, device="cpu")
-    #     input_mixup_var = input_source_var * (1-mixup_ratio) + input_target_var * mixup_ratio
-    #     f_mu, f_mu_2, ca_mu, d_mu = model(input_mixup_var, alpha=lam)
-    #     loss += MixUpLoss(args, ca_mu, target_source, ca_t.argmax(1).detach(), mixup_ratio, index, src_cs, lam, fit=args.src_fit)
-    #     d_mu_target = mixup_ratio.expand(d_mu.size(0)).long().cuda()
-        # loss += nll_loss(d_mu, d_mu_target)
+    if args.mixup:
+        # mixup_ratio = torch.rand(1, device="cpu")
+        mixup_ratio = torch.tensor(0.5, device="cpu") 
+        input_mixup_var = input_source_var * (1-mixup_ratio) + input_target_var * mixup_ratio
+        f_mu, f_mu_2, ca_mu, d_mu = model(input_mixup_var, alpha=1)
+        mix_up_loss = weight * MixUpLoss(args, ca_mu, target_source, ca_t.argmax(1).detach(), mixup_ratio, index, src_cs, lam, fit=args.src_fit)
+        loss += mix_up_loss
+        run["metrics/mix_up_loss"].log(mix_up_loss)
+
+        # d_mu_target = mixup_ratio.expand(d_mu.size(0)).long().cuda()
+        # d_mixup_loss = weight * nll_loss(d_mu, d_mu_target)
+        # run["metrics/d_mix_up_loss"].log(d_mixup_loss)
+        # loss += d_mixup_loss
 
     losses.update(loss.data.item(), input_target.size(0))
 
@@ -157,12 +180,12 @@ def TarDisClusterLoss(args, epoch, output, target, softmax=True, em=False):
     if em:
         prob_q = prob_p
     else:
-        # prob_q1 = Variable(torch.cuda.FloatTensor(prob_p.size()).fill_(0))
-        # prob_q1.scatter_(1, target.unsqueeze(1), torch.ones(prob_p.size(0), 1).cuda()) # assigned pseudo labels
+        prob_q1 = Variable(torch.cuda.FloatTensor(prob_p.size()).fill_(0))
+        prob_q1.scatter_(1, target.unsqueeze(1), torch.ones(prob_p.size(0), 1).cuda()) # assigned pseudo labels
         prob_q2 = prob_p / prob_p.sum(0, keepdim=True).pow(0.5)
         prob_q2 /= prob_q2.sum(1, keepdim=True)
-        # prob_q = (1 - args.beta) * prob_q1 + args.beta * prob_q2
-        # prob_q_max, _ = prob_q.max(dim=1)
+        prob_q = (1 - args.beta) * prob_q1 + args.beta * prob_q2
+        prob_q_max, _ = prob_q.max(dim=1)
         prob_q = prob_q2.detach()
 
     if softmax:
