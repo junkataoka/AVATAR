@@ -80,10 +80,10 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, em=(args.cluster_method=="em"))
     run["metrics/tardis_loss"].log(tardis_loss)
     loss += weight * tardis_loss
-    # d_t_target = torch.ones(d_t.size(0)).long().cuda()
-    # d_t_loss = weight * nll_loss(d_t, d_t_target) / 2
-    # loss += d_t_loss
-    # run["metrics/d_t_loss"].log(tardis_loss)
+    d_t_target = torch.ones(d_t.size(0)).long().cuda()
+    d_t_loss = nll_loss(d_t, d_t_target)
+    loss += weight * d_t_loss
+    run["metrics/d_t_loss"].log(tardis_loss)
 
     if args.learn_embed:
         t_prob_pred = (1 + (f_t.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
@@ -116,10 +116,10 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
         loss += weight * src_dis_loss
         run["metrics/src_dis_loss"].log(src_dis_loss)
 
-        # d_s_target = torch.zeros(d_s.size(0)).long().cuda()
-        # d_s_loss = weight * nll_loss(d_s, d_s_target) / 2
-        # run["metrics/d_s_loss"].log(d_s_loss)
-        # loss += d_s_loss
+        d_s_target = torch.zeros(d_s.size(0)).long().cuda()
+        d_s_loss =  nll_loss(d_s, d_s_target)
+        run["metrics/d_s_loss"].log(d_s_loss)
+        loss += weight * d_s_loss
 
         if args.learn_embed:
             s_prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
