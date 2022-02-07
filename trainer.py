@@ -126,13 +126,13 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
                 prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
                 loss += weight * SrcClassifyLoss(args, prob_pred_2, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit)
 
-    if args.mixup:
-        mixup_ratio = torch.rand(1, device="cpu")
-        input_mixup_var = input_source_var * (1-mixup_ratio) + input_target_var * mixup_ratio
-        f_mu, f_mu_2, ca_mu, d_mu = model(input_mixup_var, lam)
-        mix_up_loss = MixUpLoss(args, ca_mu, target_source, target_target, mixup_ratio, index, src_cs, lam, fit=args.src_fit)
-        loss += weight * mix_up_loss
-        run["metrics/mix_up_loss"].log(mix_up_loss)
+    # if args.mixup:
+    #     mixup_ratio = torch.rand(1, device="cpu")
+    #     input_mixup_var = input_source_var * (1-mixup_ratio) + input_target_var * mixup_ratio
+    #     f_mu, f_mu_2, ca_mu, d_mu = model(input_mixup_var, lam)
+    #     mix_up_loss = MixUpLoss(args, ca_mu, target_source, target_target, mixup_ratio, index, src_cs, tar_cs, lam, fit=args.src_fit)
+    #     loss += weight * mix_up_loss
+    #     run["metrics/mix_up_loss"].log(mix_up_loss)
 
     losses.update(loss.data.item(), input_target.size(0))
     
@@ -159,7 +159,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     return train_loader_source_batch, train_loader_target_batch
 
 
-def MixUpLoss(args, output, source_target, target_target, mixup_ratio, index, src_cs, lam, softmax=True, fit=False):
+def MixUpLoss(args, output, source_target, target_target, mixup_ratio, index, src_cs, tar_cs, lam, softmax=True, fit=False):
     if softmax:
         prob_p = F.softmax(output, dim=1)
     else:
@@ -171,10 +171,22 @@ def MixUpLoss(args, output, source_target, target_target, mixup_ratio, index, sr
     prob_q_source.scatter_(1, source_target.unsqueeze(1), torch.ones(prob_p.size(0), 1).cuda())
     prob_q = (1-mixup_ratio) * prob_q_source + (mixup_ratio) * prob_q_target
 
-    if softmax:
-        loss = -  (prob_q * F.log_softmax(output, dim=1)).sum(1).mean()
+    if args.tar_mix_weight:
+        tar_weights = lam * tar_cs[index] + (1 - lam) * torch.ones(output.size(0)).cuda()
     else:
-        loss = - (prob_q * prob_p.log()).sum(1).mean()
+        tar_weights = tar_cs[index]
+
+    if args.src_mix_weight:
+        src_weights = lam * src_cs[index] + (1 - lam) * torch.ones(output.size(0)).cuda()
+    else:
+        src_weights = src_cs[index]
+
+    mix_weights =  tar_weights * mixup_ratio + (1-mixup_ratio) * src_weights
+
+    if softmax:
+        loss = - (mix_weights * (prob_q * F.log_softmax(output, dim=1)).sum(1)).mean()
+    else:
+        loss = - (mix_weights * (prob_q * prob_p.log()).sum(1)).mean()
 
     return loss
 
@@ -196,14 +208,13 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, softmax=T
             prob_q = (1 - args.beta) * prob_q1 + args.beta * prob_q2
 
     if args.tar_mix_weight:
-        src_weights = lam * tar_cs[index] + (1 - lam) * torch.ones(output.size(0)).cuda()
+        tar_weights = lam * tar_cs[index] + (1 - lam) * torch.ones(output.size(0)).cuda()
     else:
-        src_weights = tar_cs[index]
-    
+        tar_weights = tar_cs[index]
     if softmax:
-        loss = - (prob_q * F.log_softmax(output, dim=1)).sum(1).mean()
+        loss = - (tar_weights * (prob_q * F.log_softmax(output, dim=1)).sum(1)).mean()
     else:
-        loss = - (prob_q * prob_p.log()).sum(1).mean()
+        loss = - (tar_weights * (prob_q * prob_p.log()).sum(1)).mean()
     
     return loss
     
@@ -390,7 +401,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
                    epoch, i, len(val_loader_target), batch_time=batch_time,
                    data_time=data_time, tc_top1=top1, tc_top5=top5, tc_loss=losses))
 
-    target_preds = output.data.max(1)[1]
+    target_preds = pseudo_labels.max(1)[1]
     log_confusion_matrix(target_targets, target_preds, 31, "Target True VS Target Pred", run)
     tsne = TSNE(2)
     tsne_2 = TSNE(2)
@@ -412,8 +423,8 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     ax1.legend()
     ax2.legend()
 
-    run["fig/target_tsne"].upload(fig1)
-    run["fig/target_tsne2"].upload(fig2)
+    run["fig/target_tsne"].log(fig1)
+    run["fig/target_tsne2"].log(fig2)
     plt.close(fig1)
     plt.close(fig2)
 
@@ -464,7 +475,7 @@ def log_confusion_matrix(target, label, num_classes, title, run):
     plt.figure(figsize = (12,12))
     fig_ = sns.heatmap(df_cm, annot=True, cmap='Spectral').get_figure()
     plt.title(title)
-    run[f"fig/{title}"].upload(fig_)
+    run[f"fig/{title}"].log(fig_)
     plt.close(fig_)
 
 def source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, cen, args):
