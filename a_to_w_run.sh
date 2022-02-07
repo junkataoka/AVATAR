@@ -22,7 +22,6 @@ srun python main.py  \
 --learn_embed \
 --src_cls \
 --mixup \
---randaug \
 --batch_size 42
 
 # python main.py  \
@@ -37,5 +36,4 @@ srun python main.py  \
 # --learn_embed \
 # --src_cls \
 # --mixup \
-# --randaug \
 # --batch_size 20

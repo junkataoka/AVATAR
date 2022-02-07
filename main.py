@@ -15,7 +15,6 @@ import random
 import numpy as np
 import torch.backends.cudnn as cudnn
 from torch.autograd import Variable
-import torch.nn as nn
 from models.model_construct import Model_Construct # for the model construction
 from trainer import train # for the training process
 from trainer import validate, validate_compute_cen # for the validation/test process
@@ -33,20 +32,19 @@ args = opts()
 best_prec1 = 0
 best_test_prec1 = 0
 cond_best_test_prec1 = 0
-best_cluster_acc = 0
-best_cluster_acc_2 = 0
+best_cluster_acc = 0 
+best_cluster_acc_2 = 0 
 
 def main():
     global args, best_prec1, best_test_prec1, cond_best_test_prec1, best_cluster_acc, best_cluster_acc_2
-
+    
     # define model
     model = Model_Construct(args)
     print(model)
+    model = torch.nn.DataParallel(model).cuda() # define multiple GPUs
     run = neptune.init(project = "junkataoka/SRDC",
                        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIwOTE0MGFjYy02NzMwLTRkODQtYTU4My1lNjk0YWEzODM3MGIifQ==")
-
-    model = torch.nn.DataParallel(model).cuda() # define multiple GPUs
-
+    
     # define learnable cluster centers
     learn_cen = Variable(torch.cuda.FloatTensor(args.num_classes, 2048).fill_(0))
     learn_cen.requires_grad_(True)
@@ -56,11 +54,11 @@ def main():
     # define loss function/criterion and optimizer
     criterion = torch.nn.CrossEntropyLoss().cuda()
     criterion_cons = ConsensusLoss(nClass=args.num_classes, div=args.div).cuda()
-
+    
     np.random.seed(1)  # may fix test data
     random.seed(1)
     torch.manual_seed(1)
-
+    
     # apply different learning rates to different layer
     optimizer = torch.optim.SGD([
             {'params': model.module.conv1.parameters(), 'name': 'conv'},
@@ -77,11 +75,11 @@ def main():
         ],
                                     lr=args.lr,
                                     momentum=args.momentum,
-                                    weight_decay=args.weight_decay,
+                                    weight_decay=args.weight_decay, 
                                     nesterov=args.nesterov)
-
+    
     # resume
-    epoch = 0
+    epoch = 0                                
     init_state_dict = model.state_dict()
     if args.resume:
         if os.path.isfile(args.resume):
@@ -97,7 +95,7 @@ def main():
             print("==> loaded checkpoint '{}'(epoch {})".format(args.resume, checkpoint['epoch']))
         else:
             raise ValueError('The file to be resumed from does not exist!', args.resume)
-
+    
     # make log directory
     if not os.path.isdir(args.log):
         os.makedirs(args.log)
@@ -114,7 +112,7 @@ def main():
     log.close()
 
     cudnn.benchmark = True
-
+    
     # process data and prepare dataloaders
     train_loader_source, train_loader_target, val_loader_target, val_loader_target_t, val_loader_source = generate_dataloader(args)
     train_loader_target.dataset.tgts = list(np.array(torch.LongTensor(train_loader_target.dataset.tgts).fill_(-1))) # avoid using ground truth labels of target
@@ -125,9 +123,10 @@ def main():
 
     new_epoch_flag = False # if new epoch, new_epoch_flag=True
     test_flag = False # if test, test_flag=True
-
+    
     src_cs = torch.cuda.FloatTensor(len(train_loader_source.dataset.tgts)).fill_(1) # initialize source weights
-
+    tar_cs = torch.cuda.FloatTensor(len(train_loader_target.dataset.tgts)).fill_(1) # initialize source weights
+    
     count_itern_each_epoch = 0
     for itern in range(epoch * batch_number, num_itern_total):
         # evaluate on the target training and test data
@@ -135,7 +134,7 @@ def main():
             prec1, c_s, c_s_2, c_t, c_t_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, target_features, target_features_2, target_targets, pseudo_labels = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args)
             test_acc = validate(val_loader_target_t, model, criterion, epoch, args)
             test_flag = True
-
+            
             # K-means clustering or its variants
             if ((itern == 0) and args.src_cen_first) or (args.initial_cluster == 2):
                 cen = c_s
@@ -152,7 +151,7 @@ def main():
             elif args.cluster_method == 'spherical_kmeans':
                 cluster_acc, c_t = spherical_k_means(target_features, target_targets, train_loader_target, epoch, model, cen, args, best_cluster_acc)
                 cluster_acc_2, c_t_2 = spherical_k_means(target_features_2, target_targets, train_loader_target, epoch, model, cen_2, args, best_cluster_acc_2, change_target=False)
-
+            
             # record the best accuracy of K-means clustering
             log = open(os.path.join(args.log, 'log.txt'), 'a')
             if cluster_acc != best_cluster_acc:
@@ -162,7 +161,7 @@ def main():
                 best_cluster_acc_2 = cluster_acc_2
                 log.write('\n                                                          best_cluster_2 acc: %3f' % best_cluster_acc_2)
             log.close()
-
+            
             # re-initialize learnable cluster centers
             if args.init_cen_on_st:
                 cen = (c_t + c_s) / 2# or c_srctar
@@ -173,24 +172,25 @@ def main():
             #if itern == 0:
             learn_cen.data = cen.data.clone()
             learn_cen_2.data = cen_2.data.clone()
-
+            
             # select source samples
             if (itern != 0) and (args.src_soft_select or args.src_hard_select):
                 src_cs = source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, c_t.data.clone(), args)
-
+                tar_cs = source_select(target_features, pseudo_labels, source_features, source_targets, train_loader_target, epoch, c_s.data.clone(), args)
+            
             # use source pre-trained model to extract features for first clustering
-            if (itern == 0) and args.src_pretr_first:
+            if (itern == 0) and args.src_pretr_first: 
                 model.load_state_dict(init_state_dict)
-
+                
             if itern != 0:
                 count_itern_each_epoch = 0
                 epoch += 1
             batch_number = count_epoch_on_large_dataset(train_loader_target, train_loader_source, args)
             train_loader_target_batch = enumerate(train_loader_target)
             train_loader_source_batch = enumerate(train_loader_source)
-
+            
             new_epoch_flag = True
-
+            
             del source_features
             del source_features_2
             del source_targets
@@ -202,7 +202,7 @@ def main():
             torch.cuda.empty_cache()
             torch.cuda.empty_cache()
         elif (args.src.find('visda') != -1) and (itern % int(num_itern_total / 200) == 0):
-            prec1, _, _, _, _, _, _, _, _, _, _, _, _, _ = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, compute_cen=False)
+            prec1, _, _, _, _, _, _, _, _, _, _, _, _, _ = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run, compute_cen=False)
             test_acc = validate(val_loader_target_t, model, criterion, epoch, args)
             test_flag = True
         if test_flag:
@@ -232,20 +232,20 @@ def main():
                 'best_test_prec1': best_test_prec1,
                 'cond_best_test_prec1': cond_best_test_prec1,
             }, is_cond_best, args)
-
+            
             test_flag = False
-
+        
         # early stop
         if epoch > args.stop_epoch:
                 break
 
         # train for one iteration
-        train_loader_source_batch, train_loader_target_batch = train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, criterion_cons, optimizer, itern, epoch, new_epoch_flag, src_cs, args, run)
+        train_loader_source_batch, train_loader_target_batch = train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, criterion_cons, optimizer, itern, epoch, new_epoch_flag, src_cs, tar_cs, args, run)
 
         model = model.cuda()
         new_epoch_flag = False
         count_itern_each_epoch += 1
-
+    
     log = open(os.path.join(args.log, 'log.txt'), 'a')
     log.write('\n***   best val acc: %3f   ***' % best_prec1)
     log.write('\n***   best test acc: %3f   ***' % best_test_prec1)
@@ -264,9 +264,9 @@ def count_epoch_on_large_dataset(train_loader_target, train_loader_source, args)
         batch_number_s = len(train_loader_source)
         if batch_number_s > batch_number_t:
             batch_number = batch_number_s
-
+    
     return batch_number
-
+    
 
 def save_checkpoint(state, is_best, args):
     filename = 'checkpoint.pth.tar'

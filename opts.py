@@ -14,13 +14,14 @@ def opts():
     parser.add_argument('--src_soft_select', action='store_true', help='whether to softly select source instances')
     parser.add_argument('--src_hard_select', action='store_true', help='whether to hardly select source instances')
     parser.add_argument('--src_mix_weight', action='store_true', help='whether to mix 1 and soft weight')
+    parser.add_argument('--tar_mix_weight', action='store_true', help='whether to mix 1 and soft weight')
     parser.add_argument('--tao_param', type=float, default=0.5, help='threshold parameter of cosine similarity')
     # general optimization options
-    parser.add_argument('--epochs', type=int, default=200, help='number of epochs to train')
+    parser.add_argument('--epochs', type=int, default=200, help='number of epochs to train')    
     parser.add_argument('--batch_size', type=int, default=64, help='batch size')
     parser.add_argument('--workers', type=int, default=8, metavar='N', help='number of data loading workers (default: 8)')
     parser.add_argument('--no_da', action='store_true', help='whether to not use data augmentation')
-    parser.add_argument('--lr', type=float, default=1e-5, help='learning rate')
+    parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
     parser.add_argument('--lr_plan', type=str, default='dao', help='learning rate decay plan of step or dao')
     parser.add_argument('--schedule', type=int, nargs='+', default=[80, 120], help='decrease learning rate at these epochs for step decay')
     parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
@@ -57,20 +58,10 @@ def opts():
     parser.add_argument('--arch', type=str, default='resnet50', help='model name')
     parser.add_argument('--num_neurons', type=int, default=128, help='number of neurons of fc1')
     parser.add_argument('--pretrained', action='store_true', help='whether to use pretrained model')
-    parser.add_argument('--pretrained_path', type=str, default="", help='path of pretrained model')
     # i/o
     parser.add_argument('--print_freq', type=int, default=10, metavar='N', help='print frequency (default: 10)')
-    # Mixup
+    parser.add_argument('--pretrained_path', type=str, default="", help='path of pretrained model')
     parser.add_argument('--mixup', action='store_true', help='Weather to use mix-up or not')
-    parser.add_argument('--randaug', action='store_true', help='Weather to use random augumentation or not')
-
-
-
-
-
-
-
-
 
     args = parser.parse_args()
     args.pretrained = True
@@ -78,10 +69,11 @@ def opts():
         args.init_cen_on_st = True
     elif args.src.find('webcam') != -1:
         args.beta = 0.5
+
     args.src_cls = True
     args.src_cen_first = True
     args.learn_embed = True
     args.embed_softmax = True
-    args.log = args.log + '_dann_adapt_' + args.src + '2' + args.tar + '_bs' + str(args.batch_size) + '_' + args.arch + '_lr' + str(args.lr) + '_' + args.cluster_method +"/"
+    args.log = args.log + '_adapt_' + args.src + '2' + args.tar + '_bs' + str(args.batch_size) + '_' + args.arch + '_lr' + str(args.lr) + '_' + args.cluster_method
 
     return args

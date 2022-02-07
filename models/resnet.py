@@ -113,17 +113,17 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
         self.avgpool = nn.AvgPool2d(7)
+        #self.fc = nn.Linear(512 * block.expansion, num_classeses)
         self.fc1 = nn.Sequential(nn.Linear(512 * block.expansion, num_neurons * block.expansion),
-                                 nn.BatchNorm1d(num_neurons * block.expansion),
-                                 nn.ReLU(inplace=True))
-
+        nn.BatchNorm1d(num_neurons * block.expansion),
+        nn.ReLU(inplace=True))
         self.fc2 = nn.Linear(num_neurons * block.expansion, num_classeses)
         self.domain_classifier = nn.Sequential()
         self.domain_classifier.add_module('d_fc1', nn.Linear(2048 + 4 * 128, num_neurons*block.expansion))
         self.domain_classifier.add_module('d_bn1', nn.BatchNorm1d(num_neurons*block.expansion))
         self.domain_classifier.add_module('d_relu1', nn.ReLU(True))
         self.domain_classifier.add_module('d_fc2', nn.Linear(num_neurons*block.expansion, 2))
-        self.domain_classifier.add_module('d_softmax', nn.LogSoftmax(dim=1))
+        # self.domain_classifier.add_module('d_softmax', nn.LogSoftmax(dim=1))
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -228,29 +228,15 @@ def resnet152(args, **kwargs):
     """
     model = ResNet(Bottleneck, [3, 8, 36, 3], num_classeses=args.num_classes, num_neurons=args.num_neurons)
     if args.pretrained:
-        if args.pretrained_path:
-            model_dict = model.state_dict()
-            pretrained_dict_temp = torch.load(args.pretrained_path)
-            pretrained_dict_temp2 = {k.replace('module.', ''): v for k, v in pretrained_dict_temp.items()}
-            pretrained_dict = {k: v for k, v in pretrained_dict_temp2.items()}
-            model_dict_temp = {k: v for k, v in model_dict.items() if k not in pretrained_dict}
-
-            # Updatting fc1 layers
-            pretrained_dict.update(model_dict_temp)
-            model.load_state_dict(pretrained_dict)
-            print(args.pretrained_checkpoint)
-            print('Source pre-trained model has been loaded!')
-        else:
-
-            model_dict = model.state_dict()
-            pretrained_dict = model_zoo.load_url(model_urls['resnet152'])
-            pretrained_dict.pop('fc.weight')
-            pretrained_dict.pop('fc.bias')
-            model_dict.update(pretrained_dict)
-            model.load_state_dict(model_dict)
+        model_dict = model.state_dict()
+        pretrained_dict = model_zoo.load_url(model_urls['resnet152'])
+        pretrained_dict.pop('fc.weight')
+        pretrained_dict.pop('fc.bias')
+        model_dict.update(pretrained_dict)
+        model.load_state_dict(model_dict)
 
     return model
-
+    
 
 def resnet(args, **kwargs):  # Only the ResNet34 is supported.
     print("==> creating model '{}' ".format(args.arch))
