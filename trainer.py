@@ -80,11 +80,17 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     loss += weight * tardis_loss 
     run["metrics/tardis_loss"].log(tardis_loss)
 
-    d_t_target = torch.ones(d_t.size(0)).long().cuda()
-    d_t_loss = SrcClassifyLoss(args, d_t, d_t_target, tar_index, tar_cs, lam, fit=args.src_fit)
+    d_t_cl = d_t[:, :-2]
+    d_t_d = d_t[:, -2:]
+    d_t_target = torch.ones(d_t_d.shape).long().cuda()
+    d_t_cl_loss = SrcClassifyLoss(args, d_t_cl, target_target, tar_index, tar_cs, lam, fit=args.src_fit)
+    d_t_d_loss = SrcClassifyLoss(args, d_t_d, d_t_target, tar_index, tar_cs, lam, fit=args.src_fit)
+
     # d_t_loss = nll_loss(d_t, d_t_target)
-    loss += weight * d_t_loss
-    run["metrics/d_t_loss"].log(d_t_loss)
+    loss += weight * d_t_cl_loss
+    loss += weight * d_t_d_loss
+    run["metrics/d_t_cl_loss"].log(d_t_cl_loss)
+    run["metrics/d_t_d_loss"].log(d_t_d_loss)
     
     
     if args.learn_embed:
@@ -114,17 +120,29 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
         loss += weight * src_dis_loss
         run["metrics/src_dis_loss"].log(src_dis_loss)
 
-        d_s_target = torch.zeros(d_s.size(0)).long().cuda()
-        d_s_loss = SrcClassifyLoss(args, d_s, d_s_target, index, src_cs, lam, fit=args.src_fit)
+        # d_s_target = torch.zeros(d_s.size(0)).long().cuda()
+        d_s_loss = SrcClassifyLoss(args, d_s, target_source, index, src_cs, lam, fit=args.src_fit)
         run["metrics/d_s_loss"].log(d_s_loss)
         loss += weight * d_s_loss
+
+        d_t_cl = d_t[:, :-2]
+        d_t_d = d_t[:, -2:]
+        d_t_target = torch.ones(d_t_d.shape).long().cuda()
+        d_t_cl_loss = SrcClassifyLoss(args, d_t_cl, target_target, tar_index, tar_cs, lam, fit=args.src_fit)
+        d_t_d_loss = SrcClassifyLoss(args, d_t_d, d_t_target, tar_index, tar_cs, lam, fit=args.src_fit)
+
+    # d_t_loss = nll_loss(d_t, d_t_target)
+    loss += weight * d_t_cl_loss
+    loss += weight * d_t_d_loss
+    run["metrics/d_t_cl_loss"].log(d_t_cl_loss)
+    run["metrics/d_t_d_loss"].log(d_t_d_loss)
         
-        if args.learn_embed:
-            prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-            loss += weight * SrcClassifyLoss(args, prob_pred, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit)
-            if not args.no_second_embed:
-                prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-                loss += weight * SrcClassifyLoss(args, prob_pred_2, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit)
+        # if args.learn_embed:
+        #     prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
+        #     loss += weight * SrcClassifyLoss(args, prob_pred, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit)
+        #     if not args.no_second_embed:
+        #         prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
+        #         loss += weight * SrcClassifyLoss(args, prob_pred_2, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit)
 
     # if args.mixup:
     #     mixup_ratio = torch.rand(1, device="cpu")
