@@ -26,6 +26,23 @@ def conv3x3(in_planes, out_planes, stride=1):
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=1, bias=False)
 
+class RandomLayer(nn.Module):
+    def __init__(self, input_dim_list=[], output_dim=1024):
+        super(RandomLayer, self).__init__()
+        self.input_num = len(input_dim_list)
+        self.output_dim = output_dim
+        self.random_matrix = [torch.randn(input_dim_list[i], output_dim) for i in range(self.input_num)]
+
+    def forward(self, input_list):
+        return_list = [torch.mm(input_list[i], self.random_matrix[i]) for i in range(self.input_num)]
+        return_tensor = return_list[0] / math.pow(float(self.output_dim), 1.0/len(return_list))
+        for single in return_list[1:]:
+            return_tensor = torch.mul(return_tensor, single)
+        return return_tensor
+
+    def cuda(self):
+        super(RandomLayer, self).cuda()
+        self.random_matrix = [val.cuda() for val in self.random_matrix]
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -118,11 +135,15 @@ class ResNet(nn.Module):
         nn.BatchNorm1d(num_neurons * block.expansion),
         nn.ReLU(inplace=True))
         self.fc2 = nn.Linear(num_neurons * block.expansion, num_classeses)
+
+        self.random_layer = RandomLayer([2048, 4*128, 31], output_dim=1024)
+        self.random_layer.cuda()
+
         self.domain_classifier = nn.Sequential()
-        self.domain_classifier.add_module('d_fc1', nn.Linear(2048 + 4 * 128, num_neurons*block.expansion))
+        self.domain_classifier.add_module('d_fc1', nn.Linear(1024, num_neurons*block.expansion))
         self.domain_classifier.add_module('d_bn1', nn.BatchNorm1d(num_neurons*block.expansion))
         self.domain_classifier.add_module('d_relu1', nn.ReLU(True))
-        self.domain_classifier.add_module('d_fc2', nn.Linear(num_neurons*block.expansion, num_classeses+2))
+        self.domain_classifier.add_module('d_fc2', nn.Linear(num_neurons*block.expansion, 2))
         # self.domain_classifier.add_module('d_softmax', nn.LogSoftmax(dim=1))
 
         for m in self.modules():
@@ -167,7 +188,8 @@ class ResNet(nn.Module):
         ca = self.fc2(y)
         reverse_feature_x = ReverseLayerF.apply(x, alpha)
         reverse_feature_y = ReverseLayerF.apply(y, alpha)
-        domain_output = self.domain_classifier(torch.cat([reverse_feature_x, reverse_feature_y], dim=1))
+        domain_input = self.random_layer([reverse_feature_x, reverse_feature_y, ca])
+        domain_output = self.domain_classifier(domain_input)
 
         return x, y, ca, domain_output
 

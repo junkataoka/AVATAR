@@ -23,7 +23,7 @@
 # --src_cls \
 # --mixup \
 # --batch_size 42
-
+CUDA_LAUNCH_BLOCKING=1
 python main.py  \
 --data_path_source /home/jun/GoogleDrive/project/dataset/office31/  \
 --src amazon  \
