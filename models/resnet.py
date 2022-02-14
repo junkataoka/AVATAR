@@ -188,7 +188,8 @@ class ResNet(nn.Module):
         ca = self.fc2(y)
         reverse_feature_x = ReverseLayerF.apply(x, alpha)
         reverse_feature_y = ReverseLayerF.apply(y, alpha)
-        domain_input = self.random_layer([reverse_feature_x, reverse_feature_y, ca])
+        reverse_feature_ca = ReverseLayerF.apply(ca, alpha)
+        domain_input = self.random_layer([reverse_feature_x, reverse_feature_y, reverse_feature_ca])
         domain_output = self.domain_classifier(domain_input)
 
         return x, y, ca, domain_output
