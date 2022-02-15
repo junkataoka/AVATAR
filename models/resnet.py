@@ -143,7 +143,7 @@ class ResNet(nn.Module):
         self.domain_classifier.add_module('d_fc1', nn.Linear(1024, num_neurons*block.expansion))
         self.domain_classifier.add_module('d_bn1', nn.BatchNorm1d(num_neurons*block.expansion))
         self.domain_classifier.add_module('d_relu1', nn.ReLU(True))
-        self.domain_classifier.add_module('d_fc2', nn.Linear(num_neurons*block.expansion, 2))
+        self.domain_classifier.add_module('d_fc2', nn.Linear(num_neurons*block.expansion, num_classeses+1))
         # self.domain_classifier.add_module('d_softmax', nn.LogSoftmax(dim=1))
 
         for m in self.modules():

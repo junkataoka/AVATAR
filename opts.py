@@ -70,6 +70,10 @@ def opts():
     elif args.src.find('webcam') != -1:
         args.beta = 0.5
 
+    # Not sure...
+    args.init_cen_on_st = True
+    args.src_soft_select = True
+
     args.src_cls = True
     args.src_cen_first = True
     args.learn_embed = True

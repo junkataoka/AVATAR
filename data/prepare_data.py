@@ -27,6 +27,7 @@ def generate_dataloader(args):
     if args.no_da:
         # transformation on the training data during training
         data_transform_train = transforms.Compose([
+      			# transforms.Resize(256),# spatial size of vgg-f input
       			transforms.Resize((224, 224)), # spatial size of vgg-f input
             #transforms.RandomHorizontalFlip(),
       			transforms.ToTensor(),
@@ -51,7 +52,7 @@ def generate_dataloader(args):
         ])
         # transformation on the test data during test
         data_transform_test = transforms.Compose([
-      			transforms.Resize(256), # spatial size of vgg-f input
+      			# transforms.Resize(256), # spatial size of vgg-f input
       			transforms.CenterCrop(224),
       			transforms.ToTensor(),
       			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -95,7 +96,7 @@ def generate_dataloader(args):
       	])
         # transformation on the test data during test
         data_transform_test = transforms.Compose([
-      			transforms.Resize(256), # spatial size of vgg-f input
+      			transforms.Resize(256),# spatial size of vgg-f input
       			transforms.CenterCrop(224),
       			transforms.ToTensor(),
       			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),

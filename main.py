@@ -131,7 +131,8 @@ def main():
     for itern in range(epoch * batch_number, num_itern_total):
         # evaluate on the target training and test data
         if (itern == 0) or (count_itern_each_epoch == batch_number):
-            prec1, c_s, c_s_2, c_t, c_t_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, target_features, target_features_2, target_targets, pseudo_labels = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run)
+            prec1, c_s, c_s_2, c_t, c_t_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, \
+            target_features, target_features_2, target_targets, pseudo_labels = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run)
             test_acc = validate(val_loader_target_t, model, criterion, epoch, args)
             test_flag = True
             
@@ -175,8 +176,8 @@ def main():
             
             # select source samples
             if (itern != 0) and (args.src_soft_select or args.src_hard_select):
-                src_cs = source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, c_t.data.clone(), args)
-                tar_cs = source_select(target_features, pseudo_labels, source_features, source_targets, train_loader_target, epoch, c_s.data.clone(), args)
+                src_cs = source_select(source_features, source_targets, target_features, target_targets, train_loader_source, epoch, c_t.data.clone(), args)
+                tar_cs = source_select(target_features, target_targets, source_features, source_targets, train_loader_target, epoch, c_s.data.clone(), args)
             
             # use source pre-trained model to extract features for first clustering
             if (itern == 0) and args.src_pretr_first: 
