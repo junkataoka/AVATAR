@@ -90,8 +90,8 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     # print(prob_p_class)
     # print(prob_p_dis)
 
-    d_t_loss = CondDiscriminatorLoss(args, d_t, target_target, d_t_target, tar_index, tar_cs, lam, fit=args.src_fit, src=False)
-    loss += weight * d_t_loss
+    d_t_loss = CondDiscriminatorLoss(args, d_t, target_target, tar_index, tar_cs, lam, fit=args.src_fit, src=False)
+    loss += (1-weight) * d_t_loss
     run["metrics/d_t_loss"].log(d_t_loss)
     
     
@@ -125,7 +125,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
         d_s_target = torch.ones(d_s.size(0)).long().cuda()
         d_s_loss = CondDiscriminatorLoss(args, d_s, target_source, index, src_cs, lam, fit=args.src_fit, src=True)
         run["metrics/d_s_loss"].log(d_s_loss)
-        loss += weight * d_s_loss
+        loss += (1-weight) * d_s_loss
         
         # if args.learn_embed:
         #     prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
@@ -163,9 +163,10 @@ def CondDiscriminatorLoss(args, output, target, index, src_cs, lam, softmax=True
     prob_p = F.softmax(output, dim=1)
 
     prob_p_dis = prob_p[:, -1].unsqueeze(1)
+    # prob_p_dis = torch.clamp(prob_p_dis, min=1e-3, max=0.999)
     prob_p_class = prob_p[:, :-1]
-    prob_p_class = (prob_p_class) / (1-prob_p_dis) + 1e-6
-
+    # prob_p_class = torch.clamp(prob_p_class, min=1e-3, max=0.999)
+    prob_p_class = (prob_p_class) / (1-prob_p_dis)
     prob_q_class = Variable(torch.cuda.FloatTensor(prob_p_class.size()).fill_(0))
     prob_q_class.scatter_(1, target.unsqueeze(1), torch.ones(prob_p_class.size(0), 1).cuda())
 
@@ -197,9 +198,9 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, softmax=T
     else:
         prob_p = output / output.sum(1, keepdim=True)
 
-    prob_p_dis = prob_p[:, -1].unsqueeze(1)
-    prob_p_class = prob_p[:, :-1]
-    prob_p_class = (prob_p_class) / (1-prob_p_dis)
+    # prob_p_dis = prob_p[:, -1].unsqueeze(1)
+    prob_p_class = prob_p
+    # prob_p_class = (prob_p_class) / (1-prob_p_dis)
 
     if em:
         prob_q = prob_p_class
@@ -219,12 +220,12 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, softmax=T
         tar_weights = tar_cs[index].cuda()
     if softmax:
         loss = - (tar_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
-        loss_d = - (tar_weights * ((1-prob_p_dis).log()).sum(1)).mean()
+        # loss_d = - (tar_weights * ((1-prob_p_dis).log()).sum(1)).mean()
     else:
         loss = - (tar_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
-        loss_d = - (tar_weights * ((1-prob_p_dis).log()).sum(1)).mean()
+        # loss_d = - (tar_weights * ((1-prob_p_dis).log()).sum(1)).mean()
 
-    return loss + loss_d 
+    return loss
     
     
 def SrcClassifyLoss(args, output, target, index, src_cs, lam, softmax=True, fit=False):
@@ -233,9 +234,9 @@ def SrcClassifyLoss(args, output, target, index, src_cs, lam, softmax=True, fit=
     else:
         prob_p = output / output.sum(1, keepdim=True)
 
-    prob_p_dis = prob_p[:, -1].unsqueeze(1)
-    prob_p_class = prob_p[:, :-1]
-    prob_p_class = (prob_p_class) / (1-prob_p_dis)
+    # prob_p_dis = prob_p[:, -1].unsqueeze(1)
+    prob_p_class = prob_p
+    # prob_p_class = (prob_p_class) / (1-prob_p_dis)
 
     prob_q = Variable(torch.cuda.FloatTensor(prob_p_class.size()).fill_(0))
     prob_q.scatter_(1, target.unsqueeze(1), torch.ones(prob_p_class.size(0), 1).cuda())
@@ -248,12 +249,12 @@ def SrcClassifyLoss(args, output, target, index, src_cs, lam, softmax=True, fit=
     
     if softmax:
         loss = - (src_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
-        loss_d = - (src_weights * (prob_p_dis.log()).sum(1)).mean()
+        # loss_d = - (src_weights * (prob_p_dis.log()).sum(1)).mean()
     else:
         loss = - (src_weights * (prob_q * prob_p.log()).sum(1)).mean()
-        loss_d = - (src_weights * (prob_p_dis.log()).sum(1)).mean()
+        # loss_d = - (src_weights * (prob_p_dis.log()).sum(1)).mean()
     
-    return loss + loss_d
+    return loss
 
 
 def validate(val_loader, model, criterion, epoch, args):

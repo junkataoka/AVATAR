@@ -134,7 +134,7 @@ class ResNet(nn.Module):
         self.fc1 = nn.Sequential(nn.Linear(512 * block.expansion, num_neurons * block.expansion),
         nn.BatchNorm1d(num_neurons * block.expansion),
         nn.ReLU(inplace=True))
-        self.fc2 = nn.Linear(num_neurons * block.expansion, num_classeses)
+        self.fc2 = nn.Linear(num_neurons * block.expansion, num_classeses+1)
 
         self.random_layer = RandomLayer([2048, 4*128, 31], output_dim=1024)
         self.random_layer.cuda()
