@@ -177,7 +177,11 @@ def main():
             # select source samples
             if (itern != 0) and (args.src_soft_select or args.src_hard_select):
                 src_cs = source_select(source_features, source_targets, target_features, target_targets, train_loader_source, epoch, c_t.data.clone(), args)
+                src_cs_2 = source_select(source_features_2, source_targets, target_features_2, target_targets, train_loader_source, epoch, c_t_2.data.clone(), args)
+                src_cs = (src_cs  + src_cs_2) / 2
                 tar_cs = source_select(target_features, target_targets, source_features, source_targets, train_loader_target, epoch, c_s.data.clone(), args)
+                tar_cs_2 = source_select(target_features_2, target_targets, source_features_2, source_targets, train_loader_target, epoch, c_s_2.data.clone(), args)
+                src_cs = (src_cs  + src_cs_2) / 2
             
             # use source pre-trained model to extract features for first clustering
             if (itern == 0) and args.src_pretr_first: 

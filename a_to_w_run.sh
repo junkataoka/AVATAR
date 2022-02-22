@@ -10,6 +10,7 @@
 #SBATCH --gres=gpu:1
 
 module load cuda11.1/toolkit/11.1.1
+CUDA_LAUNCH_BLOCKING=1
 srun python main.py  \
 --data_path_source /data/home/jkataok1/CycleGAN-PyTorch/data/office31/  \
 --src amazon  \
