@@ -81,9 +81,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     loss += weight * tardis_loss 
     run["metrics/tardis_loss"].log(tardis_loss)
 
-    prob_ca_t = F.softmax(ca_t, dim=1)
     d_t_loss = CondDiscriminatorLoss(args, d_t, target_target, tar_index, tar_cs, lam, fit=args.src_fit, src=False)
-    # d_t_loss = CondDiscriminatorLoss(args, d_t, prob_ca_t, tar_index, tar_cs, lam, fit=args.src_fit, src=False)
     loss += weight * d_t_loss
     run["metrics/d_t_loss"].log(d_t_loss)
     
@@ -110,12 +108,11 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
         f_s, f_s_2, ca_s, d_s = model(input_source_var, 1)
         prec1_s = accuracy(ca_s.data, target_source, topk=(1,))[0]
         top1_source.update(prec1_s.item(), input_source.size(0))
-        
+
         src_dis_loss = SrcClassifyLoss(args, ca_s, target_source, index, src_cs, lam, fit=args.src_fit, emb=False)
         loss += weight * src_dis_loss
         run["metrics/src_dis_loss"].log(src_dis_loss)
 
-        prob_ca_s = F.softmax(ca_t, dim=1)
         d_s_loss = CondDiscriminatorLoss(args, d_s, target_source, index, src_cs, lam, fit=args.src_fit, src=True)
         run["metrics/d_s_loss"].log(d_s_loss)
         loss += weight * d_s_loss
@@ -166,10 +163,8 @@ def CondDiscriminatorLoss(args, output, target, index, src_cs, lam, softmax=True
 
     if fit:
         prob_q_class = (1 - prob_p_class) * prob_q_class + prob_p_class * prob_p_class    
-    if args.src_mix_weight:
-        src_weights = lam * src_cs[index] + (1 - lam) * torch.ones(output.size(0)).cuda()
-    else:
-        src_weights = src_cs[index]
+
+    src_weights = src_cs[index]
 
     if src: 
         # loss_d = - (src_weights * ((1-prob_p_dis).log()).sum(1)).mean()
@@ -186,6 +181,7 @@ def CondDiscriminatorLoss(args, output, target, index, src_cs, lam, softmax=True
     return loss + loss_d
 
 def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, softmax=True, em=False, emb=True):
+
     if softmax:
         prob_p = F.softmax(output, dim=1)
     else:
@@ -213,10 +209,7 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, softmax=T
             prob_q2 /= prob_q2.sum(1, keepdim=True)
             prob_q = (1 - args.beta) * prob_q1 + args.beta * prob_q2
 
-    if args.tar_mix_weight:
-        tar_weights = lam * tar_cs[index] + (1 - lam) * torch.ones(output.size(0)).cuda()
-    else:
-        tar_weights = tar_cs[index].cuda()
+    tar_weights = tar_cs[index.cuda()]
     if softmax:
         loss = - (tar_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
         # loss_d = - (tar_weights * ((1-prob_p_dis).log()).sum(1)).mean()
@@ -229,8 +222,10 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, softmax=T
         return loss + loss_d
     else: 
         return loss
-    
+
 def SrcClassifyLoss(args, output, target, index, src_cs, lam, softmax=True, fit=False, emb=False):
+
+
     if softmax:
         prob_p = F.softmax(output, dim=1)
     else:
@@ -247,12 +242,11 @@ def SrcClassifyLoss(args, output, target, index, src_cs, lam, softmax=True, fit=
 
     prob_q = Variable(torch.cuda.FloatTensor(prob_p_class.size()).fill_(0))
     prob_q.scatter_(1, target.unsqueeze(1), torch.ones(prob_p_class.size(0), 1).cuda())
+
     if fit:
         prob_q = (1 - prob_p) * prob_q + prob_p * prob_p    
-    if args.src_mix_weight:
-        src_weights = lam * src_cs[index] + (1 - lam) * torch.ones(output.size(0)).cuda()
-    else:
-        src_weights = src_cs[index].cuda()
+
+    src_weights = src_cs[index].cuda()
     
     if softmax:
         loss = - (src_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
@@ -286,6 +280,7 @@ def validate(val_loader, model, criterion, epoch, args):
         # forward
         with torch.no_grad():
             _, _, output, _ = model(input_var, 1)
+            output = output[:, :-1]
             loss = criterion(output, target_var)
 
         # compute and record loss and accuracy

@@ -43,6 +43,7 @@ def main():
     print(model)
     model = torch.nn.DataParallel(model).cuda() # define multiple GPUs
     run = neptune.init(project = "junkataoka/SRDC",
+                       tags = [f"source:{args.src}", f"target:{args.tar}"],
                        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIwOTE0MGFjYy02NzMwLTRkODQtYTU4My1lNjk0YWEzODM3MGIifQ==")
     
     # define learnable cluster centers

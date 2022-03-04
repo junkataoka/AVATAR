@@ -23,6 +23,7 @@ srun python main.py  \
 --learn_embed \
 --src_cls \
 --batch_size 42 \
+--cluster_method kernel_kmeans
 
 # python main.py  \
 # --data_path_source /home/jun/GoogleDrive/project/dataset/office31/  \

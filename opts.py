@@ -65,12 +65,13 @@ def opts():
 
     args = parser.parse_args()
     args.pretrained = True
-    if args.tar.find('amazon') == -1:
-        args.init_cen_on_st = True
-    elif args.src.find('webcam') != -1:
-        args.beta = 0.5
+    # if args.tar.find('amazon') == -1:
+    #     args.init_cen_on_st = True
+    # elif args.src.find('webcam') != -1:
+    #     args.beta = 0.5
 
     # Not sure...
+    args.beta = 0.5
     args.init_cen_on_st = True
     args.src_soft_select = True
 

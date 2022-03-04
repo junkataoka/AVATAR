@@ -21,7 +21,6 @@ srun python main.py  \
 --pretrained_path /data/home/jkataok1/alexnet_resnet_finetune/checkpoints/dslr_to_webcam_resnet50.pkl \
 --learn_embed \
 --src_cls \
---mixup \
---randaug \
---batch_size 42
+--batch_size 42 \
+--cluster_method kernel_kmeans
 

@@ -36,5 +36,5 @@ python main.py  \
 --pretrained_path checkpoints/dslr_to_amazon_resnet50.pkl \
 --learn_embed \
 --src_cls \
---mixup \
---batch_size 18
+--batch_size 18 \
+--cluster_method kernel_kmeans
