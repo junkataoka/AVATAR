@@ -17,7 +17,7 @@ def opts():
     parser.add_argument('--tar_mix_weight', action='store_true', help='whether to mix 1 and soft weight')
     parser.add_argument('--tao_param', type=float, default=0.5, help='threshold parameter of cosine similarity')
     # general optimization options
-    parser.add_argument('--epochs', type=int, default=200, help='number of epochs to train')    
+    parser.add_argument('--epochs', type=int, default=200, help='number of epochs to train')
     parser.add_argument('--batch_size', type=int, default=64, help='batch size')
     parser.add_argument('--workers', type=int, default=8, metavar='N', help='number of data loading workers (default: 8)')
     parser.add_argument('--no_da', action='store_true', help='whether to not use data augmentation')
@@ -47,7 +47,7 @@ def opts():
     parser.add_argument('--beta', type=float, default=1.0, help='weight of auxiliary target distribution or assigned cluster labels')
     parser.add_argument('--embed_softmax', action='store_true', help='whether to use softmax to normalize soft cluster assignments for embedding clustering')
     parser.add_argument('--div', type=str, default='kl', help='measure of prediction divergence between one target instance and its perturbed counterpart')
-    parser.add_argument('--gray_tar_agree', action='store_true', help='whether to enforce the consistency between RGB and gray images on the target domain')
+    parser.add_argument('--gray_tar_agree', action='store_true', help='ehether to enforce the consistency between RGB and gray images on the target domain')
     parser.add_argument('--aug_tar_agree', action='store_true', help='whether to enforce the consistency between RGB and augmented images on the target domain')
     parser.add_argument('--sigma', type=float, default=0.1, help='standard deviation of Gaussian for data augmentation operation of blurring')
     # checkpoints
@@ -64,21 +64,6 @@ def opts():
     parser.add_argument('--mixup', action='store_true', help='Weather to use mix-up or not')
 
     args = parser.parse_args()
-    args.pretrained = True
-    # if args.tar.find('amazon') == -1:
-    #     args.init_cen_on_st = True
-    # elif args.src.find('webcam') != -1:
-    #     args.beta = 0.5
-
-    # Not sure...
-    args.beta = 0.5
-    args.init_cen_on_st = True
-    args.src_soft_select = True
-
-    args.src_cls = True
-    args.src_cen_first = True
-    args.learn_embed = True
-    args.embed_softmax = True
     args.log = args.log + '_adapt_' + args.src + '2' + args.tar + '_bs' + str(args.batch_size) + '_' + args.arch + '_lr' + str(args.lr) + '_' + args.cluster_method
 
     return args
