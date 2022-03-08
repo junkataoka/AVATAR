@@ -22,12 +22,11 @@ srun python main.py  \
 --learn_embed \
 --src_cls \
 --batch_size 42 \
---beta 0.5 \
+--beta 1.0 \
 --pretrained \
 --src_soft_select \
 --embed_softmax \
+--cluster_iter 20 \
+--src_cen_first \
 --init_cen_on_st \
---cluster_iter 20
-# --cluster_method kernel_kmeans
-# --src_cen_first \
-# --initial_cluster 2 \
+--cluster_method kernel_kmeans

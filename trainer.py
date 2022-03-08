@@ -14,7 +14,7 @@ import torchmetrics
 import pandas as pd
 from sklearn.manifold import TSNE
 
-def train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, criterion_cons, optimizer, itern, epoch, new_epoch_flag, src_cs, tar_cs, args, run):
+def train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, criterion_cons, optimizer, optimizer_cls, optimizer_cluster, itern, epoch, new_epoch_flag, src_cs, tar_cs, args, run):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     top1_source = AverageMeter()
@@ -31,105 +31,112 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
         weight = 1.0
 
     adjust_learning_rate(optimizer, epoch, args) # adjust learning rate
+    adjust_learning_rate(optimizer_cls, epoch, args) # adjust learning rate
+    adjust_learning_rate(optimizer_cluster, epoch, args) # adjust learning rate
 
     end = time.time()
     # prepare target data
     try:
-        if args.aug_tar_agree and (not args.gray_tar_agree):
-            (input_target, input_target_dup, target_target, tar_index) = train_loader_target_batch.__next__()[1]
-        elif args.gray_tar_agree and (not args.aug_tar_agree):
-            (input_target, input_target_gray, target_target, tar_index) = train_loader_target_batch.__next__()[1]
-        elif args.aug_tar_agree and args.gray_tar_agree:
-            (input_target, input_target_dup, input_target_gray, target_target, tar_index) = train_loader_target_batch.__next__()[1]
-        else:
-            (input_target, target_target, tar_index) = train_loader_target_batch.__next__()[1]
+        (input_target, target_target, tar_index) = train_loader_target_batch.__next__()[1]
     except StopIteration:
         train_loader_target_batch = enumerate(train_loader_target)
-        if args.aug_tar_agree and (not args.gray_tar_agree):
-            (input_target, input_target_dup, target_target, tar_index) = train_loader_target_batch.__next__()[1]
-        elif args.gray_tar_agree and (not args.aug_tar_agree):
-            (input_target, input_target_gray, target_target, tar_index) = train_loader_target_batch.__next__()[1]
-        elif args.aug_tar_agree and args.gray_tar_agree:
-            (input_target, input_target_dup, input_target_gray, target_target, tar_index) = train_loader_target_batch.__next__()[1]
-        else:
-            (input_target, target_target, tar_index) = train_loader_target_batch.__next__()[1]
+        (input_target, target_target, tar_index) = train_loader_target_batch.__next__()[1]
+
+    try:
+        (input_source, target_source, index) = train_loader_source_batch.__next__()[1]
+    except StopIteration:
+        train_loader_source_batch = enumerate(train_loader_source)
+        (input_source, target_source, index) = train_loader_source_batch.__next__()[1]
+
+    target_source = target_source.cuda()
+    input_source_var = Variable(input_source)
+    target_source_var = Variable(target_source)
     target_target = target_target.cuda()
     input_target_var = Variable(input_target)
     target_target_var = Variable(target_target)
-    if args.aug_tar_agree:
-        input_target_dup_var = Variable(input_target_dup)
-    if args.gray_tar_agree:
-        input_target_gray_var = Variable(input_target_gray)
 
+    # Update cluster centers
     # model forward on target
-    f_t, f_t_2, ca_t, d_t = model(input_target_var, 1)
-
-    if args.aug_tar_agree:
-        _, _, ca_t_dup, d_t = model(input_target_dup_var, lam)
-
-    if args.gray_tar_agree:
-        _, _, ca_t_gray, d_t = model(input_target_gray_var, lam)
-
     loss = 0
-    if args.aug_tar_agree and (not args.gray_tar_agree):
-        loss += weight * criterion_cons(ca_t, ca_t_dup)
-    elif args.gray_tar_agree and (not args.aug_tar_agree):
-        loss += weight * criterion_cons(ca_t, ca_t_gray)
-    elif args.aug_tar_agree and args.gray_tar_agree:
-        loss += weight * (criterion_cons(ca_t, ca_t_dup) + criterion_cons(ca_t, ca_t_gray))
+    f_t, f_t_2, ca_t, d_t = model(input_target_var, 1)
+    # tar_cs.fill_(1)
+    src_cs.fill_(1)
+    prob_pred = (1 + (f_t.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
+    tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs.fill_(1), lam, softmax=args.embed_softmax, emb=True)
+    run["metrics/tar_cluster_loss1"].log(tar_cluster_loss1)
+    loss += weight * tar_cluster_loss1
 
-    tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs, lam, em=(args.cluster_method == 'em'), emb=False)
-    loss += weight * tardis_loss
-    run["metrics/tardis_loss"].log(tardis_loss)
+    prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
+    tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs.fill_(1), lam, softmax=args.embed_softmax, emb=True)
+    run["metrics/tar_cluster_loss2"].log(tar_cluster_loss2)
+    loss += weight * tar_cluster_loss2
 
-    d_t_loss = CondDiscriminatorLoss(args, d_t, ca_t, target_target, tar_index, tar_cs, lam, fit=args.src_fit, src=False)
-    loss += weight * d_t_loss
-    run["metrics/d_t_loss"].log(d_t_loss)
+    # model forward on source
+    f_s, f_s_2, ca_s, d_s = model(input_source_var, 1)
 
-    if args.learn_embed:
-        prob_pred = (1 + (f_t.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-        loss += weight  * TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs, lam, softmax=args.embed_softmax, emb=True)
-        if not args.no_second_embed:
-            prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-            loss += weight * TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs, lam, softmax=args.embed_softmax, emb=True)
+    prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
+    loss += weight * SrcClassifyLoss(args, prob_pred_2, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit, emb=True)
 
-    if args.src_cls:
-        # prepare source data
-        try:
-            (input_source, target_source, index) = train_loader_source_batch.__next__()[1]
-        except StopIteration:
-            train_loader_source_batch = enumerate(train_loader_source)
-            (input_source, target_source, index) = train_loader_source_batch.__next__()[1]
-        target_source = target_source.cuda()
-        input_source_var = Variable(input_source)
-        target_source_var = Variable(target_source)
-
-        # model forward on source
-        f_s, f_s_2, ca_s, d_s = model(input_source_var, 1)
-        prec1_s = accuracy(ca_s.data, target_source, topk=(1,))[0]
-        top1_source.update(prec1_s.item(), input_source.size(0))
-
-        src_dis_loss = SrcClassifyLoss(args, ca_s, target_source, index, src_cs, lam, fit=args.src_fit, emb=False)
-        loss += weight * src_dis_loss
-        run["metrics/src_dis_loss"].log(src_dis_loss)
-
-        d_s_loss = CondDiscriminatorLoss(args, d_s, ca_s, target_source, index, src_cs, lam, fit=args.src_fit, src=True)
-        run["metrics/d_s_loss"].log(d_s_loss)
-        loss += weight * d_s_loss
-
-        # if args.learn_embed:
-        #     prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-        #     loss += weight * SrcClassifyLoss(args, prob_pred, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit, emb=True)
-        #     if not args.no_second_embed:
-        #         prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-        #         loss += weight * SrcClassifyLoss(args, prob_pred_2, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit, emb=True)
+    prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
+    loss += weight * SrcClassifyLoss(args, prob_pred, target_source, index, src_cs, lam, softmax=args.embed_softmax, fit=args.src_fit, emb=True)
 
     losses.update(loss.data.item(), input_target.size(0))
+    # loss backward and cluster update
+    model.zero_grad()
+    loss.backward()
+    optimizer_cluster.step()
 
+    # Update Feature extractor
+    loss = 0
+
+    f_t, f_t_2, ca_t, d_t = model(input_target_var, 1)
+
+    tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs.fill_(1), lam, em=(args.cluster_method == 'em'), emb=False)
+    loss += weight * tardis_loss
+    # Update target domain
+    d_t_loss = CondDiscriminatorLoss(args, ca_t, target_target, tar_index, tar_cs.fill_(1), lam, fit=args.src_fit, src=False, dis_cls=False)
+    loss += weight * d_t_loss
+
+    # model forward on source
+    f_s, f_s_2, ca_s, d_s = model(input_source_var, 1)
+
+    src_dis_loss = SrcClassifyLoss(args, ca_s, target_source, index, src_cs, lam, fit=args.src_fit, emb=False)
+    loss += weight * src_dis_loss
+
+    losses.update(loss.data.item(), input_target.size(0))
     # loss backward and network update
     model.zero_grad()
     loss.backward()
     optimizer.step()
+
+    # Update join classifier & discriminator
+    loss = 0
+
+    f_t, f_t_2, ca_t, d_t = model(input_target_var, 1)
+    tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs.fill_(1), lam, em=(args.cluster_method == 'em'), emb=False)
+    loss += weight * tardis_loss
+    run["metrics/tardis_loss"].log(tardis_loss)
+
+    d_t_loss = CondDiscriminatorLoss(args, ca_t, target_target, tar_index, tar_cs.fill_(1), lam, fit=args.src_fit, src=False, dis_cls=True)
+    loss += weight * d_t_loss
+    run["metrics/d_t_loss"].log(d_t_loss)
+
+    # model forward on source
+    f_s, f_s_2, ca_s, d_s = model(input_source_var, 1)
+    prec1_s = accuracy(ca_s.data, target_source, topk=(1,))[0]
+    top1_source.update(prec1_s.item(), input_source.size(0))
+
+    src_dis_loss = SrcClassifyLoss(args, ca_s, target_source, index, src_cs, lam, fit=args.src_fit, emb=False)
+    loss += weight * src_dis_loss
+    run["metrics/src_dis_loss"].log(src_dis_loss)
+
+    d_s_loss = CondDiscriminatorLoss(args, ca_s, target_source, index, src_cs, lam, fit=args.src_fit, src=True, dis_cls=True)
+    run["metrics/d_s_loss"].log(d_s_loss)
+    loss += weight * d_s_loss
+
+    model.zero_grad()
+    loss.backward()
+    optimizer_cls.step()
 
     batch_time.update(time.time() - end)
     if itern % args.print_freq == 0:
@@ -148,46 +155,34 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
 
     return train_loader_source_batch, train_loader_target_batch
 
-def CondDiscriminatorLoss(args, output, output_cls, target, index, src_cs, lam, softmax=True, fit=False, src=True):
+def CondDiscriminatorLoss(args, output, target, index, cs, lam, softmax=True, fit=False, src=True, dis_cls=True):
 
     prob_p = F.softmax(output, dim=1)
 
     prob_p_dis = prob_p[:, -1].unsqueeze(1)
-    prob_p_dis = torch.clamp(prob_p_dis, min=1e-3, max=0.999)
-    prob_p_class = prob_p[:, :-1]
-    prob_p_class = torch.clamp(prob_p_class, min=1e-3, max=0.999)
-    prob_p_class = prob_p_class / (1-prob_p_dis)
 
-    prob_q_class = Variable(torch.cuda.FloatTensor(prob_p_class.size()).fill_(0))
-    prob_q_class.scatter_(1, target.unsqueeze(1), torch.ones(prob_p_class.size(0), 1).cuda())
+    weights = cs[index]
 
-    if fit:
-        prob_q_class = (1 - prob_p_class) * prob_q_class + prob_p_class * prob_p_class
-
-    src_weights = src_cs[index]
-
-    if src:
+    if dis_cls:
         # loss_d = - (src_weights * ((1-prob_p_dis).log()).sum(1)).mean()
-        loss_d = - (src_weights * (prob_p_dis.log()).sum(1)).mean()
-        loss = - (src_weights * (prob_q_class * prob_p_class.log()).sum(1)).mean()
+        # loss = - (src_weights * (prob_q_class * prob_p_class.log()).sum(1)).mean()
+        if src:
+            loss_d = - (weights * ((1-prob_p_dis).log()).sum(1)).mean()
+        else:
+            loss_d = - (weights * ((prob_p_dis).log()).sum(1)).mean()
+
 
     else:
+
+        loss_d = - (weights * ((1-prob_p_dis).log()).sum(1)).mean()
         # loss_d = - (src_weights * (prob_p_dis.log()).sum(1)).mean()
-        loss_d = - (src_weights * ((1-prob_p_dis).log()).sum(1)).mean()
-        prob_p_cls = F.softmax(output_cls, dim=1)
+        # loss_d = - (weights * ((1-prob_p_dis).log()).sum(1)).mean()
+        # prob_q2 = prob_p_class / prob_p_class.sum(0, keepdim=True).pow(0.5)
+        # prob_q2 /= prob_q2.sum(1, keepdim=True)
+        # prob_q = (1 - args.beta) * prob_q_class + args.beta * prob_q2
+        # loss = - (src_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
 
-        prob_p_cls_dis = prob_p_cls[:, -1].unsqueeze(1)
-        prob_p_cls_dis = torch.clamp(prob_p_cls_dis, min=1e-3, max=0.999)
-        prob_p_cls = prob_p_cls[:, :-1]
-        prob_p_cls = torch.clamp(prob_p_cls, min=1e-3, max=0.999)
-        prob_p_cls = prob_p_cls / (1-prob_p_cls_dis)
-
-        prob_q2 = prob_p_cls / prob_p_cls.sum(0, keepdim=True).pow(0.5)
-        prob_q2 /= prob_q2.sum(1, keepdim=True)
-        prob_q = (1 - args.beta) * prob_q_class + args.beta * prob_q2
-        loss = - (src_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
-
-    return loss + loss_d
+    return loss_d
 
 def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, softmax=True, em=False, emb=True):
 
@@ -198,9 +193,9 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, softmax=T
 
     if not emb:
         prob_p_dis = prob_p[:, -1].unsqueeze(1)
-        prob_p_dis = torch.clamp(prob_p_dis, min=1e-3, max=0.999)
+        # prob_p_dis = torch.clamp(prob_p_dis, min=1e-3, max=0.999)
         prob_p_class = prob_p[:, :-1]
-        prob_p_class = torch.clamp(prob_p_class, min=1e-3, max=0.999)
+        # prob_p_class = torch.clamp(prob_p_class, min=1e-3, max=0.999)
         prob_p_class = prob_p_class / (1-prob_p_dis)
     else:
         prob_p_class = prob_p
@@ -222,22 +217,11 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, softmax=T
         prob_q = (1 - args.beta) * prob_q1 + args.beta * prob_q2
 
     tar_weights = tar_cs[index.cuda()]
-    # tar_weights.fill_(1)
-    if softmax:
-        loss = - (tar_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
-        # loss_d = - (tar_weights * ((1-prob_p_dis).log()).sum(1)).mean()
-    else:
-        loss = - (tar_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
-        # loss_d = - (tar_weights * ((1-prob_p_dis).log()).sum(1)).mean()
+    loss = - (tar_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
 
-    if not emb:
-        loss_d = - (tar_weights * ((1-prob_p_dis).log()).sum(1)).mean()
-        return loss + loss_d
-    else:
-        return loss
+    return loss
 
 def SrcClassifyLoss(args, output, target, index, src_cs, lam, softmax=True, fit=False, emb=False):
-
 
     if softmax:
         prob_p = F.softmax(output, dim=1)
@@ -246,9 +230,9 @@ def SrcClassifyLoss(args, output, target, index, src_cs, lam, softmax=True, fit=
 
     if not emb:
         prob_p_dis = prob_p[:, -1].unsqueeze(1)
-        prob_p_dis = torch.clamp(prob_p_dis, min=1e-3, max=0.999)
+        # prob_p_dis = torch.clamp(prob_p_dis, min=1e-3, max=0.999)
         prob_p_class = prob_p[:, :-1]
-        prob_p_class = torch.clamp(prob_p_class, min=1e-3, max=0.999)
+        # prob_p_class = torch.clamp(prob_p_class, min=1e-3, max=0.999)
         prob_p_class = prob_p_class / (1-prob_p_dis)
     else:
         prob_p_class = prob_p
@@ -260,17 +244,10 @@ def SrcClassifyLoss(args, output, target, index, src_cs, lam, softmax=True, fit=
         prob_q = (1 - prob_p) * prob_q + prob_p * prob_p
 
     src_weights = src_cs[index].cuda()
+    loss = - (src_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
 
-    if softmax:
-        loss = - (src_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
-    else:
-        loss = - (src_weights * (prob_q * prob_p.log()).sum(1)).mean()
+    return loss
 
-    if not emb:
-        loss_d = - (src_weights * (prob_p_dis.log()).sum(1)).mean()
-        return loss + loss_d
-    else:
-        return loss
 
 def validate(val_loader, model, criterion, epoch, args):
     batch_time = AverageMeter()
@@ -473,8 +450,6 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     fig1, ax1 = plt.subplots(figsize=(12,12))
     fig2, ax2 = plt.subplots(figsize=(12,12))
 
-    ax1.scatter(tsne_proj_cen[:, 0], tsne_proj_cen[:, 1], c="black")
-    ax2.scatter(tsne_proj_cen_2[:, 0], tsne_proj_cen_2[:, 1], c="black")
 
     for g in range(31):
         ind = np.where(target_targets.cpu().data.numpy() == g)
@@ -486,6 +461,9 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
         ax2.scatter(tsne_proj_2[ind, 0], tsne_proj_2[ind, 1],
                 label=g,
                 alpha=0.2)
+
+    ax1.scatter(tsne_proj_cen[:, 0], tsne_proj_cen[:, 1], c="black")
+    ax2.scatter(tsne_proj_cen_2[:, 0], tsne_proj_cen_2[:, 1], c="black")
 
     ax1.legend()
     ax2.legend()
@@ -776,7 +754,7 @@ def adjust_learning_rate(optimizer, epoch, args):
         lr = args.lr / math.pow((1 + 10 * epoch / args.epochs), 0.75)
     for param_group in optimizer.param_groups:
        if param_group['name'] == 'conv':
-           param_group['lr'] = lr * 0.1
+           param_group['lr'] = lr
        elif param_group['name'] == 'ca_cl':
            param_group['lr'] = lr
        elif param_group['name'] == 'cen':

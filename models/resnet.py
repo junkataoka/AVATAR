@@ -192,7 +192,6 @@ class ResNet(nn.Module):
         # reverse_feature_ca = ReverseLayerF.apply(ca, alpha)
         # domain_input = self.random_layer([reverse_feature_x, reverse_feature_y, reverse_feature_ca])
         domain_input = self.random_layer([x, y, ca])
-        domain_input = ReverseLayerF.apply(domain_input, alpha)
         domain_output = self.domain_classifier(domain_input)
 
         return x, y, ca, domain_output
@@ -262,7 +261,7 @@ def resnet152(args, **kwargs):
         model.load_state_dict(model_dict)
 
     return model
-    
+
 
 def resnet(args, **kwargs):  # Only the ResNet34 is supported.
     print("==> creating model '{}' ".format(args.arch))

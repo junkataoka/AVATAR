@@ -70,9 +70,28 @@ def main():
             {'params': model.module.layer2.parameters(), 'name': 'conv'},
             {'params': model.module.layer3.parameters(), 'name': 'conv'},
             {'params': model.module.layer4.parameters(), 'name': 'conv'},
+            # {'params': model.module.fc1.parameters(), 'name': 'ca_cl'},
+            # {'params': model.module.fc2.parameters(), 'name': 'ca_cl'},
+            # {'params': model.module.domain_classifier.parameters(), 'name': 'ca_cl'},
+            # {'params': learn_cen, 'name': 'cen'},
+            # {'params': learn_cen_2, 'name': 'cen'}
+        ],
+                                    lr=args.lr,
+                                    momentum=args.momentum,
+                                    weight_decay=args.weight_decay,
+                                    nesterov=args.nesterov)
+
+    optimizer_cls = torch.optim.SGD([
             {'params': model.module.fc1.parameters(), 'name': 'ca_cl'},
             {'params': model.module.fc2.parameters(), 'name': 'ca_cl'},
-            {'params': model.module.domain_classifier.parameters(), 'name': 'ca_cl'},
+        ],
+                                    lr=args.lr,
+                                    momentum=args.momentum,
+                                    weight_decay=args.weight_decay,
+                                    nesterov=args.nesterov)
+
+
+    optimizer_cluster = torch.optim.SGD([
             {'params': learn_cen, 'name': 'cen'},
             {'params': learn_cen_2, 'name': 'cen'}
         ],
@@ -249,7 +268,7 @@ def main():
                 break
 
         # train for one iteration
-        train_loader_source_batch, train_loader_target_batch = train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, criterion_cons, optimizer, itern, epoch, new_epoch_flag, src_cs, tar_cs, args, run)
+        train_loader_source_batch, train_loader_target_batch = train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, criterion_cons, optimizer, optimizer_cls, optimizer_cluster, itern, epoch, new_epoch_flag, src_cs, tar_cs, args, run)
 
         model = model.cuda()
         new_epoch_flag = False
