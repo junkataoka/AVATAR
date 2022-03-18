@@ -10,6 +10,7 @@
 #SBATCH --gres=gpu:1
 
 module load cuda11.1/toolkit/11.1.1
+
 srun python main.py  \
 --data_path_source /data/home/jkataok1/CycleGAN-PyTorch/data/office31/  \
 --src amazon  \
@@ -22,11 +23,13 @@ srun python main.py  \
 --learn_embed \
 --src_cls \
 --batch_size 42 \
---beta 1.0 \
+--beta 0.5 \
 --pretrained \
---src_soft_select \
---embed_softmax \
+--cluster_method kernel_kmeans \
+--epochs 200 \
 --cluster_iter 20 \
+--src_soft_select \
+--lr 0.001 \
+--embed_softmax \
 --src_cen_first \
 --init_cen_on_st \
---cluster_method kernel_kmeans

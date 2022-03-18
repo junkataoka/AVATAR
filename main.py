@@ -13,6 +13,7 @@ import shutil
 import torch
 import random
 import numpy as np
+import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 from torch.autograd import Variable
 from models.model_construct import Model_Construct # for the model construction
@@ -53,14 +54,16 @@ def main():
     learn_cen.requires_grad_(True)
     learn_cen_2 = Variable(torch.cuda.FloatTensor(args.num_classes, args.num_neurons * 4).fill_(0))
     learn_cen_2.requires_grad_(True)
+    p_label_tar = Variable(torch.cuda.FloatTensor(args.num_classes).fill_(0))
+    p_label_src = Variable(torch.cuda.FloatTensor(args.num_classes).fill_(0))
 
     # define loss function/criterion and optimizer
     criterion = torch.nn.CrossEntropyLoss().cuda()
     criterion_cons = ConsensusLoss(nClass=args.num_classes, div=args.div).cuda()
 
-    np.random.seed(1)  # may fix test data
-    random.seed(1)
-    torch.manual_seed(1)
+    # np.random.seed(1)  # may fix test data
+    # random.seed(1)
+    # torch.manual_seed(1)
 
     # apply different learning rates to different layer
     optimizer = torch.optim.SGD([
@@ -70,6 +73,8 @@ def main():
             {'params': model.module.layer2.parameters(), 'name': 'conv'},
             {'params': model.module.layer3.parameters(), 'name': 'conv'},
             {'params': model.module.layer4.parameters(), 'name': 'conv'},
+            {'params': learn_cen, 'name': 'cen'},
+            {'params': learn_cen_2, 'name': 'cen'},
             # {'params': model.module.fc1.parameters(), 'name': 'ca_cl'},
             # {'params': model.module.fc2.parameters(), 'name': 'ca_cl'},
             # {'params': model.module.domain_classifier.parameters(), 'name': 'ca_cl'},
@@ -83,9 +88,9 @@ def main():
 
     optimizer_cls = torch.optim.SGD([
             {'params': model.module.fc1.parameters(), 'name': 'ca_cl'},
-            {'params': model.module.fc2.parameters(), 'name': 'ca_cl'},
+            {'params': model.module.fc2.parameters(), 'name': 'ca_cl'}
         ],
-                                    lr=args.lr,
+                                    lr=args.lr*10,
                                     momentum=args.momentum,
                                     weight_decay=args.weight_decay,
                                     nesterov=args.nesterov)
@@ -93,7 +98,7 @@ def main():
 
     optimizer_cluster = torch.optim.SGD([
             {'params': learn_cen, 'name': 'cen'},
-            {'params': learn_cen_2, 'name': 'cen'}
+            {'params': learn_cen_2, 'name': 'cen'},
         ],
                                     lr=args.lr,
                                     momentum=args.momentum,
@@ -154,7 +159,9 @@ def main():
         # evaluate on the target training and test data
         if (itern == 0) or (count_itern_each_epoch == batch_number):
             prec1, c_s, c_s_2, c_t, c_t_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, \
-            target_features, target_features_2, target_targets, pseudo_labels = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run)
+            target_features, target_features_2, target_targets, pseudo_labels, labels_src = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run)
+            p_label_tar.data = F.softmax(pseudo_labels, dim=1).mean(0).clone()
+            p_label_src.data = labels_src.mean(0).clone()
             test_acc = validate(val_loader_target_t, model, criterion, epoch, args)
             test_flag = True
 
@@ -198,8 +205,8 @@ def main():
 
             # select source samples
             if (itern != 0) and (args.src_soft_select or args.src_hard_select):
-                src_cs_2 = source_select(source_features_2, source_targets, target_features_2, target_targets, train_loader_source, epoch, c_t_2.data.clone(), args)
-                src_cs = source_select(source_features, source_targets, target_features, target_targets, train_loader_source, epoch, c_t.data.clone(), args)
+                src_cs_2 = source_select(source_features_2, source_targets, target_features_2, pseudo_labels, train_loader_source, epoch, c_t_2.data.clone(), args)
+                src_cs = source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, c_t.data.clone(), args)
                 # src_cs = (src_cs_2 + src_cs) / 2
 
                 tar_cs_2 = source_select(target_features_2, target_targets, source_features_2, source_targets, train_loader_target, epoch, c_t_2.data.clone(), args)
@@ -230,7 +237,10 @@ def main():
             torch.cuda.empty_cache()
             torch.cuda.empty_cache()
         elif (args.src.find('visda') != -1) and (itern % int(num_itern_total / 200) == 0):
-            prec1, _, _, _, _, _, _, _, _, _, _, _, _, _ = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run, compute_cen=False)
+            prec1, _, _, _, _, _, _, _, _, _, _, _, _, pseudo_labels, labels_src = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run, compute_cen=False)
+            p_label_tar.data = F.softmax(pseudo_labels, dim=1).mean(0).clone()
+            p_label_src.data = labels_src.mean(0).clone()
+
             test_acc = validate(val_loader_target_t, model, criterion, epoch, args)
             test_flag = True
         if test_flag:
@@ -268,7 +278,7 @@ def main():
                 break
 
         # train for one iteration
-        train_loader_source_batch, train_loader_target_batch = train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, criterion_cons, optimizer, optimizer_cls, optimizer_cluster, itern, epoch, new_epoch_flag, src_cs, tar_cs, args, run)
+        train_loader_source_batch, train_loader_target_batch = train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, criterion_cons, optimizer, optimizer_cls, optimizer_cluster, itern, epoch, new_epoch_flag, src_cs, tar_cs, args, run, p_label_src, p_label_tar)
 
         model = model.cuda()
         new_epoch_flag = False

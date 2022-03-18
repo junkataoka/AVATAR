@@ -25,7 +25,7 @@ def opts():
     parser.add_argument('--lr_plan', type=str, default='dao', help='learning rate decay plan of step or dao')
     parser.add_argument('--schedule', type=int, nargs='+', default=[80, 120], help='decrease learning rate at these epochs for step decay')
     parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
-    parser.add_argument('--weight_decay', type=float, default=1e-4, help='weight decay (L2 penalty)')
+    parser.add_argument('--weight_decay', type=float, default=1e-2, help='weight decay (L2 penalty)')
     parser.add_argument('--nesterov', action='store_true', help='whether to use nesterov SGD')
     parser.add_argument('--eps', type=float, default=1e-6, help='a small value to prevent underflow')
     # specific optimization options

@@ -17,7 +17,7 @@ import time
 class KernelKMeans(BaseEstimator, ClusterMixin):
     """
     Kernel K-means
-    
+
     Reference
     ---------
     Kernel k-means, Spectral Clustering and Normalized Cuts.
@@ -38,7 +38,7 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
         self.coef0 = coef0
         self.kernel_params = kernel_params
         self.verbose = verbose
-        
+
     @property
     def _pairwise(self):
         return self.kernel == "precomputed"
@@ -57,7 +57,7 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
         n_samples = X.shape[0]
 
         K = self._get_kernel(X)
-        
+
         if args.sample_weight:
             sample_weight = K.sum(axis=1)
             #K /= np.outer(sample_weight, sample_weight)
@@ -69,7 +69,7 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
 
         dist = np.zeros((n_samples, self.n_clusters))
         self.within_distances_ = np.zeros(self.n_clusters)
-        
+
         end = time.time()
         for it in range(self.max_iter):
             dist.fill(0)
@@ -77,11 +77,11 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
                                update_within=True)
             labels_old = self.labels_
             self.labels_ = dist.argmin(axis=1)
-            
+
             # Compute the accuracy of clustering
             if true_label is not None:
                 prec1 = 100 * ((self.labels_ == true_label).sum()) / n_samples
-                self.prec1_ = prec1                                                
+                self.prec1_ = prec1
                 cluster_time = time.time() - end
                 end = time.time()
                 print('Epoch %d - Kernel K-means clustering %d: Clustering time %.3f, Prec@1 %.3f' % (epoch, it, cluster_time, prec1))
@@ -89,7 +89,7 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
                 log.write('\nEpoch %d - Kernel K-means clustering %d: Clustering time %.3f, Prec@1 %.3f' % (epoch, it, cluster_time, prec1))
                 log.close()
 
-            # Compute the number of samples whose cluster did not change 
+            # Compute the number of samples whose cluster did not change
             # since last iteration.
             n_same = np.sum((self.labels_ - labels_old) == 0)
             if 1 - float(n_same) / n_samples < self.tol:
@@ -103,7 +103,7 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
         return self
 
     def _compute_dist(self, K, dist, within_distances, update_within):
-        """Compute a n_samples x n_clusters distance matrix using the 
+        """Compute a n_samples x n_clusters distance matrix using the
         kernel trick."""
         sw = self.sample_weight_
 
@@ -144,6 +144,5 @@ if __name__ == '__main__':
     print(kkm.fit_predict(X)[10:20])
     print(kkm.predict(X[10:20]))
 '''
-    
-    
-    
+
+

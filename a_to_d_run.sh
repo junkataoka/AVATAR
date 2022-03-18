@@ -24,9 +24,10 @@ srun python main.py  \
 --batch_size 42 \
 --beta 1.0 \
 --pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 100 \
 --src_soft_select \
---embed_softmax \
---cluster_iter 20 \
 --src_cen_first \
 --init_cen_on_st \
---cluster_method kernel_kmeans
+--lr 0.001
