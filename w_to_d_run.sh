@@ -26,7 +26,5 @@ srun python main.py  \
 --pretrained \
 --cluster_method kernel_kmeans \
 --epochs 200 \
---cluster_iter 100\
---src_soft_select \
---src_cen_first \
---init_cen_on_st \
+--cluster_iter 100 \
+--lr 0.001 \

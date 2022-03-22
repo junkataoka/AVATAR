@@ -23,13 +23,13 @@ srun python main.py  \
 --learn_embed \
 --src_cls \
 --batch_size 42 \
---beta 0.5 \
+--beta 1.0 \
 --pretrained \
 --cluster_method kernel_kmeans \
 --epochs 200 \
---cluster_iter 20 \
---src_soft_select \
+--cluster_iter 100 \
 --lr 0.001 \
---embed_softmax \
---src_cen_first \
---init_cen_on_st \
+--src_soft_select \
+# --embed_softmax \
+# --src_cen_first \
+# --init_cen_on_st \
