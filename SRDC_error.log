@@ -2,3 +2,300 @@
   warnings.warn("GitPython could not be initialized")
 /data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/neptune/new/internal/utils/git.py:35: UserWarning: GitPython could not be initialized
   warnings.warn("GitPython could not be initialized")
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Traceback (most recent call last):
+  File "main.py", line 318, in <module>
+    main()
+  File "main.py", line 162, in main
+    target_features, target_features_2, target_targets, pseudo_labels, labels_src = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run)
+  File "/data/home/jkataok1/SRDC_CVPR2020/trainer.py", line 443, in validate_compute_cen
+    tsne_proj = tsne.fit_transform(tsne_in.cpu().data.numpy())
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/sklearn/manifold/_t_sne.py", line 932, in fit_transform
+    embedding = self._fit(X)
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/sklearn/manifold/_t_sne.py", line 702, in _fit
+    X = self._validate_data(X, accept_sparse=['csr'],
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/sklearn/base.py", line 421, in _validate_data
+    X = check_array(X, **check_params)
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/sklearn/utils/validation.py", line 63, in inner_f
+    return f(*args, **kwargs)
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/sklearn/utils/validation.py", line 663, in check_array
+    _assert_all_finite(array,
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/sklearn/utils/validation.py", line 103, in _assert_all_finite
+    raise ValueError(
+ValueError: Input contains NaN, infinity or a value too large for dtype('float32').
+
+If you suspect this is an IPython 7.31.1 bug, please report it at:
+    https://github.com/ipython/ipython/issues
+or send an email to the mailing list at ipython-dev@python.org
+
+You can print a more detailed traceback right now with "%tb", or use "%debug"
+to interactively debug it.
+
+Extra-detailed tracebacks for bug-reporting purposes can be enabled via:
+    %config Application.verbose_crash=True
+
+Waiting for the remaining 32 operations to synchronize with Neptune. Do not kill this process.
+srun: error: compute130: task 0: Exited with exit code 1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tardis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss1
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_src_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/src_dis_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_s_loss
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/cls_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/tar_cluster_loss2
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/feat_tar_prob
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute metrics/d_t_loss
+Traceback (most recent call last):
+  File "main.py", line 318, in <module>
+    main()
+  File "main.py", line 162, in main
+    target_features, target_features_2, target_targets, pseudo_labels, labels_src = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run)
+  File "/data/home/jkataok1/SRDC_CVPR2020/trainer.py", line 443, in validate_compute_cen
+    tsne_proj = tsne.fit_transform(tsne_in.cpu().data.numpy())
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/sklearn/manifold/_t_sne.py", line 932, in fit_transform
+    embedding = self._fit(X)
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/sklearn/manifold/_t_sne.py", line 702, in _fit
+    X = self._validate_data(X, accept_sparse=['csr'],
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/sklearn/base.py", line 421, in _validate_data
+    X = check_array(X, **check_params)
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/sklearn/utils/validation.py", line 63, in inner_f
+    return f(*args, **kwargs)
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/sklearn/utils/validation.py", line 663, in check_array
+    _assert_all_finite(array,
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/sklearn/utils/validation.py", line 103, in _assert_all_finite
+    raise ValueError(
+ValueError: Input contains NaN, infinity or a value too large for dtype('float32').
+
+If you suspect this is an IPython 7.31.1 bug, please report it at:
+    https://github.com/ipython/ipython/issues
+or send an email to the mailing list at ipython-dev@python.org
+
+You can print a more detailed traceback right now with "%tb", or use "%debug"
+to interactively debug it.
+
+Extra-detailed tracebacks for bug-reporting purposes can be enabled via:
+    %config Application.verbose_crash=True
+
+Waiting for the remaining 29 operations to synchronize with Neptune. Do not kill this process.
+srun: error: compute132: task 0: Exited with exit code 1

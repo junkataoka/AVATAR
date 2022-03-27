@@ -29,7 +29,7 @@ srun python main.py  \
 --epochs 200 \
 --cluster_iter 100 \
 --lr 0.001 \
---src_soft_select \
+# --src_soft_select \
 # --embed_softmax \
 # --src_cen_first \
 # --init_cen_on_st \
