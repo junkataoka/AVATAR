@@ -63,7 +63,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     prob_pred = (1 + (f_t.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
     prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
 
-    tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs.fill_(1), lam, p_label_src, p_label_tar, softmax=args.embed_softmax, emb=True)
+    tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs.fill_(1), lam, p_label_src, p_label_tar, softmax=True, emb=True)
     run["metrics/tar_cluster_loss1"].log(tar_cluster_loss1)
     loss += weight * tar_cluster_loss1
 
@@ -84,7 +84,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     loss += src_dis_loss
 
     prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-    loss += weight * SrcClassifyLoss(args, prob_pred, target_source, index, src_cs.fill_(1), lam, p_label_src, p_label_tar, softmax=args.embed_softmax, fit=args.src_fit, emb=True)
+    loss += weight * SrcClassifyLoss(args, prob_pred, target_source, index, src_cs.fill_(1), lam, p_label_src, p_label_tar, softmax=True, fit=args.src_fit, emb=True)
 
     prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
     loss += weight * SrcClassifyLoss(args, prob_pred_2, target_source, index, src_cs.fill_(1), lam, p_label_src, p_label_tar, softmax=False, fit=args.src_fit, emb=True)
@@ -433,9 +433,8 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     log = open(os.path.join(args.log, 'log.txt'), 'a')
     log.write("\nTest on T training set - epoch: %d, tc_loss: %4f, tc_Top1 acc: %3f, tc_Top5 acc: %3f" % (epoch, losses.avg, top1.avg, top5.avg))
 
-
     target_preds = pseudo_labels.max(1)[1]
-    log_confusion_matrix(target_targets, target_preds, 31, "Target True VS Target Pred", run)
+    log_confusion_matrix(target_preds, target_targets, 31, "Target True VS Target Pred", run)
     tsne = TSNE(2)
     tsne_2 = TSNE(2)
     tsne_in = torch.cat([target_features, c_tar], dim=0)

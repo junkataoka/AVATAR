@@ -27,7 +27,7 @@ srun python main.py  \
 --pretrained \
 --cluster_method kernel_kmeans \
 --epochs 200 \
---cluster_iter 100 \
+--cluster_iter 20 \
 --lr 0.001 \
 # --src_soft_select \
 # --embed_softmax \

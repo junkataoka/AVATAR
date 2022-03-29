@@ -211,7 +211,7 @@ def resnet50(args, **kwargs):
             # Replace names
             pretrained_dict_temp2 = {k.replace('module.', ''): v for k, v in pretrained_dict_temp.items()}
 
-            pretrained_dict = {k: v for k, v in pretrained_dict_temp2.items() if k in model_dict}
+            pretrained_dict = {k: v for k, v in pretrained_dict_temp2.items()}
             model_dict_temp = {k: v for k, v in model_dict.items() if k not in pretrained_dict}
 
             pretrained_dict.update(model_dict_temp)

@@ -19,6 +19,7 @@ python main.py  \
 --data_path_target_t /home/jun/GoogleDrive/project/dataset/office31 \
 --tar_t webcam \
 --workers 1 \
+--pretrained \
 --pretrained_path /home/jun/GoogleDrive/project/models/amazon_to_webcam_resnet50.pkl \
 --learn_embed \
 --src_cls \
@@ -27,7 +28,7 @@ python main.py  \
 --pretrained \
 --cluster_method kernel_kmeans \
 --epochs 200 \
---cluster_iter 1 \
+--cluster_iter 10 \
 --lr 0.001 \
 
 # --src_soft_select \

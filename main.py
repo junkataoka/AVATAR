@@ -41,7 +41,6 @@ def main():
 
     # define model
     model = Model_Construct(args)
-    print(model)
     model = torch.nn.DataParallel(model).cuda() # define multiple GPUs
     run = neptune.init(project = "junkataoka/SRDC",
                        tags = [f"source:{args.src}", f"target:{args.tar}"],
