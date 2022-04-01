@@ -30,8 +30,8 @@ python main.py  \
 --epochs 200 \
 --cluster_iter 10 \
 --lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
 
-# --src_soft_select \
 # --embed_softmax \
 # --src_cen_first \
-# --init_cen_on_st \

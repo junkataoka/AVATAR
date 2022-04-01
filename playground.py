@@ -1,6 +1,18 @@
 #%%
 import torch
-a = torch.load("temp_index.pt", map_location=torch.device("cpu"))
-b = torch.load("temp_src_cs.pt", map_location=torch.device("cpu"))
+import math
+import numpy as np
+import matplotlib.pyplot as plt
 
-print(b[a])
+#%%
+max_epoch = 200
+epoch = np.arange(200)
+#%%
+lam = [2 / (1.0 + math.exp(-1.0 * 10 * epoch[i] / max_epoch)) - 1 for i in range(200)]
+# %%
+plt.plot(lam)
+
+# %%
+
+lam
+# %%
