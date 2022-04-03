@@ -60,9 +60,9 @@ def main():
     criterion = torch.nn.CrossEntropyLoss().cuda()
     criterion_cons = ConsensusLoss(nClass=args.num_classes, div=args.div).cuda()
 
-    # np.random.seed(1)  # may fix test data
-    # random.seed(1)
-    # torch.manual_seed(1)
+    np.random.seed(1)  # may fix test data
+    random.seed(1)
+    torch.manual_seed(1)
 
     # apply different learning rates to different layer
     optimizer = torch.optim.SGD([
@@ -73,7 +73,7 @@ def main():
             {'params': model.module.layer3.parameters(), 'name': 'conv'},
             {'params': model.module.layer4.parameters(), 'name': 'conv'},
             {'params': learn_cen, 'name': 'cen'},
-            {'params': learn_cen_2, 'name': 'cen'},
+            # {'params': learn_cen_2, 'name': 'cen'},
             # {'params': model.module.fc1.parameters(), 'name': 'ca_cl'},
             # {'params': model.module.fc2.parameters(), 'name': 'ca_cl'},
             # {'params': model.module.domain_classifier.parameters(), 'name': 'ca_cl'},
@@ -87,7 +87,9 @@ def main():
 
     optimizer_cls = torch.optim.SGD([
             {'params': model.module.fc1.parameters(), 'name': 'ca_cl'},
-            {'params': model.module.fc2.parameters(), 'name': 'ca_cl'}
+            {'params': model.module.fc2.parameters(), 'name': 'ca_cl'},
+            {'params': learn_cen_2, 'name': 'cen'},
+            # {'params': learn_cen, 'name': 'cen'},
         ],
                                     lr=args.lr*10,
                                     momentum=args.momentum,
