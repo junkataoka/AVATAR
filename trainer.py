@@ -68,9 +68,9 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
 
     src_cs_const = Variable(torch.cuda.FloatTensor(src_cs.size()).fill_(src_cs[index].mean()))
-    tar_cs_const = Variable(torch.cuda.FloatTensor(tar_cs.size()).fill_(tar_cs[tar_index].mean()))
+    tar_cs_const = Variable(torch.cuda.FloatTensor(tar_cs.size()).fill_(src_cs[index].mean()))
 
-    tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs_const, lam, p_label_src, p_label_tar, softmax=True, emb=True)
+    tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs, lam, p_label_src, p_label_tar, softmax=True, emb=True)
     run["metrics/tar_cluster_loss1"].log(tar_cluster_loss1)
     loss += weight * tar_cluster_loss1
 
@@ -78,21 +78,21 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     # run["metrics/tar_cluster_loss2"].log(tar_cluster_loss2)
     # loss += weight * tar_cluster_loss2
 
-    tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs_const, lam, p_label_src, p_label_tar, softmax=True, emb=False)
+    tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs, lam, p_label_src, p_label_tar, softmax=True, emb=False)
     loss += weight * tardis_loss
 
-    d_t_loss = CondDiscriminatorLoss(args, epoch, ca_t, target_target, tar_index, tar_cs, lam, run, fit=args.src_fit, src=False, dis_cls=False)
+    d_t_loss = CondDiscriminatorLoss(args, epoch, ca_t, target_target, tar_index, tar_cs_const, lam, run, fit=args.src_fit, src=False, dis_cls=False)
     loss += weight2 * d_t_loss
 
     # model forward on source
     f_s, f_s_2, ca_s = model(input_source_var, 1)
 
 
-    src_dis_loss = SrcClassifyLoss(args, epoch, ca_s, target_source, index, src_cs_const, lam, p_label_src, p_label_tar, softmax=True, emb=False)
+    src_dis_loss = SrcClassifyLoss(args, epoch, ca_s, target_source, index, src_cs, lam, p_label_src, p_label_tar, softmax=True, emb=False)
     loss += src_dis_loss
 
     prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-    loss += weight * SrcClassifyLoss(args, epoch, prob_pred, target_source, index, src_cs_const, lam, p_label_src, p_label_tar, softmax=False,  emb=True)
+    loss += weight * SrcClassifyLoss(args, epoch, prob_pred, target_source, index, src_cs, lam, p_label_src, p_label_tar, softmax=False,  emb=True)
 
     # prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
     # loss += weight * SrcClassifyLoss(args, epoch, prob_pred_2, target_source, index, src_cs_const, lam, p_label_src, p_label_tar, softmax=False, emb=True)
@@ -111,11 +111,11 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
 
     f_t, f_t_2, ca_t = model(input_target_var, 1)
 
-    tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs_const, lam, p_label_src, p_label_tar, em=(args.cluster_method == 'em'), emb=False)
+    tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs, lam, p_label_src, p_label_tar, em=(args.cluster_method == 'em'), emb=False)
     loss += weight * tardis_loss
     run["metrics/tardis_loss"].log(tardis_loss)
 
-    d_t_loss = CondDiscriminatorLoss(args, epoch, ca_t, target_target, tar_index, tar_cs, lam, run, fit=args.src_fit, src=False, dis_cls=True)
+    d_t_loss = CondDiscriminatorLoss(args, epoch, ca_t, target_target, tar_index, tar_cs_const, lam, run, fit=args.src_fit, src=False, dis_cls=True)
     loss += weight2 * d_t_loss
     run["metrics/d_t_loss"].log(d_t_loss)
 
@@ -126,14 +126,14 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     # run["metrics/tar_cluster_loss1"].log(tar_cluster_loss1)
     # loss += weight * tar_cluster_loss1
 
-    tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs_const, lam, p_label_src, p_label_tar, softmax=False, emb=True)
+    tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs, lam, p_label_src, p_label_tar, softmax=False, emb=True)
     run["metrics/tar_cluster_loss2"].log(tar_cluster_loss2)
     loss += weight * tar_cluster_loss2
 
     # model forward on source
     f_s, f_s_2, ca_s = model(input_source_var, 1)
 
-    src_dis_loss = SrcClassifyLoss(args, epoch, ca_s, target_source, index, src_cs_const, lam, p_label_src, p_label_tar, fit=args.src_fit, emb=False)
+    src_dis_loss = SrcClassifyLoss(args, epoch, ca_s, target_source, index, src_cs, lam, p_label_src, p_label_tar, fit=args.src_fit, emb=False)
     loss += src_dis_loss
     run["metrics/src_dis_loss"].log(src_dis_loss)
 
@@ -141,7 +141,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     # loss += weight * SrcClassifyLoss(args, epoch, prob_pred, target_source, index, src_cs_const, lam, p_label_src, p_label_tar, softmax=True,  emb=True)
 
     prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-    loss += weight * SrcClassifyLoss(args, epoch, prob_pred_2, target_source, index, src_cs_const, lam, p_label_src, p_label_tar, softmax=False, emb=True)
+    loss += weight * SrcClassifyLoss(args, epoch, prob_pred_2, target_source, index, src_cs, lam, p_label_src, p_label_tar, softmax=False, emb=True)
 
     d_s_loss = CondDiscriminatorLoss(args, epoch, ca_s, target_source, index, src_cs, lam, run, fit=args.src_fit, src=True, dis_cls=True)
     run["metrics/d_s_loss"].log(d_s_loss)
@@ -794,9 +794,9 @@ def adjust_learning_rate(optimizer, epoch, args):
        if param_group['name'] == 'conv':
            param_group['lr'] = lr
        elif param_group['name'] == 'ca_cl':
-           param_group['lr'] = lr * 10
+           param_group['lr'] = lr
        elif param_group['name'] == 'cen':
-           param_group['lr'] = lr * 10
+           param_group['lr'] = lr
 
        else:
            raise ValueError('The required parameter group does not exist.')

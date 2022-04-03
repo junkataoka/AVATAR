@@ -91,7 +91,7 @@ def main():
             {'params': learn_cen_2, 'name': 'cen'},
             # {'params': learn_cen, 'name': 'cen'},
         ],
-                                    lr=args.lr*10,
+                                    lr=args.lr,
                                     momentum=args.momentum,
                                     weight_decay=args.weight_decay,
                                     nesterov=args.nesterov)
