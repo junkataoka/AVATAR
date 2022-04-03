@@ -70,7 +70,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     src_cs_const = Variable(torch.cuda.FloatTensor(src_cs.size()).fill_(src_cs[index].mean()))
     tar_cs_const = Variable(torch.cuda.FloatTensor(tar_cs.size()).fill_(src_cs[index].mean()))
 
-    tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs, lam, p_label_src, p_label_tar, softmax=False, emb=True)
+    tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs_const, lam, p_label_src, p_label_tar, softmax=False, emb=True)
     run["metrics/tar_cluster_loss1"].log(tar_cluster_loss1)
     loss += weight * tar_cluster_loss1
 
@@ -81,7 +81,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     # tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs, lam, p_label_src, p_label_tar, softmax=True, emb=False)
     # loss += weight * tardis_loss
 
-    d_t_loss = CondDiscriminatorLoss(args, epoch, ca_t, target_target, tar_index, tar_cs_const, lam, run, fit=args.src_fit, src=False, dis_cls=False)
+    d_t_loss = CondDiscriminatorLoss(args, epoch, ca_t, target_target, tar_index, tar_cs, lam, run, fit=args.src_fit, src=False, dis_cls=False)
     loss += weight2 * d_t_loss
 
     # model forward on source
@@ -115,7 +115,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     # loss += weight * tardis_loss
     # run["metrics/tardis_loss"].log(tardis_loss)
 
-    d_t_loss = CondDiscriminatorLoss(args, epoch, ca_t, target_target, tar_index, tar_cs_const, lam, run, fit=args.src_fit, src=False, dis_cls=True)
+    d_t_loss = CondDiscriminatorLoss(args, epoch, ca_t, target_target, tar_index, tar_cs, lam, run, fit=args.src_fit, src=False, dis_cls=True)
     loss += weight2 * d_t_loss
     run["metrics/d_t_loss"].log(d_t_loss)
 
@@ -126,7 +126,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     # run["metrics/tar_cluster_loss1"].log(tar_cluster_loss1)
     # loss += weight * tar_cluster_loss1
 
-    tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs, lam, p_label_src, p_label_tar, softmax=False, emb=True)
+    tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs_const, lam, p_label_src, p_label_tar, softmax=False, emb=True)
     run["metrics/tar_cluster_loss2"].log(tar_cluster_loss2)
     loss += weight * tar_cluster_loss2
 
