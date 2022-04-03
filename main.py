@@ -158,9 +158,13 @@ def main():
         # evaluate on the target training and test data
         if (itern == 0) or (count_itern_each_epoch == batch_number):
             prec1, c_s, c_s_2, c_t, c_t_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, \
-            target_features, target_features_2, target_targets, pseudo_labels, labels_src = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run)
-            p_label_tar.data = F.softmax(pseudo_labels, dim=1).mean(0).clone()
+            target_features, target_features_2, target_targets, pseudo_labels, labels_src, labels_tar = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run)
+            # p_label_tar.data = F.softmax(pseudo_labels, dim=1).mean(0).clone()
+            one_hot_tar = Variable(torch.cuda.FloatTensor(pseudo_labels.size()).fill_(0))
+            one_hot_tar.scatter_(1, labels_tar.unsqueeze(1), torch.ones(pseudo_labels.size(0), 1).cuda())
             p_label_src.data = labels_src.mean(0).clone()
+            p_label_tar.data = one_hot_tar.mean(0).clone()
+
             test_acc = validate(val_loader_target_t, model, criterion, epoch, args)
             test_flag = True
 
@@ -236,9 +240,11 @@ def main():
             torch.cuda.empty_cache()
             torch.cuda.empty_cache()
         elif (args.src.find('visda') != -1) and (itern % int(num_itern_total / 200) == 0):
-            prec1, _, _, _, _, _, _, _, _, _, _, _, _, pseudo_labels, labels_src = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run, compute_cen=False)
-            p_label_tar.data = F.softmax(pseudo_labels, dim=1).mean(0).clone()
+            prec1, _, _, _, _, _, _, _, _, _, _, _, _, pseudo_labels, labels_src, labels_tar = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run, compute_cen=False)
+            one_hot_tar = Variable(torch.cuda.FloatTensor(pseudo_labels.size()).fill_(0))
+            one_hot_tar.scatter_(1, labels_tar.unsqueeze(1), torch.ones(pseudo_labels.size(0), 1).cuda())
             p_label_src.data = labels_src.mean(0).clone()
+            p_label_tar.data = one_hot_tar.mean(0).clone()
 
             test_acc = validate(val_loader_target_t, model, criterion, epoch, args)
             test_flag = True

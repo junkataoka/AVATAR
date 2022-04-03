@@ -23,12 +23,14 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     # switch to train mode
     model.train()
 
-    lam = 2 / (1 + math.exp(-1 * 1 * epoch / args.epochs)) - 1 # penalty parameter
+    lam3 = 2 / (1 + math.exp(-1 * 10 * epoch / args.epochs)) - 1 # penalty parameter
     lam2 = 2 / (1 + math.exp(-1 * 10 * epoch / args.epochs)) - 1 # penalty parameter
+    lam = 2 / (1 + math.exp(-1 * 10 * epoch / args.epochs)) - 1 # penalty parameter
 
     if args.src_cls:
         weight = lam
         weight2 = lam2
+        weight3 = lam3
     else:
         weight = 1.0
 
@@ -59,39 +61,43 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
 
 
     loss = 0
-    f_t, f_t_2, ca_t, d_t = model(input_target_var, 1)
+    f_t, f_t_2, ca_t = model(input_target_var, 1)
 
     # Update target domain
     prob_pred = (1 + (f_t.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
     prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
 
-    tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs.fill_(1), lam, p_label_src, p_label_tar, softmax=True, emb=True)
+    src_cs_const = Variable(torch.cuda.FloatTensor(src_cs.size()).fill_(src_cs.mean()))
+    tar_cs_const = Variable(torch.cuda.FloatTensor(tar_cs.size()).fill_(tar_cs.mean()))
+
+    tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs_const, lam, p_label_src, p_label_tar, softmax=True, emb=True)
     run["metrics/tar_cluster_loss1"].log(tar_cluster_loss1)
     loss += weight * tar_cluster_loss1
 
-    tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs.fill_(1), lam, p_label_src, p_label_tar, softmax=False, emb=True)
+    tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs_const, lam, p_label_src, p_label_tar, softmax=False, emb=True)
     run["metrics/tar_cluster_loss2"].log(tar_cluster_loss2)
     loss += weight * tar_cluster_loss2
 
-    tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs.fill_(1), lam, p_label_src, p_label_tar, em=(args.cluster_method == 'em'), emb=False)
+    tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs_const, lam, p_label_src, p_label_tar, softmax=True, emb=False)
     loss += weight * tardis_loss
 
-    d_t_loss = CondDiscriminatorLoss(args, ca_t, target_target, tar_index, tar_cs.fill_(1), lam, run, fit=args.src_fit, src=False, dis_cls=False)
+    d_t_loss = CondDiscriminatorLoss(args, epoch, ca_t, target_target, tar_index, tar_cs, lam, run, fit=args.src_fit, src=False, dis_cls=False)
     loss += weight2 * d_t_loss
 
     # model forward on source
-    f_s, f_s_2, ca_s, d_s = model(input_source_var, 1)
+    f_s, f_s_2, ca_s = model(input_source_var, 1)
 
-    src_dis_loss = SrcClassifyLoss(args, ca_s, target_source, index, src_cs, lam, p_label_src, p_label_tar, fit=args.src_fit, emb=False)
-    loss += src_dis_loss
+
+    # src_dis_loss = SrcClassifyLoss(args, epoch, ca_s, target_source, index, src_cs_const, lam, p_label_src, p_label_tar, softmax=True, emb=False)
+    # loss += src_dis_loss
 
     prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-    loss += weight * SrcClassifyLoss(args, prob_pred, target_source, index, src_cs, lam, p_label_src, p_label_tar, softmax=True, fit=args.src_fit, emb=True)
+    loss += weight * SrcClassifyLoss(args, epoch, prob_pred, target_source, index, src_cs_const, lam, p_label_src, p_label_tar, softmax=False,  emb=True)
 
     prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-    loss += weight * SrcClassifyLoss(args, prob_pred_2, target_source, index, src_cs, lam, p_label_src, p_label_tar, softmax=False, fit=args.src_fit, emb=True)
+    loss += weight * SrcClassifyLoss(args, epoch, prob_pred_2, target_source, index, src_cs_const, lam, p_label_src, p_label_tar, softmax=False, emb=True)
 
-    d_s_loss = CondDiscriminatorLoss(args, ca_s, target_source, index, src_cs, lam, run, fit=args.src_fit, src=True, dis_cls=False)
+    d_s_loss = CondDiscriminatorLoss(args, epoch, ca_s, target_source, index, src_cs, lam, run, fit=args.src_fit, src=True, dis_cls=False)
     loss += weight2 * d_s_loss
 
     losses.update(loss.data.item(), input_target.size(0))
@@ -103,24 +109,41 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     # Update join classifier & discriminator
     loss = 0
 
-    f_t, f_t_2, ca_t, d_t = model(input_target_var, 1)
+    f_t, f_t_2, ca_t = model(input_target_var, 1)
 
-    tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs.fill_(1), lam, p_label_src, p_label_tar, em=(args.cluster_method == 'em'), emb=False)
+    tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs_const, lam, p_label_src, p_label_tar, em=(args.cluster_method == 'em'), emb=False)
     loss += weight * tardis_loss
     run["metrics/tardis_loss"].log(tardis_loss)
 
-    d_t_loss = CondDiscriminatorLoss(args, ca_t, target_target, tar_index, tar_cs.fill_(1), lam, run, fit=args.src_fit, src=False, dis_cls=True)
+    d_t_loss = CondDiscriminatorLoss(args, epoch, ca_t, target_target, tar_index, tar_cs_const, lam, run, fit=args.src_fit, src=False, dis_cls=True)
     loss += weight2 * d_t_loss
     run["metrics/d_t_loss"].log(d_t_loss)
 
-    # model forward on source
-    f_s, f_s_2, ca_s, d_s = model(input_source_var, 1)
+    prob_pred = (1 + (f_t.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
+    prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
 
-    src_dis_loss = SrcClassifyLoss(args, ca_s, target_source, index, src_cs, lam, p_label_src, p_label_tar, fit=args.src_fit, emb=False)
+    tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs_const, lam, p_label_src, p_label_tar, softmax=True, emb=True)
+    run["metrics/tar_cluster_loss1"].log(tar_cluster_loss1)
+    loss += weight * tar_cluster_loss1
+
+    tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs_const, lam, p_label_src, p_label_tar, softmax=False, emb=True)
+    run["metrics/tar_cluster_loss2"].log(tar_cluster_loss2)
+    loss += weight * tar_cluster_loss2
+
+    # model forward on source
+    f_s, f_s_2, ca_s = model(input_source_var, 1)
+
+    src_dis_loss = SrcClassifyLoss(args, epoch, ca_s, target_source, index, src_cs_const, lam, p_label_src, p_label_tar, fit=args.src_fit, emb=False)
     loss += src_dis_loss
     run["metrics/src_dis_loss"].log(src_dis_loss)
 
-    d_s_loss = CondDiscriminatorLoss(args, ca_s, target_source, index, src_cs, lam, run, fit=args.src_fit, src=True, dis_cls=True)
+    prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
+    loss += weight * SrcClassifyLoss(args, epoch, prob_pred, target_source, index, src_cs_const, lam, p_label_src, p_label_tar, softmax=True,  emb=True)
+
+    prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
+    loss += weight * SrcClassifyLoss(args, epoch, prob_pred_2, target_source, index, src_cs_const, lam, p_label_src, p_label_tar, softmax=False, emb=True)
+
+    d_s_loss = CondDiscriminatorLoss(args, epoch, ca_s, target_source, index, src_cs, lam, run, fit=args.src_fit, src=True, dis_cls=True)
     run["metrics/d_s_loss"].log(d_s_loss)
     loss += weight2 * d_s_loss
 
@@ -148,7 +171,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
 
     return train_loader_source_batch, train_loader_target_batch
 
-def CondDiscriminatorLoss(args, output, target, index, cs, lam, run, softmax=True, fit=False, src=True, dis_cls=True):
+def CondDiscriminatorLoss(args, epoch, output, target, index, cs, lam, run, softmax=True, fit=False, src=True, dis_cls=True):
 
     if softmax:
         prob_p = F.softmax(output, dim=1)
@@ -156,23 +179,29 @@ def CondDiscriminatorLoss(args, output, target, index, cs, lam, run, softmax=Tru
         prob_p = output / output.sum(dim=1, keepdim=True)
 
     prob_p_dis = prob_p[:, -1].unsqueeze(1)
+    prob_p_class = prob_p[:, :-1]
+
+    if epoch != 0:
+        entropy = -(prob_p_class * prob_p_class.log()).mean(1)
+    else:
+        entropy = 0
 
     weights = cs[index]
 
     if dis_cls:
         if src:
-            loss_d = - (weights * ((1-prob_p_dis + 1e-6).log()).sum(1)).mean()
+            loss_d = - (weights * (1+entropy) * ((1-prob_p_dis).log()).sum(1)).mean()
             run["metrics/cls_src_prob"].log(prob_p_dis.mean())
         else:
-            loss_d = - (weights * ((prob_p_dis + 1e-6).log()).sum(1)).mean()
+            loss_d = - (weights * (1+entropy) * ((prob_p_dis).log()).sum(1)).mean()
             run["metrics/cls_tar_prob"].log(prob_p_dis.mean())
 
     else:
         if src:
-            loss_d = - (weights * ((prob_p_dis + 1e-6).log()).sum(1)).mean()
+            loss_d = - (weights * (1+entropy) * ((prob_p_dis).log()).sum(1)).mean()
             run["metrics/feat_src_prob"].log(prob_p_dis.mean())
         else:
-            loss_d = - (weights * ((1-prob_p_dis + 1e-6).log()).sum(1)).mean()
+            loss_d = - (weights * (1+entropy) * ((1-prob_p_dis).log()).sum(1)).mean()
             run["metrics/feat_tar_prob"].log(prob_p_dis.mean())
         # loss_d = - (src_weights * (prob_p_dis.log()).sum(1)).mean()
         # loss_d = - (weights * ((1-prob_p_dis).log()).sum(1)).mean()
@@ -194,7 +223,7 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, p_label_s
     if not emb:
         prob_p_dis = prob_p[:, -1].unsqueeze(1)
         prob_p_class = prob_p[:, :-1]
-        prob_p_class = prob_p_class / (1-prob_p_dis + 1e-6)
+        prob_p_class = prob_p_class / (1-prob_p_dis)
 
     else:
         prob_p_class = prob_p
@@ -217,11 +246,13 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, p_label_s
 
     tar_weights = tar_cs[index.cuda()]
     class_weight = p_label_src / p_label_tar
-    loss = - (tar_weights * (class_weight * prob_q * prob_p_class.log()).sum(1)).mean()
+    if epoch < 5:
+        class_weight.fill_(1)
 
+    loss = - (tar_weights * (class_weight * prob_q * prob_p_class.log()).sum(1)).mean()
     return loss
 
-def SrcClassifyLoss(args, output, target, index, src_cs, lam, p_label_src, p_label_tar, softmax=True, fit=False, emb=False):
+def SrcClassifyLoss(args, epoch, output, target, index, src_cs, lam, p_label_src, p_label_tar, softmax=True, fit=False, emb=False):
 
     if softmax:
         prob_p = F.softmax(output, dim=1)
@@ -233,7 +264,7 @@ def SrcClassifyLoss(args, output, target, index, src_cs, lam, p_label_src, p_lab
         # prob_p_dis = torch.clamp(prob_p_dis, min=1e-3, max=0.999)
         prob_p_class = prob_p[:, :-1]
         # prob_p_class = torch.clamp(prob_p_class, min=1e-3, max=0.999)
-        prob_p_class = prob_p_class / (1-prob_p_dis + 1e-6)
+        prob_p_class = prob_p_class / (1-prob_p_dis)
     else:
         prob_p_class = prob_p
 
@@ -245,6 +276,9 @@ def SrcClassifyLoss(args, output, target, index, src_cs, lam, p_label_src, p_lab
 
     src_weights = src_cs[index].cuda()
     class_weight = p_label_tar / p_label_src
+    if epoch < 5:
+        class_weight.fill_(1)
+
     loss = - (src_weights * (class_weight * prob_q * prob_p_class.log()).sum(1)).mean()
 
     return loss
@@ -269,7 +303,7 @@ def validate(val_loader, model, criterion, epoch, args):
 
         # forward
         with torch.no_grad():
-            _, _, output, _ = model(input_var, 1)
+            _, _, output = model(input_var, 1)
             output = output[:, :-1]
             loss = criterion(output, target_var)
 
@@ -339,7 +373,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
             input_var = Variable(input)
             target = target.cuda()
             with torch.no_grad():
-                feature, feature_2, output, _ = model(input_var, 1)
+                feature, feature_2, output = model(input_var, 1)
                 output = output[:, :-1]
             source_features[index.cuda(), :] = feature.data.clone()
             source_features_2[index.cuda(), :] = feature_2.data.clone()
@@ -375,7 +409,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
         target_var = Variable(target)
 
         with torch.no_grad():
-            feature, feature_2, output, _ = model(input_var, 1)
+            feature, feature_2, output = model(input_var, 1)
             output = output[:, :-1]
         target_features[index.cuda(), :] = feature.data.clone() # index:a tensor
         target_features_2[index.cuda(), :] = feature_2.data.clone()
@@ -435,7 +469,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     log = open(os.path.join(args.log, 'log.txt'), 'a')
     log.write("\nTest on T training set - epoch: %d, tc_loss: %4f, tc_Top1 acc: %3f, tc_Top5 acc: %3f" % (epoch, losses.avg, top1.avg, top5.avg))
 
-    target_preds = pseudo_labels.max(1)[1]
+    target_preds = pseudo_labels.argmax(dim=1)
     log_confusion_matrix(target_preds, target_targets, 31, "Target True VS Target Pred", run)
     tsne = TSNE(2)
     tsne_2 = TSNE(2)
@@ -488,10 +522,10 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
         log.write("\n                          Avg. over all classes: %3f" % acc_for_each_class.mean())
         log.close()
 
-        return acc_for_each_class.mean(), c_src, c_src_2, c_tar, c_tar_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, target_features, target_features_2, target_targets, pseudo_labels, labels_src
+        return acc_for_each_class.mean(), c_src, c_src_2, c_tar, c_tar_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, target_features, target_features_2, target_targets, pseudo_labels, labels_src, target_preds
     else:
         log.close()
-        return top1.avg, c_src, c_src_2, c_tar, c_tar_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, target_features, target_features_2, target_targets, pseudo_labels, labels_src
+        return top1.avg, c_src, c_src_2, c_tar, c_tar_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, target_features, target_features_2, target_targets, pseudo_labels, labels_src, target_preds
 
 def log_confusion_matrix(target, label, num_classes, title, run):
     confusion_matrix = torchmetrics.functional.confusion_matrix(target, label, num_classes=num_classes)
@@ -563,6 +597,7 @@ def source_select(source_features, source_targets, target_features, pseudo_label
     gc.collect()
     torch.cuda.empty_cache()
     torch.cuda.empty_cache()
+    print(src_cs)
 
     return src_cs
 

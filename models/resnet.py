@@ -139,11 +139,11 @@ class ResNet(nn.Module):
         self.random_layer = RandomLayer([2048, 4*128, 32], output_dim=2048)
         self.random_layer.cuda()
 
-        self.domain_classifier = nn.Sequential()
-        self.domain_classifier.add_module('d_fc1', nn.Linear(2048, num_neurons*block.expansion))
-        self.domain_classifier.add_module('d_bn1', nn.BatchNorm1d(num_neurons*block.expansion))
-        self.domain_classifier.add_module('d_relu1', nn.ReLU(True))
-        self.domain_classifier.add_module('d_fc2', nn.Linear(num_neurons*block.expansion, num_classeses+1))
+        # self.domain_classifier = nn.Sequential()
+        # self.domain_classifier.add_module('d_fc1', nn.Linear(2048, num_neurons*block.expansion))
+        # self.domain_classifier.add_module('d_bn1', nn.BatchNorm1d(num_neurons*block.expansion))
+        # self.domain_classifier.add_module('d_relu1', nn.ReLU(True))
+        # self.domain_classifier.add_module('d_fc2', nn.Linear(num_neurons*block.expansion, num_classeses+1))
         # self.domain_classifier.add_module('d_softmax', nn.LogSoftmax(dim=1))
 
         for m in self.modules():
@@ -191,10 +191,10 @@ class ResNet(nn.Module):
         # reverse_feature_y = ReverseLayerF.apply(y, alpha)
         # reverse_feature_ca = ReverseLayerF.apply(ca, alpha)
         # domain_input = self.random_layer([reverse_feature_x, reverse_feature_y, reverse_feature_ca])
-        domain_input = self.random_layer([x, y, ca])
-        domain_output = self.domain_classifier(domain_input)
+        # domain_input = self.random_layer([x, y, ca])
+        # domain_output = self.domain_classifier(domain_input)
 
-        return x, y, ca, domain_output
+        return x, y, ca
 
 
 def resnet50(args, **kwargs):
