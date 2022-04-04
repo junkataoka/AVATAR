@@ -35,6 +35,7 @@ best_test_prec1 = 0
 cond_best_test_prec1 = 0
 best_cluster_acc = 0
 best_cluster_acc_2 = 0
+counter = 0
 
 def main():
     global args, best_prec1, best_test_prec1, cond_best_test_prec1, best_cluster_acc, best_cluster_acc_2
@@ -255,10 +256,13 @@ def main():
             log = open(os.path.join(args.log, 'log.txt'), 'a')
             run["metrics/current_acc"].log(prec1)
             if prec1 > best_prec1:
+                counter = 0
                 best_prec1 = prec1
                 cond_best_test_prec1 = 0
                 run["metrics/best_acc"].log(best_prec1)
                 log.write('\n                                                                                 best val acc till now: %3f' % best_prec1)
+            else: counter += 1
+
             if test_acc > best_test_prec1:
                 best_test_prec1 = test_acc
                 log.write('\n                                                                                 best test acc till now: %3f' % best_test_prec1)
@@ -281,7 +285,7 @@ def main():
             test_flag = False
 
         # early stop
-        if epoch > args.stop_epoch:
+        if counter > args.stop_epoch:
                 break
 
         # train for one iteration
