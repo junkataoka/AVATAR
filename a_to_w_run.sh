@@ -30,6 +30,7 @@ srun python main.py  \
 --cluster_iter 20 \
 --lr 0.001 \
 --src_soft_select \
+--stop_epoch 20 \
 # --embed_softmax \
 # --src_cen_first \
 # --init_cen_on_st \
