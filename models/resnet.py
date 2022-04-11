@@ -130,14 +130,13 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
         self.avgpool = nn.AvgPool2d(7)
-        #self.fc = nn.Linear(512 * block.expansion, num_classeses)
         self.fc1 = nn.Sequential(nn.Linear(512 * block.expansion, num_neurons * block.expansion),
         nn.BatchNorm1d(num_neurons * block.expansion),
         nn.ReLU(inplace=True))
         self.fc2 = nn.Linear(num_neurons * block.expansion, num_classeses+1)
 
-        self.random_layer = RandomLayer([2048, 4*128, 32], output_dim=2048)
-        self.random_layer.cuda()
+        # self.random_layer = RandomLayer([2048, 4*128, 32], output_dim=2048)
+        # self.random_layer.cuda()
 
         # self.domain_classifier = nn.Sequential()
         # self.domain_classifier.add_module('d_fc1', nn.Linear(2048, num_neurons*block.expansion))
@@ -209,12 +208,12 @@ def resnet50(args, **kwargs):
             # pretrained dict
             pretrained_dict_temp = torch.load(args.pretrained_path)
             # Replace names
-            pretrained_dict_temp2 = {k.replace('module.', ''): v for k, v in pretrained_dict_temp.items()}
+            # pretrained_dict_temp2 = {k.replace('module.', ''): v for k, v in pretrained_dict_temp.items()}
 
-            pretrained_dict = {k: v for k, v in pretrained_dict_temp2.items()}
-            model_dict_temp = {k: v for k, v in model_dict.items() if k not in pretrained_dict}
+            pretrained_dict = {k: v for k, v in pretrained_dict_temp.items() if k in model_dict}
+            model_dict_temp = {k: v for k, v in model_dict.items()}
 
-            pretrained_dict.update(model_dict_temp)
+            # pretrained_dict.update(model_dict_temp)
             model.load_state_dict(pretrained_dict)
             print(args.pretrained_path)
             print('Source pre-trained model has been loaded!')

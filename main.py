@@ -38,7 +38,7 @@ best_cluster_acc_2 = 0
 counter = 0
 
 def main():
-    global args, best_prec1, best_test_prec1, cond_best_test_prec1, best_cluster_acc, best_cluster_acc_2
+    global args, best_prec1, best_test_prec1, cond_best_test_prec1, best_cluster_acc, best_cluster_acc_2, counter
 
     # define model
     model = Model_Construct(args)
@@ -74,7 +74,6 @@ def main():
             {'params': model.module.layer3.parameters(), 'name': 'conv'},
             {'params': model.module.layer4.parameters(), 'name': 'conv'},
             {'params': learn_cen, 'name': 'cen'},
-            # {'params': learn_cen_2, 'name': 'cen'},
             # {'params': learn_cen_2, 'name': 'cen'},
             # {'params': model.module.fc1.parameters(), 'name': 'ca_cl'},
             # {'params': model.module.fc2.parameters(), 'name': 'ca_cl'},
@@ -163,14 +162,14 @@ def main():
         # evaluate on the target training and test data
         if (itern == 0) or (count_itern_each_epoch == batch_number):
             prec1, c_s, c_s_2, c_t, c_t_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, \
-            target_features, target_features_2, target_targets, pseudo_labels, labels_src, labels_tar = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run)
+            target_features, target_features_2, target_targets, pseudo_labels, labels_src, labels_tar = validate_compute_cen(val_loader_target_t, val_loader_source, model, criterion, epoch, args, run)
             # p_label_tar.data = F.softmax(pseudo_labels, dim=1).mean(0).clone()
             one_hot_tar = Variable(torch.cuda.FloatTensor(pseudo_labels.size()).fill_(0))
             one_hot_tar.scatter_(1, labels_tar.unsqueeze(1), torch.ones(pseudo_labels.size(0), 1).cuda())
             p_label_src.data = labels_src.mean(0).clone()
             p_label_tar.data = one_hot_tar.mean(0).clone()
 
-            test_acc = validate(val_loader_target_t, model, criterion, epoch, args)
+            test_acc = validate(val_loader_target, model, criterion, epoch, args)
             test_flag = True
 
             # K-means clustering or its variants
@@ -180,7 +179,7 @@ def main():
             else:
                 cen = c_t
                 cen_2 = c_t_2
-            if (itern != 0) and (args.initial_cluster != 0) and (args.cluster_method == 'kernel_kmeans'):
+            if args.cluster_method == 'kernel_kmeans':
                 cluster_acc_2, c_t_2 = kernel_k_means(target_features_2, target_targets, pseudo_labels, train_loader_target, epoch, model, args, best_cluster_acc_2, change_target=False)
                 cluster_acc, c_t = kernel_k_means(target_features, target_targets, pseudo_labels, train_loader_target, epoch, model, args, best_cluster_acc)
             elif args.cluster_method != 'spherical_kmeans':
@@ -244,22 +243,13 @@ def main():
             gc.collect()
             torch.cuda.empty_cache()
             torch.cuda.empty_cache()
-        elif (args.src.find('visda') != -1) and (itern % int(num_itern_total / 200) == 0):
-            prec1, _, _, _, _, _, _, _, _, _, _, _, _, pseudo_labels, labels_src, labels_tar = validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run, compute_cen=False)
-            one_hot_tar = Variable(torch.cuda.FloatTensor(pseudo_labels.size()).fill_(0))
-            one_hot_tar.scatter_(1, labels_tar.unsqueeze(1), torch.ones(pseudo_labels.size(0), 1).cuda())
-            p_label_src.data = labels_src.mean(0).clone()
-            p_label_tar.data = one_hot_tar.mean(0).clone()
-
-            test_acc = validate(val_loader_target_t, model, criterion, epoch, args)
-            test_flag = True
         if test_flag:
             # record the best prec1 and save checkpoint
             log = open(os.path.join(args.log, 'log.txt'), 'a')
-            run["metrics/current_acc"].log(prec1)
-            if prec1 > best_prec1:
+            run["metrics/current_acc"].log(test_acc)
+            if test_acc > best_prec1:
                 counter = 0
-                best_prec1 = prec1
+                best_prec1 = test_acc
                 cond_best_test_prec1 = 0
                 run["metrics/best_acc"].log(best_prec1)
                 log.write('\n                                                                                 best val acc till now: %3f' % best_prec1)

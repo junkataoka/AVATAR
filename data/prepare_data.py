@@ -14,13 +14,13 @@ def generate_dataloader(args):
     traindir_t = os.path.join(args.data_path_target, args.tar)
     valdir = os.path.join(args.data_path_target, args.tar)
     valdir_t = os.path.join(args.data_path_target_t, args.tar_t)
-    
+
     classes = os.listdir(traindir)
     classes.sort()
     ins_num_for_each_cls_src = torch.cuda.FloatTensor(args.num_classes)
     for i,c in enumerate(classes):
         ins_num_for_each_cls_src[i] = len(os.listdir(os.path.join(traindir, c)))
-    
+
     if not os.path.isdir(traindir):
         raise ValueError ('the require data path is not exist, please download the dataset')
 
@@ -61,24 +61,24 @@ def generate_dataloader(args):
         # transformation on the training data during training
         src_data_transform_train = transforms.Compose([
       			#transforms.Resize((256, 256)), # spatial size of vgg-f input
-            transforms.Resize(256),
-      			transforms.RandomCrop(224),
+            transforms.Resize((256,256)),
+      			transforms.RandomCrop((224,224)),
             transforms.RandomHorizontalFlip(),
       			transforms.ToTensor(),
       			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
       	])
         tar_data_transform_train = transforms.Compose([
       			#transforms.Resize((256, 256)), # spatial size of vgg-f input
-            transforms.Resize(256),
-      			transforms.RandomCrop(224),
+            transforms.Resize((256,256)),
+      			transforms.RandomCrop((224,224)),
             transforms.RandomHorizontalFlip(),
       			transforms.ToTensor(),
       			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
       	])
         # transformation on the duplicated data during training
         data_transform_train_dup = transforms.Compose([
-        			transforms.Resize(256),
-        			transforms.RandomCrop(224),
+        			transforms.Resize((256,256)),
+        			transforms.RandomCrop((224,224)),
         			transforms.RandomHorizontalFlip(),
         			transforms.ToTensor(),
         			transforms.Lambda(lambda x: _random_affine_augmentation(x)),
@@ -101,7 +101,7 @@ def generate_dataloader(args):
       			transforms.ToTensor(),
       			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
       	])
-       
+
     # src_data_transform_train.transforms.insert(0, RandAugment(n=1, m=2))
     # tar_data_transform_train.transforms.insert(0, RandAugment(n=1, m=2))
     source_train_dataset = ImageFolder(root=traindir, transform=src_data_transform_train)
@@ -115,8 +115,8 @@ def generate_dataloader(args):
     else:
         target_train_dataset = ImageFolder(root=traindir_t, transform=tar_data_transform_train)
     target_test_dataset = ImageFolder(root=valdir, transform=data_transform_test)
-    target_test_dataset_t = ImageFolder(root=valdir_t, transform=data_transform_test)
-    
+    target_test_dataset_t = ImageFolder(root=valdir_t, transform=tar_data_transform_train)
+
     source_train_loader = torch.utils.data.DataLoader(
         source_train_dataset, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True, sampler=None, drop_last=True
@@ -137,12 +137,12 @@ def generate_dataloader(args):
         target_test_dataset_t, batch_size=63, shuffle=False,
         num_workers=args.workers, pin_memory=True
     )
-    
+
     return source_train_loader, target_train_loader, target_test_loader, target_test_loader_t, source_test_loader
 
 
 def _random_affine_augmentation(x):
-	M = np.float32([[1 + np.random.normal(0.0, 0.1), np.random.normal(0.0, 0.1), 0], 
+	M = np.float32([[1 + np.random.normal(0.0, 0.1), np.random.normal(0.0, 0.1), 0],
 				[np.random.normal(0.0, 0.1), 1 + np.random.normal(0.0, 0.1), 0]])
 	rows, cols = x.shape[1:3]
 	dst = cv2.warpAffine(np.transpose(x.numpy(), [1, 2, 0]), M, (cols,rows))
@@ -154,6 +154,6 @@ def _gaussian_blur(x, sigma=0.1):
 	ksize = int(sigma + 0.5) * 8 + 1
 	dst = cv2.GaussianBlur(x.numpy(), (ksize, ksize), sigma)
 	return torch.from_numpy(dst)
- 
- 
- 
+
+
+

@@ -71,7 +71,9 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
         self.within_distances_ = np.zeros(self.n_clusters)
 
         end = time.time()
-        for it in range(self.max_iter):
+        it = 0
+        while it < self.max_iter:
+
             dist.fill(0)
             self._compute_dist(K, dist, self.within_distances_,
                                update_within=True)
@@ -92,11 +94,21 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
             # Compute the number of samples whose cluster did not change
             # since last iteration.
             n_same = np.sum((self.labels_ - labels_old) == 0)
-            if 1 - float(n_same) / n_samples < self.tol:
+            unique_labels = np.unique(self.labels_)
+            if len(unique_labels) < args.num_classes:
+                print("Empty cluster found, re-initializing...")
+                self.labels_ = labels_old
+               # dist = np.zeros((n_samples, self.n_clusters))
+                # self.within_distances_ = np.zeros(self.n_clusters)
+                it = 0
+
+            elif 1 - float(n_same) / n_samples < self.tol:
                 if self.verbose:
                     print("Converged at iteration", it + 1)
                 #self.labels_ = labels_old
                 break
+            else:
+                it += 1
 
         self.X_fit_ = X
 
