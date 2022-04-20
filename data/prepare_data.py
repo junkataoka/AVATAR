@@ -53,22 +53,21 @@ def generate_dataloader(args):
         # transformation on the test data during test
         data_transform_test = transforms.Compose([
       			# transforms.Resize(256), # spatial size of vgg-f input
-      			transforms.CenterCrop(224),
+      			# transforms.CenterCrop(224),
+      			transforms.Resize((224,224)),
       			transforms.ToTensor(),
       			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
       	])
     else:
         # transformation on the training data during training
         src_data_transform_train = transforms.Compose([
-      			#transforms.Resize((256, 256)), # spatial size of vgg-f input
-            transforms.Resize((256,256)),
+      			transforms.Resize((256, 256)), # spatial size of vgg-f input
       			transforms.RandomCrop((224,224)),
             transforms.RandomHorizontalFlip(),
       			transforms.ToTensor(),
       			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
       	])
         tar_data_transform_train = transforms.Compose([
-      			#transforms.Resize((256, 256)), # spatial size of vgg-f input
             transforms.Resize((256,256)),
       			transforms.RandomCrop((224,224)),
             transforms.RandomHorizontalFlip(),
@@ -96,8 +95,8 @@ def generate_dataloader(args):
       	])
         # transformation on the test data during test
         data_transform_test = transforms.Compose([
-      			transforms.Resize(256),# spatial size of vgg-f input
-      			transforms.CenterCrop(224),
+      			transforms.Resize((256,256)),# spatial size of vgg-f input
+      			transforms.CenterCrop((224, 224)),
       			transforms.ToTensor(),
       			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
       	])
@@ -130,16 +129,15 @@ def generate_dataloader(args):
         num_workers=args.workers, pin_memory=True, sampler=None, drop_last=True
     )
     target_test_loader = torch.utils.data.DataLoader(
-        target_test_dataset, batch_size=63, shuffle=False,
+        target_test_dataset, batch_size=args.batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True
     )
     target_test_loader_t = torch.utils.data.DataLoader(
-        target_test_dataset_t, batch_size=63, shuffle=False,
+        target_test_dataset_t, batch_size=args.batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True
     )
 
     return source_train_loader, target_train_loader, target_test_loader, target_test_loader_t, source_test_loader
-
 
 def _random_affine_augmentation(x):
 	M = np.float32([[1 + np.random.normal(0.0, 0.1), np.random.normal(0.0, 0.1), 0],

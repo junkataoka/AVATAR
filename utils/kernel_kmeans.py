@@ -25,7 +25,7 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
     KDD 2004.
     """
 
-    def __init__(self, n_clusters=3, max_iter=50, tol=1e-3, random_state=None,
+    def __init__(self, n_clusters=3, max_iter=50, tol=1e-4, random_state=None,
                  kernel="linear", gamma=None, degree=3, coef0=1,
                  kernel_params=None, verbose=0):
         self.n_clusters = n_clusters
@@ -94,15 +94,15 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
             # Compute the number of samples whose cluster did not change
             # since last iteration.
             n_same = np.sum((self.labels_ - labels_old) == 0)
-            unique_labels = np.unique(self.labels_)
-            if len(unique_labels) < args.num_classes:
-                print("Empty cluster found, re-initializing...")
-                self.labels_ = labels_old
-               # dist = np.zeros((n_samples, self.n_clusters))
-                # self.within_distances_ = np.zeros(self.n_clusters)
-                it = 0
+            # unique_labels = np.unique(self.labels_)
+            # if len(unique_labels) < args.num_classes:
+            #     print("Empty cluster found, re-initializing...")
+            #     self.labels_ = labels_old
+            #    # dist = np.zeros((n_samples, self.n_clusters))
+            #     # self.within_distances_ = np.zeros(self.n_clusters)
+            #     it = 0
 
-            elif 1 - float(n_same) / n_samples < self.tol:
+            if 1 - float(n_same) / n_samples < self.tol:
                 if self.verbose:
                     print("Converged at iteration", it + 1)
                 #self.labels_ = labels_old
