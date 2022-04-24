@@ -231,11 +231,11 @@ def main():
             # tar_prob_q2 /= tar_prob_q2.sum(1, keepdim=True)
             # p_label_tar = tar_prob_q2.mean(0)
             p_label_tar.data = tar_prob_class.mean(0).clone()
+            p_label_src.data = labels_src.mean(0).clone()
 
             # tar_pred = prob_pred.argmax(1)
             # one_hot_tar = Variable(torch.cuda.FloatTensor(pseudo_labels.size()).fill_(0))
             # one_hot_tar.scatter_(1, tar_pred.unsqueeze(1), torch.ones(pseudo_labels.size(0), 1).cuda())
-            p_label_src.data = labels_src.mean(0).clone()
 
             # p_label_tar.data = one_hot_tar.mean(0).clone()
             # p_label_tar.data = F.softmax(prob_pred, dim=1).mean(0).clone()
@@ -265,6 +265,8 @@ def main():
                 tar_cs_2 = source_select(target_features_2, target_targets, source_features_2, source_targets, train_loader_target, epoch, c_t_2.data.clone(), args)
                 # tar_cs = (tar_cs_2 + tar_cs) / 2
 
+
+
             # use source pre-trained model to extract features for first clustering
             if (itern == 0) and args.src_pretr_first:
                 model.load_state_dict(init_state_dict)
@@ -272,6 +274,19 @@ def main():
             if itern != 0:
                 count_itern_each_epoch = 0
                 epoch += 1
+
+            # Create threthold
+            m = torch.zeros((target_targets.size(0), args.num_classes)).fill_(0).cuda()
+            sd = torch.zeros((target_targets.size(0), args.num_classes)).fill_(0).cuda()
+            m.scatter_(dim=1, index=target_targets.unsqueeze(1), src=tar_cs.unsqueeze(1).cuda()) # assigned pseudo labels
+            sd.scatter_(dim=1, index=target_targets.unsqueeze(1), src=tar_cs.unsqueeze(1).cuda()) # assigned pseudo labels
+            th = torch.zeros(args.num_classes).cuda()
+
+            for i in range(args.num_classes):
+                mu = m[m[:, i] != 0, i].mean()
+                sdv = sd[sd[:, i] != 0, i].std()
+                th[i] = mu - sdv
+
             batch_number = count_epoch_on_large_dataset(train_loader_target, train_loader_source, args)
             train_loader_target_batch = enumerate(train_loader_target)
             train_loader_source_batch = enumerate(train_loader_source)
@@ -322,7 +337,7 @@ def main():
                 break
 
         # train for one iteration
-        train_loader_source_batch, train_loader_target_batch = train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, criterion_cons, optimizer, optimizer_cls, optimizer_cluster, itern, epoch, new_epoch_flag, src_cs, tar_cs, args, run, p_label_src, p_label_tar)
+        train_loader_source_batch, train_loader_target_batch = train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, criterion_cons, optimizer, optimizer_cls, optimizer_cluster, itern, epoch, new_epoch_flag, src_cs, tar_cs, args, run, p_label_src, p_label_tar, th)
 
         model = model.cuda()
         new_epoch_flag = False
@@ -346,7 +361,6 @@ def count_epoch_on_large_dataset(train_loader_target, train_loader_source, args)
         batch_number_s = len(train_loader_source)
         if batch_number_s > batch_number_t:
             batch_number = batch_number_s
-
     return batch_number
 
 

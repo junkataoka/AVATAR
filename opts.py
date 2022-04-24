@@ -61,7 +61,7 @@ def opts():
     # i/o
     parser.add_argument('--print_freq', type=int, default=10, metavar='N', help='print frequency (default: 10)')
     parser.add_argument('--pretrained_path', type=str, default="", help='path of pretrained model')
-    parser.add_argument('--mixup', action='store_true', help='Weather to use mix-up or not')
+
 
     args = parser.parse_args()
     args.log = args.log + '_adapt_' + args.src + '2' + args.tar + '_bs' + str(args.batch_size) + '_' + args.arch + '_lr' + str(args.lr) + '_' + args.cluster_method
