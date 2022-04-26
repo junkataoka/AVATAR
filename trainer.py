@@ -280,7 +280,7 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, p_label_s
         neg_loss = 0
 
 
-    return pos_loss + neg_loss - 0.01*class_weight.sum()
+    return pos_loss + neg_loss + 0.001 * class_weight.sum()
 
 def SrcClassifyLoss(args, epoch, output, target, index, src_cs, lam, p_label_src, p_label_tar, softmax=True, fit=False, emb=False):
 
@@ -313,7 +313,7 @@ def SrcClassifyLoss(args, epoch, output, target, index, src_cs, lam, p_label_src
     pos_loss = - (src_weights * (class_weight * prob_q * prob_p_class.log()).sum(1)).mean()
 
 
-    return pos_loss
+    return pos_loss + 0.001 * class_weight.sum()
 
 
 def validate(val_loader, model, criterion, epoch, args):
