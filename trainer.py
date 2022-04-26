@@ -106,6 +106,8 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     d_s_loss = CondDiscriminatorLoss(args, epoch, ca_s, target_source, index, src_cs, lam, run, p_label_src, p_label_tar, fit=args.src_fit, src=True, dis_cls=False)
     loss += weight_dis * d_s_loss
 
+    class_weight = (p_label_src+0.5) / (p_label_tar+0.5)
+    loss -= 1.0 * class_weight.mean()
 
     losses.update(loss.data.item(), input_target.size(0))
     # loss backward and network update
@@ -153,6 +155,9 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     d_s_loss = CondDiscriminatorLoss(args, epoch, ca_s, target_source, index, src_cs, lam, run, p_label_src, p_label_tar, fit=args.src_fit, src=True, dis_cls=True)
     run["metrics/d_s_loss"].log(d_s_loss)
     loss += weight_dis * d_s_loss
+
+    class_weight = (p_label_src+0.5) / (p_label_tar+0.5)
+    loss -= 1.0 * class_weight.mean()
 
     prec1_s = accuracy(ca_s.data, target_source, topk=(1,))[0]
     top1_source.update(prec1_s.item(), input_source.size(0))
@@ -204,18 +209,22 @@ def CondDiscriminatorLoss(args, epoch, output, target, index, cs, lam, run, p_la
 
     if dis_cls:
         if src:
-            loss_d = - ((weights * entropy_weight) * ((1-prob_p_dis).log())).mean()
+            class_weight = (p_label_tar+0.5) / (p_label_src+0.5)
+            loss_d = - ((weights * entropy_weight) * (class_weight[target]*(1-prob_p_dis).log())).mean()
             run["metrics/cls_src_prob"].log(prob_p_dis.mean())
         else:
-            loss_d = - ((weights * entropy_weight) * ((prob_p_dis).log())).mean()
+            class_weight = (p_label_src+0.5) / (p_label_tar+0.5)
+            loss_d = - ((weights * entropy_weight) * (class_weight[target]*prob_p_dis.log())).mean()
             run["metrics/cls_tar_prob"].log(prob_p_dis.mean())
 
     else:
         if src:
-            loss_d = - ((weights * entropy_weight) * ((prob_p_dis).log())).mean()
+            class_weight = (p_label_tar+0.5) / (p_label_src+0.5)
+            loss_d = - ((weights * entropy_weight) * (class_weight[target]*prob_p_dis.log())).mean()
             run["metrics/feat_src_prob"].log(prob_p_dis.mean())
         else:
-            loss_d = - ((weights * entropy_weight) * ((1-prob_p_dis).log())).mean()
+            class_weight = (p_label_src+0.5) / (p_label_tar+0.5)
+            loss_d = - ((weights * entropy_weight) * (class_weight[target]*(1-prob_p_dis).log())).mean()
             run["metrics/feat_tar_prob"].log(prob_p_dis.mean())
         # loss_d = - (src_weights * (prob_p_dis.log()).sum(1)).mean()
         # loss_d = - (weights * ((1-prob_p_dis).log()).sum(1)).mean()
@@ -280,7 +289,7 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, p_label_s
         neg_loss = 0
 
 
-    return pos_loss + neg_loss + 0.001 * class_weight.sum()
+    return pos_loss + neg_loss
 
 def SrcClassifyLoss(args, epoch, output, target, index, src_cs, lam, p_label_src, p_label_tar, softmax=True, fit=False, emb=False):
 
@@ -306,6 +315,7 @@ def SrcClassifyLoss(args, epoch, output, target, index, src_cs, lam, p_label_src
 
     src_weights = src_cs[index].cuda()
     class_weight = (p_label_tar+0.5) / (p_label_src+0.5)
+    # class_weight = (p_label_src+0.5) / (p_label_tar+0.5)
 
     if epoch < 1:
         class_weight.fill_(1)
@@ -313,7 +323,7 @@ def SrcClassifyLoss(args, epoch, output, target, index, src_cs, lam, p_label_src
     pos_loss = - (src_weights * (class_weight * prob_q * prob_p_class.log()).sum(1)).mean()
 
 
-    return pos_loss + 0.001 * class_weight.sum()
+    return pos_loss
 
 
 def validate(val_loader, model, criterion, epoch, args):
