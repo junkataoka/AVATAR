@@ -285,7 +285,7 @@ def main():
             for i in range(args.num_classes):
                 mu = m[m[:, i] != 0, i].mean()
                 sdv = sd[sd[:, i] != 0, i].std()
-                th[i] = mu - sdv
+                th[i] = mu - 2 * sdv
 
             batch_number = count_epoch_on_large_dataset(train_loader_target, train_loader_source, args)
             train_loader_target_batch = enumerate(train_loader_target)
