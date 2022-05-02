@@ -271,9 +271,10 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, p_label_s
 
     tar_weights = tar_cs[index.cuda()]
     pos_mask = torch.where(tar_weights >= th[target], 1, 0)
+    # pos_mask = torch.where(tar_weights >= th, 1, 0)
 
     # class_weight = (p_label_src / p_label_tar) / (p_label_src / p_label_tar).sum()
-    class_weight = (p_label_src+0.5) / (p_label_tar+0.5)
+    class_weight = torch.exp(p_label_src) / torch.exp(p_label_tar)
 
     if epoch < 1:
         class_weight.fill_(1)
@@ -282,14 +283,14 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, p_label_s
 
     if len(torch.unique(pos_mask)) == 2:
         pos_loss = - (tar_weights[pos_mask==1] * (class_weight * prob_q[pos_mask==1] * prob_p_class[pos_mask==1].log()).sum(1)).mean()
-        neg_loss = - ((1-tar_weights[pos_mask==0]) * (class_weight * prob_q[pos_mask==0] * (1-prob_p_class[pos_mask==0]).log()).sum(1)).mean()
+        neg_loss = - ((tar_weights[pos_mask==0]) * (class_weight * prob_q[pos_mask==0] * (1-prob_p_class[pos_mask==0]).log()).sum(1)).mean()
 
     else:
         pos_loss = - (tar_weights[pos_mask==1] * (class_weight * prob_q[pos_mask==1] * prob_p_class[pos_mask==1].log()).sum(1)).mean()
         neg_loss = 0
 
 
-    return pos_loss + neg_loss
+    return pos_loss + neg_loss + 0.01*class_weight.sum()
 
 def SrcClassifyLoss(args, epoch, output, target, index, src_cs, lam, p_label_src, p_label_tar, softmax=True, fit=False, emb=False):
 
@@ -314,8 +315,7 @@ def SrcClassifyLoss(args, epoch, output, target, index, src_cs, lam, p_label_src
         prob_q = (1 - prob_p) * prob_q + prob_p * prob_p
 
     src_weights = src_cs[index].cuda()
-    class_weight = (p_label_tar+0.5) / (p_label_src+0.5)
-    # class_weight = (p_label_src+0.5) / (p_label_tar+0.5)
+    class_weight = torch.exp(p_label_tar) / torch.exp(p_label_src)
 
     if epoch < 1:
         class_weight.fill_(1)

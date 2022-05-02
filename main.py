@@ -177,12 +177,12 @@ def main():
                 cen = c_t
                 cen_2 = c_t_2
 
-            prob_pred = (1 + (target_features.unsqueeze(1) - cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
-            prob_pred_2 = (1 + (target_features_2.unsqueeze(1) - cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
+            # prob_pred = (1 + (target_features.unsqueeze(1) - cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
+            # prob_pred_2 = (1 + (target_features_2.unsqueeze(1) - cen_2.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
 
             if args.cluster_method == 'kernel_kmeans':
-                cluster_acc, c_t = kernel_k_means(target_features, target_targets, pseudo_labels, train_loader_target, epoch, model, args, best_cluster_acc, change_target=True)
-                cluster_acc_2, c_t_2 = kernel_k_means(target_features_2, target_targets, pseudo_labels, train_loader_target, epoch, model, args, best_cluster_acc_2, change_target=False)
+                cluster_acc, c_t = kernel_k_means(target_features, target_targets, pseudo_labels, train_loader_target, epoch, model, args, best_cluster_acc, change_target=False)
+                cluster_acc_2, c_t_2 = kernel_k_means(target_features_2, target_targets, pseudo_labels, train_loader_target, epoch, model, args, best_cluster_acc_2, change_target=True)
             elif args.cluster_method != 'spherical_kmeans':
                 cluster_acc_2, c_t_2 = k_means(target_features_2, target_targets, train_loader_target, epoch, model, cen_2, args, best_cluster_acc_2, change_target=True)
                 cluster_acc, c_t = k_means(target_features, target_targets, train_loader_target, epoch, model, cen, args, best_cluster_acc, change_target=False)
@@ -257,12 +257,12 @@ def main():
 
             # select source samples
             if (itern != 0) and (args.src_soft_select or args.src_hard_select):
-                src_cs = source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, c_t.data.clone(), args)
-                src_cs_2 = source_select(source_features_2, source_targets, target_features_2, pseudo_labels, train_loader_source, epoch, c_t_2.data.clone(), args)
+                # src_cs = source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, cen.data.clone(), args)
+                src_cs = source_select(source_features_2, source_targets, target_features_2, pseudo_labels, train_loader_source, epoch, cen_2.data.clone(), args)
                 # src_cs = (src_cs_2 + src_cs) / 2
 
-                tar_cs = source_select(target_features, target_targets, source_features, source_targets, train_loader_target, epoch, c_t.data.clone(), args)
-                tar_cs_2 = source_select(target_features_2, target_targets, source_features_2, source_targets, train_loader_target, epoch, c_t_2.data.clone(), args)
+                # tar_cs = source_select(target_features, target_targets, source_features, source_targets, train_loader_target, epoch, cen.data.clone(), args)
+                tar_cs = source_select(target_features_2, target_targets, source_features_2, source_targets, train_loader_target, epoch, cen_2.data.clone(), args)
                 # tar_cs = (tar_cs_2 + tar_cs) / 2
 
 
@@ -282,10 +282,12 @@ def main():
             sd.scatter_(dim=1, index=target_targets.unsqueeze(1), src=tar_cs.unsqueeze(1).cuda()) # assigned pseudo labels
             th = torch.zeros(args.num_classes).cuda()
 
+
             for i in range(args.num_classes):
                 mu = m[m[:, i] != 0, i].mean()
                 sdv = sd[sd[:, i] != 0, i].std()
                 th[i] = mu - sdv
+            # th = tar_cs.mean() - 2*tar_cs.std()
 
             batch_number = count_epoch_on_large_dataset(train_loader_target, train_loader_source, args)
             train_loader_target_batch = enumerate(train_loader_target)
