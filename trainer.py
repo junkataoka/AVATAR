@@ -283,14 +283,13 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, p_label_s
 
     if len(torch.unique(pos_mask)) == 2:
         pos_loss = - (tar_weights[pos_mask==1] * (class_weight * prob_q[pos_mask==1] * prob_p_class[pos_mask==1].log()).sum(1)).mean()
-        neg_loss = - ((tar_weights[pos_mask==0]) * (class_weight * prob_q[pos_mask==0] * (1-prob_p_class[pos_mask==0]).log()).sum(1)).mean()
-
+        neg_loss = - ((1-tar_weights[pos_mask==0]) * (class_weight * prob_q[pos_mask==0] * (1-prob_p_class[pos_mask==0]).log()).sum(1)).mean()
     else:
         pos_loss = - (tar_weights[pos_mask==1] * (class_weight * prob_q[pos_mask==1] * prob_p_class[pos_mask==1].log()).sum(1)).mean()
         neg_loss = 0
 
 
-    return pos_loss + neg_loss + 0.01*class_weight.sum()
+    return pos_loss + neg_loss + 0.1*class_weight.sum()
 
 def SrcClassifyLoss(args, epoch, output, target, index, src_cs, lam, p_label_src, p_label_tar, softmax=True, fit=False, emb=False):
 
