@@ -23,7 +23,7 @@ srun python main.py  \
 --learn_embed \
 --src_cls \
 --batch_size 42 \
---beta 1.0 \
+--beta 0.0 \
 --pretrained \
 --cluster_method kernel_kmeans \
 --epochs 200 \
