@@ -22,7 +22,11 @@ srun python main.py  \
 --pretrained_path /data/home/jkataok1/alexnet_resnet_finetune/checkpoints/amazon_to_webcam_resnet50.pkl \
 --learn_embed \
 --src_cls \
+<<<<<<< HEAD
 --batch_size 32 \
+=======
+--batch_size 42 \
+>>>>>>> b68b7b194396bc8979608b4faebecf44c08a24a4
 --beta 0.0 \
 --pretrained \
 --cluster_method kernel_kmeans \

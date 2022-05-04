@@ -258,11 +258,11 @@ def main():
             # select source samples
             if (itern != 0) and (args.src_soft_select or args.src_hard_select):
                 # src_cs = source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, cen.data.clone(), args)
-                src_cs = source_select(source_features_2, source_targets, target_features_2, pseudo_labels, train_loader_source, epoch, cen_2.data.clone(), args)
+                src_cs = source_select(source_features_2, source_targets, target_features_2, pseudo_labels, train_loader_source, epoch, c_t_2.data.clone(), args)
                 # src_cs = (src_cs_2 + src_cs) / 2
 
                 # tar_cs = source_select(target_features, target_targets, source_features, source_targets, train_loader_target, epoch, cen.data.clone(), args)
-                tar_cs = source_select(target_features_2, target_targets, source_features_2, source_targets, train_loader_target, epoch, cen_2.data.clone(), args)
+                tar_cs = source_select(target_features_2, target_targets, source_features_2, source_targets, train_loader_target, epoch, c_t_2.data.clone(), args)
                 # tar_cs = (tar_cs_2 + tar_cs) / 2
 
 
