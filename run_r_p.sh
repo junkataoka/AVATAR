@@ -26,7 +26,9 @@ srun python main.py  \
 --beta 1.0 \
 --pretrained \
 --cluster_method kernel_kmeans \
---epochs 50 \
---cluster_iter 20 \
+--epochs 200 \
+--cluster_iter 100 \
 --lr 0.001 \
---num_classes 65
+--num_classes 65 \
+--src_soft_select \
+--init_cen_on_st
