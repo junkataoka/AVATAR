@@ -1,0 +1,263 @@
+python main.py  \
+--data_path_source /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--src Art  \
+--data_path_target /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar Clipart \
+--data_path_target_t  /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar_t Clipart \
+--workers 1 \
+--pretrained_path /home/jun/GoogleDrive/project/models/Art_to_Clipart_resnet50.pkl \
+--learn_embed \
+--src_cls \
+--batch_size 32 \
+--beta 1.0 \
+--pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 50 \
+--lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
+--num_classes 65
+
+python main.py  \
+--data_path_source /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--src Art  \
+--data_path_target /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar Product \
+--data_path_target_t  /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar_t Product \
+--workers 1 \
+--pretrained_path /home/jun/GoogleDrive/project/models/Art_to_Product_resnet50.pkl \
+--learn_embed \
+--src_cls \
+--batch_size 32 \
+--beta 1.0 \
+--pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 50 \
+--lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
+--num_classes 65
+
+python main.py  \
+--data_path_source /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--src Art  \
+--data_path_target /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar RealWorld \
+--data_path_target_t  /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar_t RealWorld \
+--workers 1 \
+--pretrained_path /home/jun/GoogleDrive/project/models/Art_to_RealWorld_resnet50.pkl \
+--learn_embed \
+--src_cls \
+--batch_size 32 \
+--beta 1.0 \
+--pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 50 \
+--lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
+--num_classes 65
+
+python main.py  \
+--data_path_source /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--src Clipart  \
+--data_path_target /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar Art \
+--data_path_target_t  /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar_t Art \
+--workers 1 \
+--pretrained_path /home/jun/GoogleDrive/project/models/Clipart_to_Art_resnet50.pkl \
+--learn_embed \
+--src_cls \
+--batch_size 32 \
+--beta 1.0 \
+--pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 50 \
+--lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
+--num_classes 65
+
+python main.py  \
+--data_path_source /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--src Clipart  \
+--data_path_target /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar Product \
+--data_path_target_t  /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar_t Product \
+--workers 1 \
+--pretrained_path /home/jun/GoogleDrive/project/models/Clipart_to_Product_resnet50.pkl \
+--learn_embed \
+--src_cls \
+--batch_size 32 \
+--beta 1.0 \
+--pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 50 \
+--lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
+--num_classes 65
+
+python main.py  \
+--data_path_source /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--src Clipart  \
+--data_path_target /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar RealWorld \
+--data_path_target_t  /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar_t RealWorld \
+--workers 1 \
+--pretrained_path /home/jun/GoogleDrive/project/models/Clipart_to_RealWorld_resnet50.pkl \
+--learn_embed \
+--src_cls \
+--batch_size 32 \
+--beta 1.0 \
+--pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 50 \
+--lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
+--num_classes 65
+
+python main.py  \
+--data_path_source /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--src Product  \
+--data_path_target /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar Art \
+--data_path_target_t  /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar_t Art \
+--workers 1 \
+--pretrained_path /home/jun/GoogleDrive/project/models/Product_to_Art_resnet50.pkl \
+--learn_embed \
+--src_cls \
+--batch_size 32 \
+--beta 1.0 \
+--pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 50 \
+--lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
+--num_classes 65
+
+python main.py  \
+--data_path_source /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--src Product  \
+--data_path_target /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar Clipart \
+--data_path_target_t  /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar_t Clipart \
+--workers 1 \
+--pretrained_path /home/jun/GoogleDrive/project/models/Product_to_Clipart_resnet50.pkl \
+--learn_embed \
+--src_cls \
+--batch_size 32 \
+--beta 1.0 \
+--pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 50 \
+--lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
+--num_classes 65
+
+python main.py  \
+--data_path_source /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--src Product  \
+--data_path_target /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar RealWorld \
+--data_path_target_t  /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar_t RealWorld \
+--workers 1 \
+--pretrained_path /home/jun/GoogleDrive/project/models/Product_to_RealWorld_resnet50.pkl \
+--learn_embed \
+--src_cls \
+--batch_size 32 \
+--beta 1.0 \
+--pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 50 \
+--lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
+--num_classes 65
+
+python main.py  \
+--data_path_source /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--src RealWorld  \
+--data_path_target /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar Art \
+--data_path_target_t  /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar_t Art \
+--workers 1 \
+--pretrained_path /home/jun/GoogleDrive/project/models/RealWorld_to_Art_resnet50.pkl \
+--learn_embed \
+--src_cls \
+--batch_size 32 \
+--beta 1.0 \
+--pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 50 \
+--lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
+--num_classes 65
+
+python main.py  \
+--data_path_source /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--src RealWorld  \
+--data_path_target /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar Clipart \
+--data_path_target_t  /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar_t Clipart \
+--workers 1 \
+--pretrained_path /home/jun/GoogleDrive/project/models/RealWorld_to_Clipart_resnet50.pkl \
+--learn_embed \
+--src_cls \
+--batch_size 32 \
+--beta 1.0 \
+--pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 50 \
+--lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
+--num_classes 65
+
+python main.py  \
+--data_path_source /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--src RealWorld  \
+--data_path_target /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar Product \
+--data_path_target_t  /home/jun/GoogleDrive/project/dataset/OfficeHomeDataset_10072016 \
+--tar_t Product \
+--workers 1 \
+--pretrained_path /home/jun/GoogleDrive/project/models/RealWorld_to_Product_resnet50.pkl \
+--learn_embed \
+--src_cls \
+--batch_size 32 \
+--beta 1.0 \
+--pretrained \
+--cluster_method kernel_kmeans \
+--epochs 200 \
+--cluster_iter 50 \
+--lr 0.001 \
+--src_soft_select \
+--init_cen_on_st \
+--num_classes 65

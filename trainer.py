@@ -513,7 +513,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     log.write("\nTest on T training set - epoch: %d, tc_loss: %4f, tc_Top1 acc: %3f, tc_Top5 acc: %3f" % (epoch, losses.avg, top1.avg, top5.avg))
 
     target_preds = pseudo_labels.argmax(dim=1)
-    log_confusion_matrix(target_preds, target_targets, 31, "Target True VS Target Pred", run)
+    log_confusion_matrix(target_preds, target_targets, args.num_classes, "Target True VS Target Pred", run)
     tsne = TSNE(2)
     tsne_2 = TSNE(2)
     tsne_in = torch.cat([target_features, c_tar], dim=0)
@@ -521,16 +521,16 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     tsne_proj = tsne.fit_transform(tsne_in.cpu().data.numpy())
     tsne_proj_2 = tsne_2.fit_transform(tsne_in_2.cpu().data.numpy())
 
-    tsne_proj_cen = tsne_proj[-31:]
-    tsne_proj_cen_2 = tsne_proj_2[-31:]
-    tsne_proj = tsne_proj[:-31]
-    tsne_proj_2 = tsne_proj_2[:-31]
+    tsne_proj_cen = tsne_proj[-args.num_classes:]
+    tsne_proj_cen_2 = tsne_proj_2[-args.num_classes:]
+    tsne_proj = tsne_proj[:-args.num_classes]
+    tsne_proj_2 = tsne_proj_2[:-args.num_classes]
 
     fig1, ax1 = plt.subplots(figsize=(12,12))
     fig2, ax2 = plt.subplots(figsize=(12,12))
 
 
-    for g in range(31):
+    for g in range(args.num_classes):
         ind = np.where(target_targets.cpu().data.numpy() == g)
 
         ax1.scatter(tsne_proj[ind, 0], tsne_proj[ind, 1],
