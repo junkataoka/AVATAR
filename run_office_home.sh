@@ -1,7 +1,7 @@
 #!/bin/bash
-# sbatch run_a_c.sh
-# sbatch run_a_p.sh
-# sbatch run_a_r.sh
+sbatch run_a_c.sh
+sbatch run_a_p.sh
+sbatch run_a_r.sh
 
 sbatch run_c_a.sh
 sbatch run_c_p.sh

@@ -106,8 +106,8 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     d_s_loss = CondDiscriminatorLoss(args, epoch, ca_s, target_source, index, src_cs, lam, run, p_label_src, p_label_tar, fit=args.src_fit, src=True, dis_cls=False)
     loss += weight_dis * d_s_loss
 
-    # class_weight = (p_label_src+0.5) / (p_label_tar+0.5)
-    # loss += 0.1 * class_weight.mean()
+    class_weight = torch.exp(p_label_src) / torch.exp(p_label_tar)
+    loss += weight_dis * args.delta * class_weight.sum()
 
     losses.update(loss.data.item(), input_target.size(0))
     # loss backward and network update
@@ -156,8 +156,8 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     run["metrics/d_s_loss"].log(d_s_loss)
     loss += weight_dis * d_s_loss
 
-    # class_weight = (p_label_src+0.5) / (p_label_tar+0.5)
-    # loss += 0.1 * class_weight.mean()
+    class_weight = torch.exp(p_label_src) / torch.exp(p_label_tar)
+    loss += weight_dis * args.delta * class_weight.sum()
 
     prec1_s = accuracy(ca_s.data, target_source, topk=(1,))[0]
     top1_source.update(prec1_s.item(), input_source.size(0))
@@ -213,6 +213,8 @@ def CondDiscriminatorLoss(args, epoch, output, target, index, cs, lam, run, p_la
             loss_d = - ((weights * entropy_weight) * ((1-prob_p_dis).log())).mean()
             run["metrics/cls_src_prob"].log(prob_p_dis.mean())
         else:
+            if epoch <= 5:
+                weights.fill_(1)
             loss_d = - ((weights * entropy_weight) * (prob_p_dis.log())).mean()
             run["metrics/cls_tar_prob"].log(prob_p_dis.mean())
 
@@ -222,6 +224,8 @@ def CondDiscriminatorLoss(args, epoch, output, target, index, cs, lam, run, p_la
             loss_d = - ((weights * entropy_weight) * (prob_p_dis.log())).mean()
             run["metrics/feat_src_prob"].log(prob_p_dis.mean())
         else:
+            if epoch <= 5:
+                weights.fill_(1)
             loss_d = - ((weights * entropy_weight) * ((1-prob_p_dis).log())).mean()
             run["metrics/feat_tar_prob"].log(prob_p_dis.mean())
         # loss_d = - (src_weights * (prob_p_dis.log()).sum(1)).mean()
@@ -275,11 +279,14 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, p_label_s
     class_weight = torch.exp(p_label_src) / torch.exp(p_label_tar)
 
     if epoch < 1:
-        class_weight.fill_(1)
         pos_loss = 0
         neg_loss = 0
 
-    if len(torch.unique(pos_mask)) == 2:
+    if epoch <= 5:
+        class_weight.fill_(1)
+        tar_weights.fill_(1)
+
+    if len(torch.unique(pos_mask)) == 2 and epoch > 5:
         pos_loss = - (tar_weights[pos_mask==1] * (class_weight * prob_q[pos_mask==1] * prob_p_class[pos_mask==1].log()).sum(1)).mean()
         neg_loss = - ((1-tar_weights[pos_mask==0]) * (class_weight * prob_q[pos_mask==0] * (1-prob_p_class[pos_mask==0]).log()).sum(1)).mean()
     else:
@@ -287,7 +294,7 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, lam, p_label_s
         neg_loss = 0
 
 
-    return pos_loss + neg_loss + 0.1*class_weight.sum()
+    return pos_loss + neg_loss
 
 def SrcClassifyLoss(args, epoch, output, target, index, src_cs, lam, p_label_src, p_label_tar, softmax=True, fit=False, emb=False):
 
@@ -522,28 +529,35 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     tsne_proj = tsne_proj[:-args.num_classes]
     tsne_proj_2 = tsne_proj_2[:-args.num_classes]
 
-    fig1, ax1 = plt.subplots(figsize=(12,12))
-    fig2, ax2 = plt.subplots(figsize=(12,12))
-
+    fig1, ax1 = plt.subplots(figsize=(3.54,3.54))
+    fig2, ax2 = plt.subplots(figsize=(3.54,3.54))
 
     for g in range(args.num_classes):
         ind = np.where(target_targets.cpu().data.numpy() == g)
 
         ax1.scatter(tsne_proj[ind, 0], tsne_proj[ind, 1],
-                label=g,
+                label=None,
                 alpha=0.2)
 
         ax2.scatter(tsne_proj_2[ind, 0], tsne_proj_2[ind, 1],
-                label=g,
+                label=None,
                 alpha=0.2)
 
     ax1.scatter(tsne_proj_cen[:, 0], tsne_proj_cen[:, 1], c="black")
     ax2.scatter(tsne_proj_cen_2[:, 0], tsne_proj_cen_2[:, 1], c="black")
 
-    ax1.legend()
-    ax2.legend()
+    # ax1.legend()
+    # ax2.legend()
+    ax1.axes.get_xaxis().set_visible(False)
+    ax1.axes.get_yaxis().set_visible(False)
+    ax2.axes.get_xaxis().set_visible(False)
+    ax2.axes.get_yaxis().set_visible(False)
     run["fig/target_tsne"].log(fig1)
     run["fig/target_tsne2"].log(fig2)
+    ax1_save_file = os.path.join("figures", args.log+f'_curepoch{epoch}'+'_targe_tsne1.png', dpi=600)
+    ax1.figure.savefig(ax1_save_file)
+    ax2_save_file = os.path.join("figures", args.log+f'_curepoch{epoch}'+'_targe_tsne2.png', dpi=600)
+    ax2.figure.savefig(ax2_save_file)
     plt.close(fig1)
     plt.close(fig2)
 

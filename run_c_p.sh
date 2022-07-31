@@ -19,11 +19,11 @@ srun python main.py  \
 --data_path_target_t  /data/home/jkataok1/CycleGAN-PyTorch/data/OfficeHomeDataset_10072016 \
 --tar_t Product \
 --workers 1 \
---pretrained_path /data/home/jkataok1/alexnet_resnet_finetune/checkpoints/Clipart_to_Prdocut_resnet50.pkl \
+--pretrained_path /data/home/jkataok1/alexnet_resnet_finetune/checkpoints/Clipart_to_Product_resnet50.pkl \
 --learn_embed \
 --src_cls \
---batch_size 42 \
---beta 0.0 \
+--batch_size 32 \
+--beta 1.0 \
 --pretrained \
 --cluster_method kernel_kmeans \
 --epochs 200 \

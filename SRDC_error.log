@@ -2,7 +2,4 @@
   warnings.warn("GitPython could not be initialized")
 /data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/neptune/new/internal/utils/git.py:35: UserWarning: GitPython could not be initialized
   warnings.warn("GitPython could not be initialized")
-/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/neptune/new/internal/utils/git.py:35: UserWarning: GitPython could not be initialized
-  warnings.warn("GitPython could not be initialized")
-/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/neptune/new/internal/utils/git.py:35: UserWarning: GitPython could not be initialized
-  warnings.warn("GitPython could not be initialized")
+Waiting for the remaining 21 operations to synchronize with Neptune. Do not kill this process.

@@ -45,7 +45,7 @@ def main():
     model = Model_Construct(args)
     model = torch.nn.DataParallel(model).cuda() # define multiple GPUs
     run = neptune.init(project = "junkataoka/SRDC",
-                       tags = [f"source:{args.src}", f"target:{args.tar}"],
+                       tags = [f"source:{args.src}", f"target:{args.tar}", f"delta:{args.delta}", f"beta:{args.beta}"],
                        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIwOTE0MGFjYy02NzMwLTRkODQtYTU4My1lNjk0YWEzODM3MGIifQ==")
 
     run["paramteres"] = args
@@ -62,9 +62,9 @@ def main():
     criterion = torch.nn.CrossEntropyLoss().cuda()
     criterion_cons = ConsensusLoss(nClass=args.num_classes, div=args.div).cuda()
 
-    # np.random.seed(1)  # may fix test data
-    # random.seed(1)
-    # torch.manual_seed(1)
+    np.random.seed(12)  # may fix test data
+    random.seed(12)
+    torch.manual_seed(12)
 
     # apply different learning rates to different layer
     optimizer = torch.optim.SGD([

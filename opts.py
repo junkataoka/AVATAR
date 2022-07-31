@@ -50,6 +50,7 @@ def opts():
     parser.add_argument('--gray_tar_agree', action='store_true', help='ehether to enforce the consistency between RGB and gray images on the target domain')
     parser.add_argument('--aug_tar_agree', action='store_true', help='whether to enforce the consistency between RGB and augmented images on the target domain')
     parser.add_argument('--sigma', type=float, default=0.1, help='standard deviation of Gaussian for data augmentation operation of blurring')
+    parser.add_argument('--delta', type=float, default=1.0, help='parameter for regularization')
     # checkpoints
     parser.add_argument('--resume', type=str, default='', help='checkpoints path to resume')
     parser.add_argument('--log', type=str, default='./checkpoints/office31', help='log folder')

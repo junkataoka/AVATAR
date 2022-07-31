@@ -22,11 +22,11 @@ srun python main.py  \
 --learn_embed \
 --src_cls \
 --batch_size 32 \
---beta 0.0 \
+--beta 1.0 \
 --pretrained \
 --cluster_method kernel_kmeans \
 --epochs 200 \
 --cluster_iter 100 \
 --lr 0.001 \
 --src_soft_select \
---init_cen_on_st
+--init_cen_on_st \

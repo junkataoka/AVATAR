@@ -22,7 +22,7 @@ srun python main.py  \
 --pretrained_path /data/home/jkataok1/alexnet_resnet_finetune/checkpoints/RealWorld_to_Product_resnet50.pkl \
 --learn_embed \
 --src_cls \
---batch_size 42 \
+--batch_size 32 \
 --beta 1.0 \
 --pretrained \
 --cluster_method kernel_kmeans \
