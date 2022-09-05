@@ -53,7 +53,7 @@ def main():
     # define learnable cluster centers
     learn_cen = Variable(torch.cuda.FloatTensor(args.num_classes, 2048).fill_(0))
     learn_cen.requires_grad_(True)
-    learn_cen_2 = Variable(torch.cuda.FloatTensor(args.num_classes, args.num_neurons * 4).fill_(0))
+    learn_cen_2 = Variable(torch.cuda.FloatTensor(args.num_classes, 2048 // 4).fill_(0))
     learn_cen_2.requires_grad_(True)
     p_label_tar = Variable(torch.cuda.FloatTensor(args.num_classes).fill_(0))
     p_label_src = Variable(torch.cuda.FloatTensor(args.num_classes).fill_(0))
@@ -166,7 +166,7 @@ def main():
             target_features, target_features_2, target_targets, pseudo_labels, labels_src, labels_tar = validate_compute_cen(val_loader_target_t, val_loader_source, model, criterion, epoch, args, run)
 
 
-            test_acc = validate(val_loader_target, model, criterion, epoch, args)
+            test_acc, test_acc_each_class = validate(val_loader_target, model, criterion, epoch, args)
             test_flag = True
 
             # K-means clustering or its variants
@@ -215,11 +215,10 @@ def main():
                 log.write('\n                                                          best_cluster_2 acc: %3f' % best_cluster_acc_2)
             log.close()
 
-            # re-initialize learnable cluster centers
             if args.init_cen_on_st:
+               cen = (c_t + c_s) / 2# or c_srctar
                 cen = (c_t + c_s) / 2# or c_srctar
                 cen_2 = (c_t_2 + c_s_2) / 2# or c_srctar_2
-            else:
                 cen = c_t
                 cen_2 = c_t_2
             #if itern == 0:
@@ -309,12 +308,15 @@ def main():
             # record the best prec1 and save checkpoint
             log = open(os.path.join(args.log, 'log.txt'), 'a')
             run["metrics/current_acc"].log(test_acc)
+            for idx, acc in enumerate(test_acc_each_class):
+                run[f"metrics/current_acc_class{idx}"].log(acc)
             if test_acc > best_prec1:
                 counter = 0
                 best_prec1 = test_acc
                 cond_best_test_prec1 = 0
                 run["metrics/best_acc"].log(best_prec1)
-                log.write('\n                                                                                 best val acc till now: %3f' % best_prec1)
+                for idx, acc in enumerate(test_acc_each_class):
+                    run[f"metrics/best_acc_class{idx}"].log(acc)
             else: counter += 1
 
             is_cond_best = ((prec1 == best_prec1) and (test_acc > cond_best_test_prec1))

@@ -2,6 +2,8 @@ import argparse
 
 def opts():
     parser = argparse.ArgumentParser(description='SRDC', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    #model
+    parser.add_argument('--model', type=str, default='resnet50', help='model name')
     # datasets
     parser.add_argument('--data_path_source', type=str, default='./data/datasets/Office31/', help='root of source training set')
     parser.add_argument('--data_path_target', type=str, default='./data/datasets/Office31/', help='root of target training set')
@@ -57,7 +59,6 @@ def opts():
     parser.add_argument('--stop_epoch', type=int, default=200, metavar='N', help='stop epoch for early stop (default: 200)')
     # architecture
     parser.add_argument('--arch', type=str, default='resnet50', help='model name')
-    parser.add_argument('--num_neurons', type=int, default=128, help='number of neurons of fc1')
     parser.add_argument('--pretrained', action='store_true', help='whether to use pretrained model')
     # i/o
     parser.add_argument('--print_freq', type=int, default=10, metavar='N', help='print frequency (default: 10)')

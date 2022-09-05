@@ -59,7 +59,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
 
 
     loss = 0
-    f_t, f_t_2, ca_t = model(input_target_var, 1)
+    f_t, f_t_2, ca_t = model(input_target_var)
 
     # Update target domain
     prob_pred = (1 + (f_t.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2) / args.alpha).pow(- (args.alpha + 1) / 2)
@@ -92,7 +92,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     loss += weight_dis * d_t_loss
 
     # model forward on source
-    f_s, f_s_2, ca_s = model(input_source_var, 1)
+    f_s, f_s_2, ca_s = model(input_source_var)
 
     src_dis_loss = SrcClassifyLoss(args, epoch, ca_s, target_source, index, src_cs, lam, p_label_src, p_label_tar, softmax=True, emb=False)
     loss += src_dis_loss
@@ -118,7 +118,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     # Update join classifier & discriminator
     loss = 0
 
-    f_t, f_t_2, ca_t = model(input_target_var, 1)
+    f_t, f_t_2, ca_t = model(input_target_var)
 
     tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs, lam, p_label_src, p_label_tar, th, emb=False, em=False)
     loss += weight_tar_cls * tardis_loss
@@ -140,7 +140,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     loss += weight_tar_cluster * tar_cluster_loss2
 
     # model forward on source
-    f_s, f_s_2, ca_s = model(input_source_var, 1)
+    f_s, f_s_2, ca_s = model(input_source_var)
 
     src_dis_loss = SrcClassifyLoss(args, epoch, ca_s, target_source, index, src_cs, lam, p_label_src, p_label_tar, fit=args.src_fit, emb=False)
     loss += src_dis_loss
@@ -349,7 +349,7 @@ def validate(val_loader, model, criterion, epoch, args):
 
         # forward
         with torch.no_grad():
-            _, _, output = model(input_var, 1)
+            _, _, output = model(input_var)
             output = output[:, :-1]
             loss = criterion(output, target_var)
 
@@ -393,7 +393,7 @@ def validate(val_loader, model, criterion, epoch, args):
         return acc_for_each_class.mean()
     else:
         log.close()
-        return top1.avg
+        return top1.avg, acc_for_each_class
 
 
 def validate_compute_cen(val_loader_target, val_loader_source, model, criterion, epoch, args, run, compute_cen=True):
@@ -408,18 +408,18 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
 
     # compute source class centroids
     source_features = torch.cuda.FloatTensor(len(val_loader_source.dataset.imgs), 2048).fill_(0)
-    source_features_2 = torch.cuda.FloatTensor(len(val_loader_source.dataset.imgs), args.num_neurons*4).fill_(0)
+    source_features_2 = torch.cuda.FloatTensor(len(val_loader_source.dataset.imgs), 2048//4).fill_(0)
     source_targets = torch.cuda.LongTensor(len(val_loader_source.dataset.imgs)).fill_(0)
     labels_src = torch.cuda.FloatTensor(len(val_loader_source.dataset.imgs), args.num_classes).fill_(0)
     c_src = torch.cuda.FloatTensor(args.num_classes, 2048).fill_(0)
-    c_src_2 = torch.cuda.FloatTensor(args.num_classes, args.num_neurons*4).fill_(0)
+    c_src_2 = torch.cuda.FloatTensor(args.num_classes, 2048//4).fill_(0)
     count_s = torch.cuda.FloatTensor(args.num_classes, 1).fill_(0)
     if compute_cen:
         for i, (input, target, index) in enumerate(val_loader_source): # the iterarion in the source dataset
             input_var = Variable(input)
             target = target.cuda()
             with torch.no_grad():
-                feature, feature_2, output = model(input_var, 1)
+                feature, feature_2, output = model(input_var)
                 output = output[:, :-1]
             source_features[index.cuda(), :] = feature.data.clone()
             source_features_2[index.cuda(), :] = feature_2.data.clone()
@@ -437,11 +437,11 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
                 count_s += target_.sum(0).unsqueeze(1)
 
     target_features = torch.cuda.FloatTensor(len(val_loader_target.dataset.imgs), 2048).fill_(0)
-    target_features_2 = torch.cuda.FloatTensor(len(val_loader_target.dataset.imgs), args.num_neurons*4).fill_(0)
+    target_features_2 = torch.cuda.FloatTensor(len(val_loader_target.dataset.imgs), 2048//4).fill_(0)
     target_targets = torch.cuda.LongTensor(len(val_loader_target.dataset.imgs)).fill_(0)
     pseudo_labels = torch.cuda.FloatTensor(len(val_loader_target.dataset.imgs), args.num_classes).fill_(0)
     c_tar = torch.cuda.FloatTensor(args.num_classes, 2048).fill_(0)
-    c_tar_2 = torch.cuda.FloatTensor(args.num_classes, args.num_neurons*4).fill_(0)
+    c_tar_2 = torch.cuda.FloatTensor(args.num_classes, 2048//4).fill_(0)
     count_t = torch.cuda.FloatTensor(args.num_classes, 1).fill_(0)
 
     total_vector = torch.FloatTensor(args.num_classes).fill_(0)
@@ -455,7 +455,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
         target_var = Variable(target)
 
         with torch.no_grad():
-            feature, feature_2, output = model(input_var, 1)
+            feature, feature_2, output = model(input_var)
             output = output[:, :-1]
         target_features[index.cuda(), :] = feature.data.clone() # index:a tensor
         target_features_2[index.cuda(), :] = feature_2.data.clone()
@@ -496,7 +496,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
 
     # compute global class centroids
     c_srctar = torch.cuda.FloatTensor(args.num_classes, 2048).fill_(0)
-    c_srctar_2 = torch.cuda.FloatTensor(args.num_classes, args.num_neurons*4).fill_(0)
+    c_srctar_2 = torch.cuda.FloatTensor(args.num_classes, 2048//4).fill_(0)
     if (args.cluster_method == 'spherical_kmeans'):
         c_srctar = c_src + c_tar
         c_srctar_2 = c_src_2 + c_tar_2
@@ -537,14 +537,16 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
 
         ax1.scatter(tsne_proj[ind, 0], tsne_proj[ind, 1],
                 label=None,
-                alpha=0.2)
+                alpha=0.5,
+                s=1.5)
 
         ax2.scatter(tsne_proj_2[ind, 0], tsne_proj_2[ind, 1],
                 label=None,
-                alpha=0.2)
+                alpha=0.5,
+                s=1.5)
 
-    ax1.scatter(tsne_proj_cen[:, 0], tsne_proj_cen[:, 1], c="black")
-    ax2.scatter(tsne_proj_cen_2[:, 0], tsne_proj_cen_2[:, 1], c="black")
+    ax1.scatter(tsne_proj_cen[:, 0], tsne_proj_cen[:, 1], c="black", s=1.5)
+    ax2.scatter(tsne_proj_cen_2[:, 0], tsne_proj_cen_2[:, 1], c="black", s=1.5)
 
     # ax1.legend()
     # ax2.legend()
@@ -554,10 +556,10 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     ax2.axes.get_yaxis().set_visible(False)
     run["fig/target_tsne"].log(fig1)
     run["fig/target_tsne2"].log(fig2)
-    ax1_save_file = os.path.join("figures", args.log+f'_curepoch{epoch}'+'_targe_tsne1.png', dpi=600)
-    ax1.figure.savefig(ax1_save_file)
-    ax2_save_file = os.path.join("figures", args.log+f'_curepoch{epoch}'+'_targe_tsne2.png', dpi=600)
-    ax2.figure.savefig(ax2_save_file)
+    ax1_save_file = os.path.join(args.log, f'_curepoch{epoch}'+'_targe_tsne1.png')
+    ax1.figure.savefig(ax1_save_file, dpi=600, bbox_inches="tight")
+    ax2_save_file = os.path.join(args.log, f'_curepoch{epoch}'+'_targe_tsne2.png')
+    ax2.figure.savefig(ax2_save_file, dpi=600, bbox_inches="tight")
     plt.close(fig1)
     plt.close(fig2)
 

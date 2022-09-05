@@ -2,4 +2,12 @@
   warnings.warn("GitPython could not be initialized")
 /data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/neptune/new/internal/utils/git.py:35: UserWarning: GitPython could not be initialized
   warnings.warn("GitPython could not be initialized")
-Waiting for the remaining 21 operations to synchronize with Neptune. Do not kill this process.
+Experiencing connection interruptions. Reestablishing communication with Neptune.
+Experiencing connection interruptions. Reestablishing communication with Neptune.
+Experiencing connection interruptions. Reestablishing communication with Neptune.
+Experiencing connection interruptions. Reestablishing communication with Neptune.
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+srun: got SIGCONT
+slurmstepd: error: *** JOB 4637106 ON compute130 CANCELLED AT 2022-08-28T23:15:39 ***
+slurmstepd: error: *** STEP 4637106.0 ON compute130 CANCELLED AT 2022-08-28T23:15:40 ***
+srun: forcing job termination
