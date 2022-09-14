@@ -1,5 +1,0 @@
-srun: got SIGCONT
-slurmstepd: error: *** JOB 4644446 ON compute131 CANCELLED AT 2022-09-13T23:53:13 ***
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-slurmstepd: error: *** STEP 4644446.0 ON compute131 CANCELLED AT 2022-09-13T23:53:13 ***
-srun: forcing job termination
