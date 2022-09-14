@@ -58,9 +58,6 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
 
         K = self._get_kernel(X)
 
-        if args.sample_weight:
-            sample_weight = K.sum(axis=1)
-            #K /= np.outer(sample_weight, sample_weight)
         sw = sample_weight if sample_weight is not None else np.ones(n_samples)
         self.sample_weight_ = sw
 
@@ -94,13 +91,6 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
             # Compute the number of samples whose cluster did not change
             # since last iteration.
             n_same = np.sum((self.labels_ - labels_old) == 0)
-            # unique_labels = np.unique(self.labels_)
-            # if len(unique_labels) < args.num_classes:
-            #     print("Empty cluster found, re-initializing...")
-            #     self.labels_ = labels_old
-            #    # dist = np.zeros((n_samples, self.n_clusters))
-            #     # self.within_distances_ = np.zeros(self.n_clusters)
-            #     it = 0
 
             if 1 - float(n_same) / n_samples < self.tol:
                 if self.verbose:

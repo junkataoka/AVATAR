@@ -14,7 +14,7 @@ class MyResNet50(ResNet):
         self.fc1 = nn.Sequential(nn.Linear(num_of_feature_map, num_of_feature_map//4),
         nn.BatchNorm1d(num_of_feature_map//4),
         nn.ReLU(inplace=True))
-        self.fc2 = nn.Linear(num_of_feature_map//2, n_class+1)
+        self.fc2 = nn.Linear(num_of_feature_map//4, n_class+1)
 
     def forward(self, x):
         # change forward here
@@ -66,14 +66,14 @@ def resnet50(args, **kwargs):
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = MyResNet50(n_class=args.num_clases)
+    model = MyResNet50(n_class=args.num_classes)
 
     if args.pretrained:
         if args.pretrained_path:
             model_dict = model.state_dict()
             pretrained_dict_temp = torch.load(args.pretrained_path)
             pretrained_dict = {k: v for k, v in pretrained_dict_temp.items() if k in model_dict}
-            model.load_state_dict(pretrained_dict)
+            model.load_state_dict(pretrained_dict, strict=False)
             print(args.pretrained_path)
             print('Source pre-trained model has been loaded!')
 
@@ -94,7 +94,7 @@ def resnet101(args, **kwargs):
             model_dict = model.state_dict()
             pretrained_dict_temp = torch.load(args.pretrained_path)
             pretrained_dict = {k: v for k, v in pretrained_dict_temp.items() if k in model_dict}
-            model.load_state_dict(pretrained_dict)
+            model.load_state_dict(pretrained_dict, strict=False)
             print(args.pretrained_path)
             print('Source pre-trained model has been loaded!')
 
@@ -104,9 +104,9 @@ def resnet101(args, **kwargs):
     return model
 
 def resnet(args, **kwargs):
-    if args.model == 'resnet50':
+    if args.arch == 'resnet50':
         return resnet50(args)
-    elif args.model == 'resnet101':
+    elif args.arch == 'resnet101':
         return resnet101(args)
     else:
         raise ValueError('Unrecognized model architecture: ', args.arch)

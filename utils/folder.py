@@ -3,9 +3,7 @@ File modified from: https://github.com/pytorch/vision/blob/master/torchvision/da
 """
 
 import torch.utils.data as data
-
 from PIL import Image
-
 import os
 import os.path
 import sys
@@ -124,7 +122,7 @@ class DatasetFolder(data.Dataset):
         path, _ = self.samples[index]
         sample = self.loader(path)
         target = self.tgts[index]
-        
+
         if self.transform_gray is not None:
             sample_gray = self.transform_gray(sample)
 
@@ -210,6 +208,5 @@ class ImageFolder(DatasetFolder):
                                           transform_aug=transform_aug,
                                           transform_gray=transform_gray)
         self.imgs = self.samples
-        
-        
-        
+
+

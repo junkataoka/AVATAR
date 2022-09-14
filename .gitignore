@@ -1,2 +1,4 @@
 checkpoints/*
-.neptune/*
+.neptune
+.ipynb_checkpoints
+data/*
