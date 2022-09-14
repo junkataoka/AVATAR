@@ -2,3 +2,4 @@ checkpoints/*
 .neptune
 .ipynb_checkpoints
 data/*
+docs
