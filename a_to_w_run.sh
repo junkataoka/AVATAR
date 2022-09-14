@@ -1,17 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=SRDC
-#SBATCH --output=SRDC_output.txt
-#SBATCH --error=SRDC_error.log
-#SBATCH --mail-type=ALL
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --partition=gpucompute
-#SBATCH --mem=20GB
-#SBATCH --gres=gpu:1
 
-module load cuda11.1/toolkit/11.1.1
-
-srun python main.py  \
+python main.py  \
 --data_path_source /data/home/jkataok1/AVATAR/data/office31/  \
 --src amazon  \
 --data_path_target /data/home/jkataok1/AVATAR/data/office31/ \
