@@ -48,7 +48,7 @@ def generate_dataloader(args):
         num_workers=args.workers, pin_memory=True, sampler=None, drop_last=True
     )
     source_test_loader = torch.utils.data.DataLoader(
-        source_test_dataset, batch_size=63, shuffle=False,
+        source_test_dataset, batch_size=args.batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True
     )
     target_train_loader = torch.utils.data.DataLoader(

@@ -13,6 +13,7 @@ import shutil
 import torch
 import random
 import numpy as np
+import pandas as pd
 import torch.nn.functional as F
 from torch.autograd import Variable
 from models.model_construct import Model_Construct # for the model construction
@@ -24,6 +25,7 @@ from opts import opts # options for the project
 from utils.prepare_data import generate_dataloader # prepare the data and dataloader
 import time
 import gc
+from collections import defaultdict
 
 args = opts()
 
@@ -84,6 +86,10 @@ def main():
     # resume
     epoch = 0
     init_state_dict = model.state_dict()
+    dict_th = defaultdict(list)
+    dict_mu = defaultdict(list)
+    dict_sd = defaultdict(list)
+    dict_acc = defaultdict(list)
     # make log directory
     if not os.path.isdir(args.log):
         os.makedirs(args.log)
@@ -114,13 +120,14 @@ def main():
     tar_cs = torch.cuda.FloatTensor(len(train_loader_target.dataset.tgts)).fill_(1) # initialize source weights
 
     count_itern_each_epoch = 0
+    th = torch.zeros(args.num_classes).cuda()
     for itern in range(epoch * batch_number, num_itern_total):
         # evaluate on the target training and test data
         if (itern == 0) or (count_itern_each_epoch == batch_number):
             prec1, c_s, c_s_2, c_t, c_t_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, \
             target_features, target_features_2, target_targets, pseudo_labels, labels_src, labels_tar = validate_compute_cen(val_loader_target_t, val_loader_source, model, criterion, epoch, args)
 
-            test_acc = validate(val_loader_target, model, criterion, epoch, args)
+            test_acc, acc_for_each_class = validate(val_loader_target, model, criterion, epoch, args)
             test_flag = True
 
             # K-means clustering or its variants
@@ -154,12 +161,14 @@ def main():
             sd = torch.zeros((target_targets.size(0), args.num_classes)).fill_(0).cuda()
             m.scatter_(dim=1, index=target_targets.unsqueeze(1), src=tar_cs.unsqueeze(1).cuda()) # assigned pseudo labels
             sd.scatter_(dim=1, index=target_targets.unsqueeze(1), src=tar_cs.unsqueeze(1).cuda()) # assigned pseudo labels
-            th = torch.zeros(args.num_classes).cuda()
 
             for i in range(args.num_classes):
                 mu = m[m[:, i] != 0, i].mean()
                 sdv = sd[sd[:, i] != 0, i].std()
                 th[i] = mu - sdv
+                dict_mu[i].append(mu.cpu().numpy())
+                dict_sd[i].append(sdv.cpu().numpy())
+                dict_th[i].append(th[i].cpu().numpy())
 
             batch_number = count_epoch_on_large_dataset(train_loader_target, train_loader_source, args)
             train_loader_target_batch = enumerate(train_loader_target)
@@ -185,6 +194,11 @@ def main():
                 best_prec1 = test_acc
                 cond_best_test_prec1 = 0
                 cond_best_test_prec1 = 0
+                dict_acc["epoch"].append(epoch)
+                dict_acc["test_acc"].append(best_prec1)
+                for i in range(len(acc_for_each_class)):
+                    dict_acc[f"test_acc_class_{i+1}"].append(acc_for_each_class[i].numpy())
+
                 log.write('\n                                                                                 best val acc till now: %3f' % best_prec1)
             else: counter += 1
             is_cond_best = ((prec1 == best_prec1) and (test_acc > cond_best_test_prec1))
@@ -223,7 +237,14 @@ def main():
     log.write(time.asctime(time.localtime(time.time())))
     log.write('\n-------------------------------------------\n')
     log.close()
-
+    df_sd = pd.DataFrame.from_dict(dict_sd)
+    df_mu = pd.DataFrame.from_dict(dict_mu)
+    df_th = pd.DataFrame.from_dict(dict_th)
+    df_acc = pd.DataFrame.from_dict(dict_acc)
+    df_mu.to_csv(os.path.join(args.log, "df_mu.csv"), index=None)
+    df_sd.to_csv(os.path.join(args.log, "df_sd.csv"), index=None)
+    df_th.to_csv(os.path.join(args.log, "df_th.csv"), index=None)
+    df_acc.to_csv(os.path.join(args.log, "acc.csv"), index=None)
 
 def count_epoch_on_large_dataset(train_loader_target, train_loader_source, args):
     batch_number_t = len(train_loader_target)
@@ -246,3 +267,4 @@ if __name__ == '__main__':
     main()
 
 
+#

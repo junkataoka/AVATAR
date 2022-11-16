@@ -11,6 +11,12 @@ def opts():
     parser.add_argument('--tar', type=str, default='webcam_half', help='target training set')
     parser.add_argument('--tar_t', type=str, default='webcam_half2', help='target test set')
     parser.add_argument('--num_classes', type=int, default=31, help='class number')
+    parser.add_argument('--domain_adv', action='store_true', help='whether to used domain adversarial')
+    parser.add_argument('--dis_src', action='store_true', help='whether to use source discriminative loss')
+    parser.add_argument('--dis_tar', action='store_true', help='whether to use target discriminative loss')
+    parser.add_argument('--dis_feat_src', action='store_true', help='whether to use discriminative feature loss')
+    parser.add_argument('--dis_feat_tar', action='store_true', help='whether to use discriminative feature loss')
+    parser.add_argument('--conf_pseudo_label', action='store_true', help='whether to use confidence based pseduo-labelling')
     # general optimization options
     parser.add_argument('--epochs', type=int, default=200, help='number of epochs to train')
     parser.add_argument('--batch_size', type=int, default=64, help='batch size')
@@ -27,7 +33,7 @@ def opts():
     # checkpoints
     parser.add_argument('--resume', type=str, default='', help='checkpoints path to resume')
     parser.add_argument('--log', type=str, default='./checkpoints/office31', help='log folder')
-    parser.add_argument('--stop_epoch', type=int, default=200, metavar='N', help='stop epoch for early stop (default: 200)')
+    parser.add_argument('--stop_epoch', type=int, default=200, metavar='N', help='stop epoch for early stop (default: 50)')
     # architecture
     parser.add_argument('--arch', type=str, default='resnet50', help='model name')
     parser.add_argument('--pretrained', action='store_true', help='whether to use pretrained model')
@@ -36,6 +42,37 @@ def opts():
     parser.add_argument('--pretrained_path', type=str, default="", help='path of pretrained model')
 
     args = parser.parse_args()
-    args.log = args.log + '_adapt_' + args.src + '2' + args.tar + '_bs' + str(args.batch_size) + '_' + args.arch + '_lr' + str(args.lr)
+    if args.domain_adv:
+        domain_adv_flag = "_domain-adv"
+    else:
+        domain_adv_flag = ""
+
+    if args.dis_src:
+        dis_src_flag = "_dis-src"
+    else:
+        dis_src_flag = ""
+
+    if args.dis_tar:
+        dis_tar_flag = "_dis-tar"
+    else:
+        dis_tar_flag = ""
+
+    if args.dis_feat_src:
+        dis_feat_src_flag = "_dis-feat-src"
+    else:
+        dis_feat_src_flag = ""
+
+    if args.dis_feat_tar:
+        dis_feat_tar_flag = "_dis-feat-tar"
+    else:
+        dis_feat_tar_flag = ""
+
+    if args.conf_pseudo_label:
+        conf_pseudo_label_flag = "_conf-pseudo-label"
+    else:
+        conf_pseudo_label_flag = ""
+
+    args.log = args.log + '_adapt_' + args.src + '2' + args.tar + '_bs' + str(args.batch_size) + '_' + args.arch + '_lr' + str(args.lr) \
+        + domain_adv_flag + dis_src_flag + dis_tar_flag + dis_feat_src_flag + dis_feat_tar_flag + conf_pseudo_label_flag
 
     return args
