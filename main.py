@@ -185,6 +185,11 @@ def main():
             torch.cuda.empty_cache()
             torch.cuda.empty_cache()
 
+        dict_acc["epoch"].append(epoch)
+        dict_acc["test_acc"].append(test_acc)
+        for i in range(len(acc_for_each_class)):
+            dict_acc[f"test_acc_class_{i+1}"].append(acc_for_each_class[i].numpy())
+
         if test_flag:
             # record the best prec1 and save checkpoint
             log = open(os.path.join(args.log, 'log.txt'), 'a')
@@ -194,10 +199,6 @@ def main():
                 best_prec1 = test_acc
                 cond_best_test_prec1 = 0
                 cond_best_test_prec1 = 0
-                dict_acc["epoch"].append(epoch)
-                dict_acc["test_acc"].append(best_prec1)
-                for i in range(len(acc_for_each_class)):
-                    dict_acc[f"test_acc_class_{i+1}"].append(acc_for_each_class[i].numpy())
 
                 log.write('\n                                                                                 best val acc till now: %3f' % best_prec1)
             else: counter += 1
