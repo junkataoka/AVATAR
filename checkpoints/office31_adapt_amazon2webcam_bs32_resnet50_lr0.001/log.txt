@@ -1,0 +1,27 @@
+{"arch": "resnet50", "batch_size": 32, "cluster_iter": 100, "cluster_kernel": "rbf", "conf_pseudo_label": false, "data_path_source": "data/datasets/office31/", "data_path_target": "data/datasets/office31/", "data_path_target_t": "data/datasets/office31/", "dis_feat_src": false, "dis_feat_tar": false, "dis_src": false, "dis_tar": false, "domain_adv": false, "epochs": 200, "gamma": null, "log": "./checkpoints/office31_adapt_amazon2webcam_bs32_resnet50_lr0.001", "lr": 0.001, "momentum": 0.9, "nesterov": false, "num_classes": 31, "pretrained": true, "pretrained_path": "checkpoints/amazon_to_webcam_resnet50.pkl", "print_freq": 1, "resume": "", "src": "amazon", "stop_epoch": 200, "tar": "webcam", "tar_t": "webcam", "weight_decay": 0.01, "workers": 1}
+
+-------------------------------------------
+Mon Nov 21 21:34:53 2022
+-------------------------------------------
+Test on T training set - epoch: 0, tc_loss: 0.833039, tc_Top1 acc: 77.861635, tc_Top5 acc: 95.220126
+Acc for each class: 1st: 93.103447,  2nd: 100.000000, 3rd: 85.714287, 4th: 83.333336, 5th: 75.000000, 6th: 38.709679, 7th: 100.000000, 8th: 88.888885, 9th: 80.952377, 10th: 100.000000, 11th: 85.185188, 12th: 100.000000, 13th: 73.333336, 14th: 63.157894, 15th: 10.000000, 16th: 41.860466, 17th: 93.333336, 18th: 96.296295, 19th: 57.142857, 20th: 100.000000, 21th: 93.750000, 22th: 100.000000, 23th: 56.666668, 24th: 85.185188, 25th: 90.000000, 26th: 54.545456, 27th: 100.000000, 28th: 56.666668, 29th: 83.333336, 30th: 86.956520, 31th: 71.428574
+                          Avg. over all classes: 78.856255
+             Test on T test set - epoch: 0, loss: 0.820922, Top1 acc: 78.993711, Top5 acc: 94.968553
+Acc for each class: 1st: 86.206894,  2nd: 100.000000, 3rd: 85.714287, 4th: 75.000000, 5th: 81.250000, 6th: 45.161289, 7th: 97.500000, 8th: 94.444443, 9th: 76.190475, 10th: 100.000000, 11th: 88.888885, 12th: 100.000000, 13th: 86.666664, 14th: 68.421051, 15th: 10.000000, 16th: 37.209301, 17th: 96.666664, 18th: 100.000000, 19th: 71.428574, 20th: 100.000000, 21th: 93.750000, 22th: 95.000000, 23th: 53.333332, 24th: 85.185188, 25th: 90.000000, 26th: 45.454544, 27th: 100.000000, 28th: 66.666664, 29th: 83.333336, 30th: 86.956520, 31th: 71.428574
+                          Avg. over all classes: 79.737305
+Epoch 0 - Kernel K-means clustering 0: Clustering time 0.003, Prec@1 88.176
+Epoch 0 - Kernel K-means clustering 1: Clustering time 0.004, Prec@1 90.063
+Epoch 0 - Kernel K-means clustering 2: Clustering time 0.014, Prec@1 90.063
+Epoch 0 - Kernel K-means clustering 3: Clustering time 0.005, Prec@1 90.314
+Epoch 0 - Kernel K-means clustering 4: Clustering time 0.020, Prec@1 90.818
+Epoch 0 - Kernel K-means clustering 5: Clustering time 0.008, Prec@1 91.321
+Epoch 0 - Kernel K-means clustering 6: Clustering time 0.012, Prec@1 91.824
+Epoch 0 - Kernel K-means clustering 7: Clustering time 0.007, Prec@1 91.824
+Epoch 0 - Kernel K-means clustering 8: Clustering time 0.008, Prec@1 91.824
+Epoch 0 - Kernel K-means clustering 0: Clustering time 0.007, Prec@1 85.031
+Epoch 0 - Kernel K-means clustering 1: Clustering time 0.009, Prec@1 86.667
+Epoch 0 - Kernel K-means clustering 2: Clustering time 0.004, Prec@1 87.170
+Epoch 0 - Kernel K-means clustering 3: Clustering time 0.014, Prec@1 87.170
+Epoch 0 - Kernel K-means clustering 4: Clustering time 0.016, Prec@1 87.421
+Epoch 0 - Kernel K-means clustering 5: Clustering time 0.004, Prec@1 87.421
+                                                                                 best val acc till now: 78.993711

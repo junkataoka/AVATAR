@@ -40,6 +40,7 @@ def opts():
     # i/o
     parser.add_argument('--print_freq', type=int, default=1, metavar='N', help='print frequency (default: 10)')
     parser.add_argument('--pretrained_path', type=str, default="", help='path of pretrained model')
+    parser.add_argument('--tsne', action='store_true', help='whether to use tsne')
 
     args = parser.parse_args()
     if args.domain_adv:
@@ -71,8 +72,13 @@ def opts():
         conf_pseudo_label_flag = "_conf-pseudo-label"
     else:
         conf_pseudo_label_flag = ""
+    if args.tsne:
+        tsne_flag = "_tsne"
+    else:
+        tsne_flag = ""
+
 
     args.log = args.log + '_adapt_' + args.src + '2' + args.tar + '_bs' + str(args.batch_size) + '_' + args.arch + '_lr' + str(args.lr) \
-        + domain_adv_flag + dis_src_flag + dis_tar_flag + dis_feat_src_flag + dis_feat_tar_flag + conf_pseudo_label_flag
+        + domain_adv_flag + dis_src_flag + dis_tar_flag + dis_feat_src_flag + dis_feat_tar_flag + conf_pseudo_label_flag + tsne_flag
 
     return args

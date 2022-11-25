@@ -26,6 +26,7 @@ from utils.prepare_data import generate_dataloader # prepare the data and datalo
 import time
 import gc
 from collections import defaultdict
+from sklearn.manifold import TSNE
 
 args = opts()
 
@@ -155,6 +156,29 @@ def main():
 
             src_cs = source_select(source_features_2, source_targets, target_features_2, pseudo_labels, train_loader_source, epoch, c_t_2.data.clone(), args)
             tar_cs = source_select(target_features_2, target_targets, source_features_2, source_targets, train_loader_target, epoch, c_t_2.data.clone(), args)
+
+            tsne_feature_2 = torch.cat([source_features_2, target_features_2], axis=0)
+            tsne_feature = torch.cat([source_features, target_features], axis=0)
+
+            tsne_true_label =torch.cat([source_targets, target_targets], axis=0).view(-1)
+            tsne_pseudo_label =torch.cat([source_targets, pseudo_labels.max(1)[1].long()], axis=0).view(-1)
+
+            tsne_embed_1 = TSNE(n_components=2).fit_transform(tsne_feature.cpu().numpy())
+            tsne_embed_2 = TSNE(n_components=2).fit_transform(tsne_feature_2.cpu().numpy())
+
+            domain_label = [0 for i in range(source_features.shape[0])] + [1 for i in range(target_features.shape[0])]
+
+            tsne_df = pd.DataFrame(tsne_embed_1)
+            tsne_df2 = pd.DataFrame(tsne_embed_2)
+            label_df = pd.DataFrame({"True_label": tsne_true_label.cpu().numpy().tolist(),
+                                     "Pseudo_label": tsne_pseudo_label.cpu().numpy().tolist(),
+                                     "Domain label": domain_label})
+
+            model_info = args.log.split("/")[-1]
+            tsne_df.to_csv(f"tsne/{model_info}_tsne_df_epoch{epoch}.csv")
+            tsne_df2.to_csv(f"tsne/{model_info}_tsne_df2_epoch{epoch}.csv")
+            label_df.to_csv(f"tsne/{model_info}_label_df_epoch{epoch}.csv")
+
 
             # Create threthold
             m = torch.zeros((target_targets.size(0), args.num_classes)).fill_(0).cuda()

@@ -9,7 +9,6 @@ from sklearn.base import BaseEstimator, ClusterMixin
 from sklearn.metrics.pairwise import pairwise_kernels
 from sklearn.utils import check_random_state
 
-import ipdb
 import os
 import time
 
