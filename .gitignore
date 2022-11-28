@@ -4,3 +4,4 @@ checkpoints/*pkl
 data/*
 *srum.sh
 .env
+figures

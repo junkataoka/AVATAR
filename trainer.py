@@ -214,7 +214,7 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, p_label_src, p
 
     elif args.conf_pseudo_label:
 
-        if epoch <= 5:
+        if epoch <= args.warmup:
             class_weight.fill_(1)
             tar_weights.fill_(1)
 

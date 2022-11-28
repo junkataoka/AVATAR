@@ -41278,3 +41278,133 @@ Train - epoch: 199, top1_s acc: 53.125000, loss: 14.464340
 -------------------------------------------
 Wed Nov 23 21:45:37 2022
 -------------------------------------------
+{"arch": "resnet50", "batch_size": 32, "cluster_iter": 100, "cluster_kernel": "rbf", "conf_pseudo_label": true, "data_path_source": "data/datasets/office31/", "data_path_target": "data/datasets/office31/", "data_path_target_t": "data/datasets/office31/", "dis_feat_src": true, "dis_feat_tar": true, "dis_src": true, "dis_tar": true, "domain_adv": true, "epochs": 200, "gamma": null, "log": "./checkpoints/office31_adapt_amazon2webcam_bs32_resnet50_lr0.001_domain-adv_dis-src_dis-tar_dis-feat-src_dis-feat-tar_conf-pseudo-label_tsne", "lr": 0.001, "momentum": 0.9, "nesterov": false, "num_classes": 31, "pretrained": true, "pretrained_path": "checkpoints/amazon_to_webcam_resnet50.pkl", "print_freq": 1, "resume": "", "src": "amazon", "stop_epoch": 200, "tar": "webcam", "tar_t": "webcam", "tsne": true, "warm_up": 100, "weight_decay": 0.01, "workers": 1}
+
+-------------------------------------------
+Sat Nov 26 19:51:54 2022
+-------------------------------------------
+Test on T training set - epoch: 0, tc_loss: 0.833039, tc_Top1 acc: 77.861635, tc_Top5 acc: 95.220126
+Acc for each class: 1st: 93.103447,  2nd: 100.000000, 3rd: 85.714287, 4th: 83.333336, 5th: 75.000000, 6th: 38.709679, 7th: 100.000000, 8th: 88.888885, 9th: 80.952377, 10th: 100.000000, 11th: 85.185188, 12th: 100.000000, 13th: 73.333336, 14th: 63.157894, 15th: 10.000000, 16th: 41.860466, 17th: 93.333336, 18th: 96.296295, 19th: 57.142857, 20th: 100.000000, 21th: 93.750000, 22th: 100.000000, 23th: 56.666668, 24th: 85.185188, 25th: 90.000000, 26th: 54.545456, 27th: 100.000000, 28th: 56.666668, 29th: 83.333336, 30th: 86.956520, 31th: 71.428574
+                          Avg. over all classes: 78.856255
+             Test on T test set - epoch: 0, loss: 0.820922, Top1 acc: 78.993711, Top5 acc: 94.968553
+Acc for each class: 1st: 86.206894,  2nd: 100.000000, 3rd: 85.714287, 4th: 75.000000, 5th: 81.250000, 6th: 45.161289, 7th: 97.500000, 8th: 94.444443, 9th: 76.190475, 10th: 100.000000, 11th: 88.888885, 12th: 100.000000, 13th: 86.666664, 14th: 68.421051, 15th: 10.000000, 16th: 37.209301, 17th: 96.666664, 18th: 100.000000, 19th: 71.428574, 20th: 100.000000, 21th: 93.750000, 22th: 95.000000, 23th: 53.333332, 24th: 85.185188, 25th: 90.000000, 26th: 45.454544, 27th: 100.000000, 28th: 66.666664, 29th: 83.333336, 30th: 86.956520, 31th: 71.428574
+                          Avg. over all classes: 79.737305
+Epoch 0 - Kernel K-means clustering 0: Clustering time 0.004, Prec@1 88.176
+Epoch 0 - Kernel K-means clustering 1: Clustering time 0.005, Prec@1 90.063
+Epoch 0 - Kernel K-means clustering 2: Clustering time 0.005, Prec@1 90.063
+Epoch 0 - Kernel K-means clustering 3: Clustering time 0.006, Prec@1 90.314
+Epoch 0 - Kernel K-means clustering 4: Clustering time 0.004, Prec@1 90.818
+Epoch 0 - Kernel K-means clustering 5: Clustering time 0.004, Prec@1 91.321
+Epoch 0 - Kernel K-means clustering 6: Clustering time 0.004, Prec@1 91.824
+Epoch 0 - Kernel K-means clustering 7: Clustering time 0.007, Prec@1 91.824
+Epoch 0 - Kernel K-means clustering 8: Clustering time 0.004, Prec@1 91.824
+Epoch 0 - Kernel K-means clustering 0: Clustering time 0.004, Prec@1 85.031
+Epoch 0 - Kernel K-means clustering 1: Clustering time 0.003, Prec@1 86.667
+Epoch 0 - Kernel K-means clustering 2: Clustering time 0.004, Prec@1 87.170
+Epoch 0 - Kernel K-means clustering 3: Clustering time 0.008, Prec@1 87.170
+Epoch 0 - Kernel K-means clustering 4: Clustering time 0.005, Prec@1 87.421
+Epoch 0 - Kernel K-means clustering 5: Clustering time 0.006, Prec@1 87.421
+Train - epoch: 0, top1_s acc: 90.625000, loss: 0.401405
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.219819
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.058913
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.163160
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.354834
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.268434
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.249486
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.172913
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.131114
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.216841
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.180915
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.236281
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.120192
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.307387
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.143098
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.140156
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.200972
+Train - epoch: 0, top1_s acc: 90.625000, loss: 0.252508
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.240698
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.365519
+Train - epoch: 0, top1_s acc: 90.625000, loss: 0.411260
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.289182
+Train - epoch: 0, top1_s acc: 90.625000, loss: 0.328792
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.192140
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.240548
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.271799
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.363626
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.148673
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.193734
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.298029
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.124247
+Train - epoch: 0, top1_s acc: 90.625000, loss: 0.342248
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.217497
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.168261
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.175822
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.323168
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.293115
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.226487
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.298891
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.209631
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.243993
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.100115
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.226116
+Train - epoch: 0, top1_s acc: 90.625000, loss: 0.308648
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.258085
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.179637
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.125642
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.122867
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.141187
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.171832
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.261907
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.239706
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.305279
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.149710
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.260475
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.105747
+Train - epoch: 0, top1_s acc: 90.625000, loss: 0.311252
+Train - epoch: 0, top1_s acc: 87.500000, loss: 0.233061
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.244786
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.108396
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.163087
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.317157
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.136003
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.162333
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.431345
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.211992
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.179523
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.125117
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.265566
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.163229
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.244341
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.189614
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.239659
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.096548
+Train - epoch: 0, top1_s acc: 90.625000, loss: 0.345879
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.298871
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.137307
+Train - epoch: 0, top1_s acc: 87.500000, loss: 0.312871
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.075424
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.230653
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.259859
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.233681
+Train - epoch: 0, top1_s acc: 96.875000, loss: 0.093505
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.130411
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.215397
+Train - epoch: 0, top1_s acc: 93.750000, loss: 0.267933
+Train - epoch: 0, top1_s acc: 87.500000, loss: 0.441311
+Train - epoch: 0, top1_s acc: 100.000000, loss: 0.115969
+Test on T training set - epoch: 0, tc_loss: 0.751275, tc_Top1 acc: 77.484277, tc_Top5 acc: 95.849057
+Acc for each class: 1st: 89.655174,  2nd: 100.000000, 3rd: 89.285713, 4th: 83.333336, 5th: 37.500000, 6th: 61.290321, 7th: 97.500000, 8th: 83.333336, 9th: 61.904762, 10th: 89.473686, 11th: 92.592590, 12th: 100.000000, 13th: 66.666664, 14th: 68.421051, 15th: 20.000000, 16th: 60.465115, 17th: 86.666664, 18th: 100.000000, 19th: 85.714287, 20th: 100.000000, 21th: 93.750000, 22th: 100.000000, 23th: 60.000000, 24th: 85.185188, 25th: 35.000000, 26th: 54.545456, 27th: 100.000000, 28th: 73.333336, 29th: 83.333336, 30th: 91.304344, 31th: 71.428574
+                          Avg. over all classes: 78.118805
+             Test on T test set - epoch: 0, loss: 0.735534, Top1 acc: 77.735849, Top5 acc: 96.100629
+Acc for each class: 1st: 93.103447,  2nd: 100.000000, 3rd: 96.428574, 4th: 83.333336, 5th: 50.000000, 6th: 54.838711, 7th: 100.000000, 8th: 83.333336, 9th: 66.666664, 10th: 100.000000, 11th: 92.592590, 12th: 96.296295, 13th: 73.333336, 14th: 68.421051, 15th: 13.333333, 16th: 60.465115, 17th: 93.333336, 18th: 100.000000, 19th: 71.428574, 20th: 100.000000, 21th: 93.750000, 22th: 100.000000, 23th: 53.333332, 24th: 85.185188, 25th: 32.500000, 26th: 63.636364, 27th: 100.000000, 28th: 73.333336, 29th: 83.333336, 30th: 91.304344, 31th: 71.428574
+                          Avg. over all classes: 78.861687
+Epoch 0 - Kernel K-means clustering 0: Clustering time 0.004, Prec@1 87.170
+Epoch 0 - Kernel K-means clustering 1: Clustering time 0.005, Prec@1 88.553
+Epoch 0 - Kernel K-means clustering 2: Clustering time 0.004, Prec@1 89.182
+Epoch 0 - Kernel K-means clustering 3: Clustering time 0.007, Prec@1 89.182
+Epoch 0 - Kernel K-means clustering 4: Clustering time 0.004, Prec@1 89.182
+Epoch 0 - Kernel K-means clustering 0: Clustering time 0.003, Prec@1 83.899
+Epoch 0 - Kernel K-means clustering 1: Clustering time 0.003, Prec@1 85.283
+Epoch 0 - Kernel K-means clustering 2: Clustering time 0.004, Prec@1 85.535
+Epoch 0 - Kernel K-means clustering 3: Clustering time 0.014, Prec@1 85.535
+                                                                                 best val acc till now: 78.993711
