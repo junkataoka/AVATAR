@@ -126,7 +126,7 @@ def main():
         # evaluate on the target training and test data
         if (itern == 0) or (count_itern_each_epoch == batch_number):
             prec1, c_s, c_s_2, c_t, c_t_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, \
-            target_features, target_features_2, target_targets, pseudo_labels, labels_src, labels_tar = validate_compute_cen(val_loader_target_t, val_loader_source, model, criterion, epoch, args)
+            target_features, target_features_2, target_targets, pseudo_labels, labels_src, labels_tar, path_src, path_tar = validate_compute_cen(val_loader_target_t, val_loader_source, model, criterion, epoch, args)
 
             test_acc, acc_for_each_class = validate(val_loader_target, model, criterion, epoch, args)
             test_flag = True
@@ -162,17 +162,21 @@ def main():
 
             tsne_true_label =torch.cat([source_targets, target_targets], axis=0).view(-1)
             tsne_pseudo_label =torch.cat([source_targets, pseudo_labels.max(1)[1].long()], axis=0).view(-1)
+            path_tsne = path_src + path_tar
+
 
             tsne_embed_1 = TSNE(n_components=2).fit_transform(tsne_feature.cpu().numpy())
             tsne_embed_2 = TSNE(n_components=2).fit_transform(tsne_feature_2.cpu().numpy())
 
             domain_label = [0 for i in range(source_features.shape[0])] + [1 for i in range(target_features.shape[0])]
+            print(len(tsne_true_label), len(tsne_pseudo_label), len(path_tsne), len(domain_label))
 
             tsne_df = pd.DataFrame(tsne_embed_1)
             tsne_df2 = pd.DataFrame(tsne_embed_2)
             label_df = pd.DataFrame({"True_label": tsne_true_label.cpu().numpy().tolist(),
                                      "Pseudo_label": tsne_pseudo_label.cpu().numpy().tolist(),
-                                     "Domain label": domain_label})
+                                     "Domain label": domain_label,
+                                     "Path": path_tsne})
 
             model_info = args.log.split("/")[-1]
             tsne_df.to_csv(f"tsne/{model_info}_tsne_df_epoch{epoch}.csv")

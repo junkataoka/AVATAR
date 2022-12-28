@@ -29,7 +29,8 @@ srun python main.py  \
 --domain_adv \
 --dis_src \
 --dis_tar \
---conf_pseudo_label
+--conf_pseudo_label \
+--tsne
 # --dis_feat_src \
 # --dis_feat_tar \
 # --conf_pseudo_label

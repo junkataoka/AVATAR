@@ -41,7 +41,7 @@ def opts():
     parser.add_argument('--print_freq', type=int, default=1, metavar='N', help='print frequency (default: 10)')
     parser.add_argument('--pretrained_path', type=str, default="", help='path of pretrained model')
     parser.add_argument('--tsne', action='store_true', help='whether to use tsne')
-    parser.add_argument('--warm_up', type=float, default=100, help='warmup epoch size')
+    parser.add_argument('--warmup', type=float, default=5, help='warmup epoch size')
     parser.add_argument('--ID', type=int, default=1, metavar='N', help='Training ID')
 
     args = parser.parse_args()

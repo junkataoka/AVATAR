@@ -31,16 +31,16 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     end = time.time()
     # prepare target data
     try:
-        (input_target, target_target, tar_index) = train_loader_target_batch.__next__()[1]
+        (input_target, target_target, tar_index, tar_path) = train_loader_target_batch.__next__()[1]
     except StopIteration:
         train_loader_target_batch = enumerate(train_loader_target)
-        (input_target, target_target, tar_index) = train_loader_target_batch.__next__()[1]
+        (input_target, target_target, tar_index, tar_path) = train_loader_target_batch.__next__()[1]
 
     try:
-        (input_source, target_source, index) = train_loader_source_batch.__next__()[1]
+        (input_source, target_source, index, path) = train_loader_source_batch.__next__()[1]
     except StopIteration:
         train_loader_source_batch = enumerate(train_loader_source)
-        (input_source, target_source, index) = train_loader_source_batch.__next__()[1]
+        (input_source, target_source, index, path) = train_loader_source_batch.__next__()[1]
 
     target_source = target_source.cuda()
     input_source_var = Variable(input_source)
@@ -269,7 +269,7 @@ def validate(val_loader, model, criterion, epoch, args):
     total_vector = torch.FloatTensor(args.num_classes).fill_(0)
     correct_vector = torch.FloatTensor(args.num_classes).fill_(0)
     end = time.time()
-    for i, (input, target, _) in enumerate(val_loader):
+    for i, (input, target, _, _) in enumerate(val_loader):
         target = target.cuda()
         input_var = Variable(input)
         target_var = Variable(target)
@@ -335,8 +335,10 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     c_src = torch.cuda.FloatTensor(args.num_classes, 2048).fill_(0)
     c_src_2 = torch.cuda.FloatTensor(args.num_classes, 2048//4).fill_(0)
     count_s = torch.cuda.FloatTensor(args.num_classes, 1).fill_(0)
+    path_src = []
+
     if compute_cen:
-        for i, (input, target, index) in enumerate(val_loader_source): # the iterarion in the source dataset
+        for i, (input, target, index, path) in enumerate(val_loader_source): # the iterarion in the source dataset
             input_var = Variable(input)
             target = target.cuda()
             with torch.no_grad():
@@ -352,6 +354,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
             c_src += (feature.unsqueeze(1) * target_.unsqueeze(2)).sum(0)
             c_src_2 += (feature_2.unsqueeze(1) * target_.unsqueeze(2)).sum(0)
             count_s += target_.sum(0).unsqueeze(1)
+            path_src += path
 
     target_features = torch.cuda.FloatTensor(len(val_loader_target.dataset.imgs), 2048).fill_(0)
     target_features_2 = torch.cuda.FloatTensor(len(val_loader_target.dataset.imgs), 2048//4).fill_(0)
@@ -360,12 +363,13 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     c_tar = torch.cuda.FloatTensor(args.num_classes, 2048).fill_(0)
     c_tar_2 = torch.cuda.FloatTensor(args.num_classes, 2048//4).fill_(0)
     count_t = torch.cuda.FloatTensor(args.num_classes, 1).fill_(0)
+    path_tar = []
 
     total_vector = torch.FloatTensor(args.num_classes).fill_(0)
     correct_vector = torch.FloatTensor(args.num_classes).fill_(0)
 
     end = time.time()
-    for i, (input, target, index) in enumerate(val_loader_target): # the iterarion in the target dataset
+    for i, (input, target, index, path) in enumerate(val_loader_target): # the iterarion in the target dataset
         data_time.update(time.time() - end)
         input_var = Variable(input)
         target = target.cuda()
@@ -378,6 +382,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
         target_features_2[index.cuda(), :] = feature_2.data.clone()
         target_targets[index.cuda()] = target.clone()
         pseudo_labels[index.cuda(), :] = output.data.clone()
+        path_tar += path
 
         if compute_cen: # compute target class centroids
             pred = output.data.max(1)[1]
@@ -439,7 +444,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     log.write("\n                          Avg. over all classes: %3f" % acc_for_each_class.mean())
     log.close()
 
-    return acc_for_each_class.mean(), c_src, c_src_2, c_tar, c_tar_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, target_features, target_features_2, target_targets, pseudo_labels, labels_src, target_preds
+    return acc_for_each_class.mean(), c_src, c_src_2, c_tar, c_tar_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, target_features, target_features_2, target_targets, pseudo_labels, labels_src, target_preds, path_src, path_tar
 
 def source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, cen, args):
     # compute source weights

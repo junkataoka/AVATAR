@@ -1,7 +1,13 @@
-checkpoints/*pkl
+checkpoints
 .neptune
 .ipynb_checkpoints
 data/*
 *srum.sh
 .env
 figures
+experiment
+*.log
+*.txt
+tsne
+bin
+

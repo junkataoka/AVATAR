@@ -139,7 +139,7 @@ class DatasetFolder(data.Dataset):
         elif (self.transform_gray is not None):
             return sample, sample_gray, target, index
         else:
-            return sample, target, index
+            return sample, target, index, path
 
     def __len__(self):
         return len(self.samples)
