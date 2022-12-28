@@ -1,6 +1,16 @@
 # AVATAR2022
 Code release for AdVersarial self-superVised domain Adaptation network for TArget domain (AVATAR)
 
+> **Abstract:** *We propose an unsupervised domain adaption (UDA) method to predict unlabeled data on the target domain, given labeled data from the source domain. Mainstream UDA models aim to learn domain-invariant features from the two domains or improve target discrimination based on labeled source domain data. However, such methods risk misclassifying the target domain when a discrepancy between the source and target domain is large. To tackle this problem, we propose an Adversarial self-superVised domain Adaptation network for TARget domain (AVATAR) algorithm, which outperforms state-of-the-art UDA models by reducing the domain discrepancy while enhancing the discrimination by a domain adversarial learning, deep clustering, and confidence-based pseudo-labeling strategy. Our proposed model significantly outperforms the state-of-the-art methods in two UDA benchmarks, and extensive ablation studies show the effectiveness of the proposed approach.*
+
+# Table of Contents
+  - [Requirements](#Requirements)
+  - [Dataset](#Dataset)
+  - [Training](#Training)
+  - [Performance](#Performance)
+  - [Citation](#Citation)
+
+
 # Requirements
 - Python 3.8.5
 - Pytorch 1.9.1
