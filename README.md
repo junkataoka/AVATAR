@@ -12,7 +12,7 @@ Code release for AdVersarial self-superVised domain Adaptation network for TArge
   - [Citation](#Citation)
 
 # Architecture
-![Model Architeuture](pics/AVATAR_figure_new.pdf)
+![Model Architeuture](pics/AVATAR_architecture.jpg)
 
 # Requirements
 - Python 3.8.5
