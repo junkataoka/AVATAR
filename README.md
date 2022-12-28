@@ -60,7 +60,9 @@ Office31
 Replace arguments in a_to_w_run.sh with those in your system.
 
 # Performance
+## Office 31
 ![Office 31 performance](pics/office31_avatar.jpg)
+## Office-home
 ![Office-Home performance](pics/office_home_avatar.jpg)
 
 # Citations
