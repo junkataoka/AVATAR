@@ -7,6 +7,7 @@ Code release for AdVersarial self-superVised domain Adaptation network for TArge
 
 # Dataset
 ## [Office-31](https://drive.google.com/file/d/0B4IapRTv9pJ1WGZVd1VDMmhwdlE/view)
+## [Office-home](https://drive.google.com/file/d/0B81rNlvomiwed0V1YUxQdC1uOTg/view?usp=sharing&resourcekey=0-2SNWq0CDAuWOBRRBL7ZZsw)
 The structure of the dataset should be like
 ```
 Office31
@@ -61,9 +62,9 @@ Replace arguments in a_to_w_run.sh with those in your system.
 
 # Performance
 ## Office 31
-![Office 31 performance](pics/office31_avatar.jpg)
+![Office-31 performance](pics/office31_avatar.jpg)
 ## Office-home
-![Office-Home performance](pics/office_home_avatar.jpg)
+![Office-home performance](pics/office_home_avatar.jpg)
 
 # Citations
 ```
