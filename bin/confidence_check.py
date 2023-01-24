@@ -15,22 +15,153 @@ mpl.rcParams['ytick.labelsize'] = label_size
 tasks = ["amazon2dslr", "amazon2webcam", "webcam2amazon", "dslr2amazon", "webcam2dslr", "dslr2webcam"]
 labels = [r"A$\rightarrow$D", r"A$\rightarrow$W", r"W$\rightarrow$A", r"D$\rightarrow$A", r"W$\rightarrow$D", r"D$\rightarrow$W"]
 
-fig, ax1 = plt.subplots(figsize=(6, 4))
+home_dir = "/data/home/jkataok1/AVATAR2022"
+
+df = pd.DataFrame()
 
 for idx, task in enumerate(tasks):
-   path = f"~/AVATAR/checkpoints/office31_adapt_{task}_bs32_resnet50_lr0.001_domain-adv_dis-src_dis-tar_conf-pseudo-labelID1"
-   acc_csv = pd.read_csv(os.path.join(path, "acc.csv"))
 
-   acc = acc_csv.groupby("epoch")["test_acc"].max().values
-   ax1.plot(acc, "-", label=f"{labels[idx]}")
+   path_id1 = f"checkpoints/office31_adapt_{task}_bs32_resnet50_lr0.001_domain-adv_dis-src_dis-tar_conf-pseudo-labelID1"
+   path_id2 = f"checkpoints/office31_adapt_{task}_bs32_resnet50_lr0.001_domain-adv_dis-src_dis-tar_conf-pseudo-labelID2"
+   path_id3 = f"checkpoints/office31_adapt_{task}_bs32_resnet50_lr0.001_domain-adv_dis-src_dis-tar_conf-pseudo-labelID3"
 
-ax1.set_xlabel("Epoch", fontsize=16)
-ax1.set_ylabel("Accuracy", fontsize=16)
-ax1.yaxis.set_ticks(np.arange(50, 105, 5))
+   acc_id1 = pd.read_csv(os.path.join(home_dir, path_id1, "acc.csv"))
+   acc_id1 = acc_id1.groupby("epoch")["test_acc"].mean()
 
-ax1.legend(loc=4)
-plt.savefig(f"~/figures/accuracy.png", bbox_inches="tight", dpi=300)
+   acc_id2 = pd.read_csv(os.path.join(home_dir, path_id2, "acc.csv"))
+   acc_id2 = acc_id2.groupby("epoch")["test_acc"].mean()
 
+   acc_id3 = pd.read_csv(os.path.join(home_dir, path_id3, "acc.csv"))
+   acc_id3 = acc_id3.groupby("epoch")["test_acc"].mean()
+
+   acc_df = pd.concat([acc_id1, acc_id2, acc_id3], axis=0)
+   acc_df = acc_df.reset_index()
+   acc_df.columns = ["epoch", task]
+   df = pd.concat([df, acc_df[task]], axis=1)
+
+   # ax1.plot(acc, "-", label=f"{labels[idx]}")
+#%%
+acc_gathered_df = pd.concat([acc_df["epoch"], df], axis=1)
+acc_gathered_df
+sns.set_style("darkgrid")
+#%%
+# fig, ax = plt.subplots(figsize=(16, 8), nrows=1, ncols=3)
+sns.lineplot(data=acc_gathered_df, x="epoch", y="amazon2webcam", label=r"A$\rightarrow$W")
+sns.lineplot(data=acc_gathered_df, x="epoch", y="dslr2webcam", label=r"D$\rightarrow$W")
+plt.legend(fontsize=label_size, loc=4)
+plt.ylabel('average accuracy', fontsize=label_size)
+plt.xlabel('epochs', fontsize=label_size)
+plt.savefig(os.path.join(home_dir, "figures", "acc_1.png"), bbox_inches="tight", dpi=300)
+#%%
+sns.lineplot(data=acc_gathered_df, x="epoch", y="webcam2dslr", label=r"W$\rightarrow$D")
+sns.lineplot(data=acc_gathered_df, x="epoch", y="amazon2dslr", label=r"A$\rightarrow$D")
+plt.legend(fontsize=label_size, loc=4)
+plt.ylabel('average accuracy', fontsize=label_size)
+plt.xlabel('epochs', fontsize=label_size)
+plt.savefig(os.path.join(home_dir, "figures", "acc_2.png"), bbox_inches="tight", dpi=300)
+#%%
+sns.lineplot(data=acc_gathered_df, x="epoch", y="dslr2amazon", label=r"D$\rightarrow$A")
+sns.lineplot(data=acc_gathered_df, x="epoch", y="webcam2amazon", label=r"W$\rightarrow$A")
+plt.legend(fontsize=label_size, loc=4)
+plt.ylabel('average accuracy', fontsize=label_size)
+plt.xlabel('epochs', fontsize=label_size)
+plt.savefig(os.path.join(home_dir, "figures", "acc_3.png"), bbox_inches="tight", dpi=300)
+
+#%%
+fig, axs = plt.subplots(ncols=3, nrows=1, figsize=(18,4))
+sns.lineplot(data=acc_gathered_df, x="epoch", y="amazon2webcam", label=r"A$\rightarrow$W", ax=axs[0])
+sns.lineplot(data=acc_gathered_df, x="epoch", y="dslr2webcam", label=r"D$\rightarrow$W", ax=axs[0])
+axs[0].set_yticks(np.arange(0, 120, 20))
+axs[0].set_ylabel('average accuracy', fontsize=label_size)
+axs[0].set_xlabel('epochs', fontsize=label_size)
+axs[0].legend(fontsize=label_size, loc=4)
+
+sns.lineplot(data=acc_gathered_df, x="epoch", y="webcam2dslr", label=r"W$\rightarrow$D", ax=axs[1])
+sns.lineplot(data=acc_gathered_df, x="epoch", y="amazon2dslr", label=r"A$\rightarrow$D", ax=axs[1])
+axs[1].set_yticks(np.arange(0, 120, 20))
+axs[1].set_ylabel('average accuracy', fontsize=label_size)
+axs[1].set_xlabel('epochs', fontsize=label_size)
+axs[1].legend(fontsize=label_size, loc=4)
+
+sns.lineplot(data=acc_gathered_df, x="epoch", y="dslr2amazon", label=r"D$\rightarrow$A", ax=axs[2])
+sns.lineplot(data=acc_gathered_df, x="epoch", y="webcam2amazon", label=r"W$\rightarrow$A", ax=axs[2])
+axs[2].set_yticks(np.arange(0, 120, 20))
+axs[2].set_ylabel('average accuracy', fontsize=label_size)
+axs[2].set_xlabel('epochs', fontsize=label_size)
+axs[2].legend(fontsize=label_size, loc=4)
+plt.savefig(os.path.join(home_dir, "figures", "acc_4.png"), bbox_inches="tight", dpi=300)
+
+#%%
+df = pd.DataFrame()
+for idx, task in enumerate(tasks):
+
+   path_id1 = f"checkpoints/office31_adapt_{task}_bs32_resnet50_lr0.001_domain-adv_dis-src_dis-tar_conf-pseudo-labelID1"
+   path_id2 = f"checkpoints/office31_adapt_{task}_bs32_resnet50_lr0.001_domain-adv_dis-src_dis-tar_conf-pseudo-labelID2"
+   path_id3 = f"checkpoints/office31_adapt_{task}_bs32_resnet50_lr0.001_domain-adv_dis-src_dis-tar_conf-pseudo-labelID3"
+
+   th_id1 = pd.read_csv(os.path.join(home_dir, path_id1, "df_th.csv"))
+   th_id1 = th_id1.mean(axis=1)
+
+   th_id2 = pd.read_csv(os.path.join(home_dir, path_id2, "df_th.csv"))
+   th_id2 = th_id2.mean(axis=1)
+
+   th_id3 = pd.read_csv(os.path.join(home_dir, path_id3, "df_th.csv"))
+   th_id3 = th_id3.mean(axis=1)
+
+   th_df = pd.concat([th_id1, th_id2, th_id3], axis=0)
+   th_df = th_df.reset_index()
+   th_df.columns = ["epoch", task]
+   df = pd.concat([df, th_df[task]], axis=1)
+
+#%%
+th_gathered_df = pd.concat([th_df["epoch"], df], axis=1)
+sns.set_style("darkgrid")
+#%%
+# fig, ax = plt.subplots(figsize=(16, 8), nrows=1, ncols=3)
+sns.lineplot(data=th_gathered_df, x="epoch", y="amazon2webcam", label=r"A$\rightarrow$W")
+sns.lineplot(data=th_gathered_df, x="epoch", y="dslr2webcam", label=r"D$\rightarrow$W")
+plt.legend(fontsize=12, loc=4)
+plt.ylabel('average threshold value', fontsize=12)
+plt.xlabel('epochs', fontsize=12)
+plt.savefig(os.path.join(home_dir, "figures", "th_1.png"), bbox_inches="tight", dpi=300)
+#%%
+sns.lineplot(data=th_gathered_df, x="epoch", y="webcam2dslr", label=r"W$\rightarrow$D")
+sns.lineplot(data=th_gathered_df, x="epoch", y="amazon2dslr", label=r"A$\rightarrow$D")
+plt.legend(fontsize=12, loc=4)
+plt.ylabel('average thrshold value', fontsize=12)
+plt.xlabel('epochs', fontsize=12)
+plt.savefig(os.path.join(home_dir, "figures", "th_2.png"), bbox_inches="tight", dpi=300)
+#%%
+sns.lineplot(data=th_gathered_df, x="epoch", y="dslr2amazon", label=r"D$\rightarrow$A")
+sns.lineplot(data=th_gathered_df, x="epoch", y="webcam2amazon", label=r"W$\rightarrow$A")
+plt.legend(fontsize=12, loc=4)
+plt.ylabel('average accuracy', fontsize=12)
+plt.xlabel('epochs', fontsize=12)
+plt.savefig(os.path.join(home_dir, "figures", "th_3.png"), bbox_inches="tight", dpi=300)
+
+#%%
+fig, axs = plt.subplots(ncols=3, nrows=1, figsize=(18,4))
+sns.lineplot(data=th_gathered_df, x="epoch", y="amazon2webcam", label=r"A$\rightarrow$W", ax=axs[0])
+sns.lineplot(data=th_gathered_df, x="epoch", y="dslr2webcam", label=r"D$\rightarrow$W", ax=axs[0])
+axs[0].set_yticks(np.arange(0.6, 1.1, 0.1))
+axs[0].set_ylabel('average threshold value', fontsize=label_size)
+axs[0].set_xlabel('epochs', fontsize=label_size)
+axs[0].legend(fontsize=label_size, loc=4)
+
+sns.lineplot(data=th_gathered_df, x="epoch", y="webcam2dslr", label=r"W$\rightarrow$D", ax=axs[1])
+sns.lineplot(data=th_gathered_df, x="epoch", y="amazon2dslr", label=r"A$\rightarrow$D", ax=axs[1])
+axs[1].set_yticks(np.arange(0.6, 1.1, 0.1))
+axs[1].set_ylabel('average threshold value', fontsize=label_size)
+axs[1].set_xlabel('epochs', fontsize=label_size)
+axs[1].legend(fontsize=label_size, loc=4)
+
+sns.lineplot(data=th_gathered_df, x="epoch", y="dslr2amazon", label=r"D$\rightarrow$A", ax=axs[2])
+sns.lineplot(data=th_gathered_df, x="epoch", y="webcam2amazon", label=r"W$\rightarrow$A", ax=axs[2])
+axs[2].set_yticks(np.arange(0.6, 1.1, 0.1))
+axs[2].set_ylabel('average threshold value', fontsize=label_size)
+axs[2].set_xlabel('epochs', fontsize=label_size)
+axs[2].legend(fontsize=label_size, loc=4)
+plt.savefig(os.path.join(home_dir, "figures", "th_4.png"), bbox_inches="tight", dpi=300)
 #%%
 
 fig, ax1 = plt.subplots(figsize=(6, 4))

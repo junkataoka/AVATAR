@@ -12,24 +12,47 @@
 module load cuda11.1/toolkit/11.1.1
 
 srun python main.py  \
---data_path_source /data/home/jkataok1/AVATAR2022/data/datasets/office_home/  \
+--data_path_source /data/home/jkataok1/AVATAR2022/data/datasets/office_home_sub1/  \
 --src art  \
---data_path_target /data/home/jkataok1/AVATAR2022/data/datasets/office_home/ \
+--data_path_target /data/home/jkataok1/AVATAR2022/data/datasets/office_home_sub1/ \
 --tar clipart \
---data_path_target_t /data/home/jkataok1/AVATAR2022/data/datasets/office_home/ \
+--data_path_target_t /data/home/jkataok1/AVATAR2022/data/datasets/office_home_sub1/ \
 --tar_t clipart \
 --workers 1 \
---pretrained_path /data/home/jkataok1/AVATAR2022/checkpoints/Art_to_Clipart_resnet50.pkl \
+--pretrained_path /data/home/jkataok1/AVATAR2022/checkpoints/art_to_clipart_resnet50_office_home_sub1.pkl \
 --batch_size 32 \
 --pretrained \
 --epochs 200 \
 --cluster_iter 100 \
 --lr 0.001 \
---num_classes 65 \
+--num_classes 10 \
 --domain_adv \
 --dis_src \
 --dis_tar \
---conf_pseudo_label
+--conf_pseudo_label \
+--log ./checkpoints/office_home_sub1
+
+# srun python main.py  \
+# --data_path_source /data/home/jkataok1/AVATAR2022/data/datasets/office_home_sub2/  \
+# --src art  \
+# --data_path_target /data/home/jkataok1/AVATAR2022/data/datasets/office_home_sub2/ \
+# --tar clipart \
+# --data_path_target_t /data/home/jkataok1/AVATAR2022/data/datasets/office_home_sub2/ \
+# --tar_t clipart \
+# --workers 1 \
+# --pretrained_path /data/home/jkataok1/AVATAR2022/checkpoints/art_to_clipart_resnet50_office_home_sub2.pkl \
+# --batch_size 32 \
+# --pretrained \
+# --epochs 200 \
+# --cluster_iter 100 \
+# --lr 0.001 \
+# --num_classes 10 \
+# --domain_adv \
+# --dis_src \
+# --dis_tar \
+# --conf_pseudo_label \
+# --log ./checkpoints/office_home_sub2
+
 # --dis_feat_src \
 # --dis_feat_tar \
 # --conf_pseudo_label

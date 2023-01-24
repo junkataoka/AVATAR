@@ -1,7 +1,7 @@
 import argparse
 
 def opts():
-    parser = argparse.ArgumentParser(description='SRDC', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(description='AVATAR', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     #model
     # datasets
     parser.add_argument('--data_path_source', type=str, default='./data/datasets/Office31/', help='root of source training set')

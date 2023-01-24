@@ -12,14 +12,14 @@
 module load cuda11.1/toolkit/11.1.1
 
 srun python main.py  \
---data_path_source /data/home/jkataok1/AVATAR2022/data/datasets/office_home/  \
+--data_path_source /data/home/jkataok1/AVATAR2022/data/datasets/office_home_sub1/  \
 --src art  \
---data_path_target /data/home/jkataok1/AVATAR2022/data/datasets/office_home/ \
+--data_path_target /data/home/jkataok1/AVATAR2022/data/datasets/office_home_sub1/ \
 --tar product \
---data_path_target_t /data/home/jkataok1/AVATAR2022/data/datasets/office_home/ \
+--data_path_target_t /data/home/jkataok1/AVATAR2022/data/datasets/office_home_sub1/ \
 --tar_t product \
 --workers 1 \
---pretrained_path /data/home/jkataok1/AVATAR2022/checkpoints/Art_to_Product_resnet50.pkl \
+--pretrained_path /data/home/jkataok1/AVATAR2022/checkpoints/art_to_product_resnet50_office_home_sub1.pkl \
 --batch_size 32 \
 --pretrained \
 --epochs 200 \
@@ -29,7 +29,9 @@ srun python main.py  \
 --domain_adv \
 --dis_src \
 --dis_tar \
---conf_pseudo_label
+--conf_pseudo_label \
+--log ./checkpoints/office_home
+
 # --dis_feat_src \
 # --dis_feat_tar \
 # --conf_pseudo_label
