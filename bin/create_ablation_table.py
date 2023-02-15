@@ -48,7 +48,6 @@ for i in range(len(domain_combinations)):
 #out.to_csv("office_home_ablation.csv")
 
 out["Avg"] = out.mean(axis=1)
-out
 #%%
 out[["art2clipart", "art2product", "art2realworld", "clipart2art", "clipart2product", "clipart2realworld", "product2art",
      "product2clipart", "product2realworld", "realworld2art", "realworld2clipart", "realworld2product", "Avg"]]

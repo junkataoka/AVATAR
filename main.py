@@ -94,6 +94,8 @@ def main():
     # make log directory
     if not os.path.isdir(args.log):
         os.makedirs(args.log)
+    if not os.path.isdir(os.path.join(args.log, "tsne")):
+        os.makedirs(os.path.join(args.log, "tsne"))
     log = open(os.path.join(args.log, 'log.txt'), 'a')
     state = {k: v for k, v in args._get_kwargs()}
     log.write(json.dumps(state) + '\n')
@@ -169,7 +171,6 @@ def main():
             tsne_embed_2 = TSNE(n_components=2).fit_transform(tsne_feature_2.cpu().numpy())
 
             domain_label = [0 for i in range(source_features.shape[0])] + [1 for i in range(target_features.shape[0])]
-            print(len(tsne_true_label), len(tsne_pseudo_label), len(path_tsne), len(domain_label))
 
             tsne_df = pd.DataFrame(tsne_embed_1)
             tsne_df2 = pd.DataFrame(tsne_embed_2)
@@ -178,10 +179,9 @@ def main():
                                      "Domain label": domain_label,
                                      "Path": path_tsne})
 
-            model_info = args.log.split("/")[-1]
-            tsne_df.to_csv(f"tsne/{model_info}_tsne_df_epoch{epoch}.csv")
-            tsne_df2.to_csv(f"tsne/{model_info}_tsne_df2_epoch{epoch}.csv")
-            label_df.to_csv(f"tsne/{model_info}_label_df_epoch{epoch}.csv")
+            tsne_df.to_csv(f"{args.log}/tsne/tsne1_epoch{epoch}.csv")
+            tsne_df2.to_csv(f"{args.log}/tsne/tsne2_epoch{epoch}.csv")
+            label_df.to_csv(f"{args.log}/tsne/label_epoch{epoch}.csv")
 
 
             # Create threthold

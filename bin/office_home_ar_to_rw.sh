@@ -9,17 +9,15 @@
 #SBATCH --mem=20GB
 #SBATCH --gres=gpu:1
 
-module load cuda11.1/toolkit/11.1.1
-
-srun python main.py  \
---data_path_source /data/home/jkataok1/AVATAR2022/data/datasets/office_home/  \
+python main.py  \
+--data_path_source /data/home/jkataok1/AVATAR2022/data/datasets/office_home_sub3/  \
 --src art  \
---data_path_target /data/home/jkataok1/AVATAR2022/data/datasets/office_home/ \
+--data_path_target /data/home/jkataok1/AVATAR2022/data/datasets/office_home_sub3/ \
 --tar realworld \
---data_path_target_t /data/home/jkataok1/AVATAR2022/data/datasets/office_home/ \
+--data_path_target_t /data/home/jkataok1/AVATAR2022/data/datasets/office_home_sub3/ \
 --tar_t realworld \
 --workers 1 \
---pretrained_path /data/home/jkataok1/AVATAR2022/checkpoints/Art_to_RealWorld_resnet50.pkl \
+--pretrained_path /data/home/jkataok1/AVATAR2022/checkpoints/office_home_sub3.pkl \
 --batch_size 32 \
 --pretrained \
 --epochs 200 \
@@ -29,7 +27,8 @@ srun python main.py  \
 --domain_adv \
 --dis_src \
 --dis_tar \
---conf_pseudo_label
+--conf_pseudo_label \ 
+--log ./checkpoints/office_home_sub3
 # --dis_feat_src \
 # --dis_feat_tar \
 # --conf_pseudo_label

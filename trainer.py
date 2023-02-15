@@ -160,7 +160,6 @@ def CondDiscriminatorLoss(epoch, output, index, cs, src=True, dis_cls=True):
     prob_p = F.softmax(output, dim=1)
 
     prob_p_dis = prob_p[:, -1].unsqueeze(1)
-    prob_p_class = prob_p[:, :-1] / (1-prob_p_dis)
 
     weights = cs[index]
 
@@ -198,6 +197,7 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, p_label_src, p
     else:
         prob_p_class = prob_p
 
+    prob_p_class = torch.clip(prob_p_class, min=1e-6, max=1.0)
 
     prob_q2 = prob_p_class / prob_p_class.sum(0, keepdim=True).pow(0.5)
     prob_q2 /= prob_q2.sum(1, keepdim=True)
@@ -206,8 +206,6 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, p_label_src, p
     tar_weights = tar_cs[index.cuda()]
     pos_mask = torch.where(tar_weights >= th[target], 1, 0)
 
-    class_weight = torch.exp(p_label_src) / torch.exp(p_label_tar)
-
     if epoch < 1:
         pos_loss = 0
         neg_loss = 0
@@ -215,19 +213,18 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, p_label_src, p
     elif args.conf_pseudo_label:
 
         if epoch <= args.warmup:
-            class_weight.fill_(1)
             tar_weights.fill_(1)
 
         elif len(torch.unique(pos_mask)) == 2:
-            pos_loss = - (tar_weights[pos_mask==1] * (class_weight * prob_q[pos_mask==1] * prob_p_class[pos_mask==1].log()).sum(1)).mean()
-            neg_loss = - ((1-tar_weights[pos_mask==0]) * (class_weight * prob_q[pos_mask==0] * (1-prob_p_class[pos_mask==0]).log()).sum(1)).mean()
+            pos_loss = - (tar_weights[pos_mask==1] * (prob_q[pos_mask==1] * prob_p_class[pos_mask==1].log()).sum(1)).mean()
+            neg_loss = - ((1-tar_weights[pos_mask==0]) * (prob_q[pos_mask==0] * (1-prob_p_class[pos_mask==0]).log()).sum(1)).mean()
 
         else:
-            pos_loss = - (tar_weights[pos_mask==1] * (class_weight * prob_q[pos_mask==1] * prob_p_class[pos_mask==1].log()).sum(1)).mean()
+            pos_loss = - (tar_weights[pos_mask==1] * (prob_q[pos_mask==1] * prob_p_class[pos_mask==1].log()).sum(1)).mean()
             neg_loss = 0
 
     else:
-        pos_loss = - (tar_weights * (class_weight * prob_q * prob_p_class.log()).sum(1)).mean()
+        pos_loss = - (tar_weights * ( prob_q * prob_p_class.log()).sum(1)).mean()
         neg_loss = 0
 
     return pos_loss + neg_loss
@@ -242,17 +239,14 @@ def SrcClassifyLoss(args, epoch, output, target, index, src_cs, p_label_src, p_l
         prob_p_class = prob_p_class / (1-prob_p_dis)
     else:
         prob_p_class = prob_p
-
+    prob_p_class = torch.clip(prob_p_class, min=1e-6, max=1.0)
     prob_q = Variable(torch.cuda.FloatTensor(prob_p_class.size()).fill_(0))
     prob_q.scatter_(1, target.unsqueeze(1), torch.ones(prob_p_class.size(0), 1).cuda())
 
     src_weights = src_cs[index].cuda()
-    class_weight = torch.exp(p_label_tar) / torch.exp(p_label_src)
 
-    if epoch < 1:
-        class_weight.fill_(1)
 
-    pos_loss = - (src_weights * (class_weight * prob_q * prob_p_class.log()).sum(1)).mean()
+    pos_loss = - (src_weights * (prob_q * prob_p_class.log()).sum(1)).mean()
 
     return pos_loss
 
@@ -269,7 +263,7 @@ def validate(val_loader, model, criterion, epoch, args):
     total_vector = torch.FloatTensor(args.num_classes).fill_(0)
     correct_vector = torch.FloatTensor(args.num_classes).fill_(0)
     end = time.time()
-    for i, (input, target, _, _) in enumerate(val_loader):
+    for i, (input, target, _, temp) in enumerate(val_loader):
         target = target.cuda()
         input_var = Variable(input)
         target_var = Variable(target)

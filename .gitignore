@@ -3,7 +3,7 @@ checkpoints
 .ipynb_checkpoints
 data/*
 *srum.sh
-.env
+env
 figures
 experiment
 *.log
