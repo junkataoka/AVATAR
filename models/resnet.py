@@ -5,6 +5,7 @@ import torch
 import torchvision
 import torchvision.models as models
 from torchvision.models.resnet import ResNet, BasicBlock, Bottleneck
+from torchvision.models.vision_transformer import VisionTransformer
 
 
 class MyResNet50(ResNet):
@@ -61,6 +62,7 @@ class MyResNet101(ResNet):
         ca = self.fc2(x2)
         return x, x2, ca
 
+
 def resnet50(args, **kwargs):
     """Constructs a ResNet-50 model.
     Args:
@@ -103,10 +105,14 @@ def resnet101(args, **kwargs):
 
     return model
 
-def resnet(args, **kwargs):
+
+def construct(args, **kwargs):
+
     if args.arch == 'resnet50':
         return resnet50(args)
     elif args.arch == 'resnet101':
         return resnet101(args)
+    elif args.arch == 'dino':
+        return dino(args)
     else:
         raise ValueError('Unrecognized model architecture: ', args.arch)

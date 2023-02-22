@@ -9,7 +9,11 @@ from utils.kernel_kmeans import KernelKMeans
 import gc
 import pandas as pd
 
-def train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, optimizer, optimizer_cls, itern, epoch, src_cs, tar_cs, args, p_label_src, p_label_tar, th):
+def train(
+    train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model,
+    learn_cen, optimizer, optimizer_cls, itern, epoch, src_cs, tar_cs, args, p_label_src, p_label_tar, th
+    ):
+
     batch_time = AverageMeter()
     data_time = AverageMeter()
     top1_source = AverageMeter()
@@ -48,7 +52,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     input_target_var = Variable(input_target)
 
     loss = 0
-    f_t, f_t_2, ca_t = model(input_target_var)
+    f_t, ca_t = model(input_target_var)
 
     if args.domain_adv:
         d_t_loss = CondDiscriminatorLoss(epoch, ca_t, tar_index, tar_cs, src=False, dis_cls=False)
@@ -61,17 +65,17 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     if args.dis_feat_tar:
     # Update target domain
         prob_pred = (1 + (f_t.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
-        prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
+        # prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
 
         tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs, p_label_src, p_label_tar, th, emb=True)
         loss += weight_tar_cluster * tar_cluster_loss1
 
-        tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs, p_label_src, p_label_tar, th, emb=True)
-        loss += weight_tar_cluster * tar_cluster_loss2
+        # tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs, p_label_src, p_label_tar, th, emb=True)
+        # loss += weight_tar_cluster * tar_cluster_loss2
 
 
     # model forward on source
-    f_s, f_s_2, ca_s = model(input_source_var)
+    f_s, ca_s = model(input_source_var)
     if args.domain_adv:
         d_s_loss = CondDiscriminatorLoss(epoch, ca_s, index, src_cs, src=True, dis_cls=False)
         loss += weight_dis * d_s_loss
@@ -84,8 +88,8 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
         prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
         loss += weight_src_cluster * SrcClassifyLoss(args, epoch, prob_pred, target_source, index, src_cs, p_label_src, p_label_tar, emb=True)
 
-        prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
-        loss += weight_src_cluster * SrcClassifyLoss(args, epoch, prob_pred_2, target_source, index, src_cs, p_label_src, p_label_tar, emb=True)
+        # prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
+        # loss += weight_src_cluster * SrcClassifyLoss(args, epoch, prob_pred_2, target_source, index, src_cs, p_label_src, p_label_tar, emb=True)
 
     losses.update(loss.data.item(), input_target.size(0))
     # loss backward and network update
@@ -96,7 +100,7 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
     # Update join classifier & discriminator
     loss = 0
 
-    f_t, f_t_2, ca_t = model(input_target_var)
+    f_t, ca_t = model(input_target_var)
     if args.domain_adv:
         d_t_loss = CondDiscriminatorLoss(epoch, ca_t, tar_index, tar_cs, src=False, dis_cls=True)
         loss += weight_dis * d_t_loss
@@ -108,15 +112,15 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
 
     if args.dis_feat_tar:
         prob_pred = (1 + (f_t.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
-        prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
+        # prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
 
         tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs, p_label_src, p_label_tar, th, emb=True)
         loss += weight_tar_cluster * tar_cluster_loss1
 
-        tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs, p_label_src, p_label_tar, th, emb=True)
-        loss += weight_tar_cluster * tar_cluster_loss2
+        # tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs, p_label_src, p_label_tar, th, emb=True)
+        # loss += weight_tar_cluster * tar_cluster_loss2
 
-    f_s, f_s_2, ca_s = model(input_source_var)
+    f_s, ca_s = model(input_source_var)
     # model forward on source
     if args.domain_adv:
         d_s_loss = CondDiscriminatorLoss(epoch, ca_s, index, src_cs, src=True, dis_cls=True)
@@ -130,8 +134,8 @@ def train(train_loader_source, train_loader_source_batch, train_loader_target, t
         prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
         loss += weight_src_cluster * SrcClassifyLoss(args, epoch, prob_pred, target_source, index, src_cs, p_label_src, p_label_tar, emb=True)
 
-        prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
-        loss += weight_src_cluster * SrcClassifyLoss(args, epoch, prob_pred_2, target_source, index, src_cs, p_label_src, p_label_tar, emb=True)
+        # prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
+        # loss += weight_src_cluster * SrcClassifyLoss(args, epoch, prob_pred_2, target_source, index, src_cs, p_label_src, p_label_tar, emb=True)
 
     prec1_s = accuracy(ca_s.data, target_source, topk=(1,))[0]
     top1_source.update(prec1_s.item(), input_source.size(0))
@@ -270,7 +274,7 @@ def validate(val_loader, model, criterion, epoch, args):
 
         # forward
         with torch.no_grad():
-            _, _, output = model(input_var)
+            _, output = model(input_var)
             output = output[:, :-1]
             loss = criterion(output, target_var)
 
@@ -322,13 +326,6 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     model.eval()
 
     # compute source class centroids
-    source_features = torch.cuda.FloatTensor(len(val_loader_source.dataset.imgs), 2048).fill_(0)
-    source_features_2 = torch.cuda.FloatTensor(len(val_loader_source.dataset.imgs), 2048//4).fill_(0)
-    source_targets = torch.cuda.LongTensor(len(val_loader_source.dataset.imgs)).fill_(0)
-    labels_src = torch.cuda.FloatTensor(len(val_loader_source.dataset.imgs), args.num_classes).fill_(0)
-    c_src = torch.cuda.FloatTensor(args.num_classes, 2048).fill_(0)
-    c_src_2 = torch.cuda.FloatTensor(args.num_classes, 2048//4).fill_(0)
-    count_s = torch.cuda.FloatTensor(args.num_classes, 1).fill_(0)
     path_src = []
 
     if compute_cen:
@@ -336,29 +333,27 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
             input_var = Variable(input)
             target = target.cuda()
             with torch.no_grad():
-                feature, feature_2, output = model(input_var)
+                feature, output = model(input_var)
                 output = output[:, :-1]
+
+            if i == 0:
+                source_features = torch.cuda.FloatTensor(len(val_loader_source.dataset.imgs), feature.shape[-1]).fill_(0)
+                source_targets = torch.cuda.LongTensor(len(val_loader_source.dataset.imgs)).fill_(0)
+                labels_src = torch.cuda.FloatTensor(len(val_loader_source.dataset.imgs), args.num_classes).fill_(0)
+                c_src = torch.cuda.FloatTensor(args.num_classes, feature.shape[-1]).fill_(0)
+                count_s = torch.cuda.FloatTensor(args.num_classes, 1).fill_(0)
+
             source_features[index.cuda(), :] = feature.data.clone()
-            source_features_2[index.cuda(), :] = feature_2.data.clone()
             source_targets[index.cuda()] = target.clone()
             target_ = torch.cuda.FloatTensor(output.size()).fill_(0)
             target_.scatter_(1, target.unsqueeze(1), torch.ones(output.size(0), 1).cuda())
             labels_src[index.cuda(), :] = target_.clone()
 
             c_src += (feature.unsqueeze(1) * target_.unsqueeze(2)).sum(0)
-            c_src_2 += (feature_2.unsqueeze(1) * target_.unsqueeze(2)).sum(0)
             count_s += target_.sum(0).unsqueeze(1)
             path_src += path
 
-    target_features = torch.cuda.FloatTensor(len(val_loader_target.dataset.imgs), 2048).fill_(0)
-    target_features_2 = torch.cuda.FloatTensor(len(val_loader_target.dataset.imgs), 2048//4).fill_(0)
-    target_targets = torch.cuda.LongTensor(len(val_loader_target.dataset.imgs)).fill_(0)
-    pseudo_labels = torch.cuda.FloatTensor(len(val_loader_target.dataset.imgs), args.num_classes).fill_(0)
-    c_tar = torch.cuda.FloatTensor(args.num_classes, 2048).fill_(0)
-    c_tar_2 = torch.cuda.FloatTensor(args.num_classes, 2048//4).fill_(0)
-    count_t = torch.cuda.FloatTensor(args.num_classes, 1).fill_(0)
     path_tar = []
-
     total_vector = torch.FloatTensor(args.num_classes).fill_(0)
     correct_vector = torch.FloatTensor(args.num_classes).fill_(0)
 
@@ -370,10 +365,16 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
         target_var = Variable(target)
 
         with torch.no_grad():
-            feature, feature_2, output = model(input_var)
+            feature, output = model(input_var)
             output = output[:, :-1]
+        if i == 0:
+            target_features = torch.cuda.FloatTensor(len(val_loader_target.dataset.imgs), feature.shape[-1]).fill_(0)
+            target_targets = torch.cuda.LongTensor(len(val_loader_target.dataset.imgs)).fill_(0)
+            pseudo_labels = torch.cuda.FloatTensor(len(val_loader_target.dataset.imgs), args.num_classes).fill_(0)
+            c_tar = torch.cuda.FloatTensor(args.num_classes, feature.shape[-1]).fill_(0)
+            count_t = torch.cuda.FloatTensor(args.num_classes, 1).fill_(0)
+
         target_features[index.cuda(), :] = feature.data.clone() # index:a tensor
-        target_features_2[index.cuda(), :] = feature_2.data.clone()
         target_targets[index.cuda()] = target.clone()
         pseudo_labels[index.cuda(), :] = output.data.clone()
         path_tar += path
@@ -383,7 +384,6 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
             pred_ = torch.cuda.FloatTensor(output.size()).fill_(0)
             pred_.scatter_(1, pred.unsqueeze(1), torch.ones(output.size(0), 1).cuda())
             c_tar += (feature.unsqueeze(1) * pred_.unsqueeze(2)).sum(0)
-            c_tar_2 += (feature_2.unsqueeze(1) * pred_.unsqueeze(2)).sum(0)
             count_t += pred_.sum(0).unsqueeze(1)
 
         # compute and record loss and accuracy
@@ -408,13 +408,9 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
 
     # compute global class centroids
     c_srctar = torch.cuda.FloatTensor(args.num_classes, 2048).fill_(0)
-    c_srctar_2 = torch.cuda.FloatTensor(args.num_classes, 2048//4).fill_(0)
     c_srctar = (c_src + c_tar) / (count_s + count_t)
-    c_srctar_2 = (c_src_2 + c_tar_2) / (count_s + count_t)
     c_src /= count_s
-    c_src_2 /= count_s
     c_tar /= (count_t + 1e-6)
-    c_tar_2 /= (count_t + 1e-6)
 
     acc_for_each_class = 100.0 * correct_vector / total_vector
 
@@ -438,7 +434,8 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     log.write("\n                          Avg. over all classes: %3f" % acc_for_each_class.mean())
     log.close()
 
-    return acc_for_each_class.mean(), c_src, c_src_2, c_tar, c_tar_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, target_features, target_features_2, target_targets, pseudo_labels, labels_src, target_preds, path_src, path_tar
+    return acc_for_each_class.mean(), c_src, c_tar, c_srctar, source_features, source_targets, target_features, \
+        target_targets, pseudo_labels, labels_src, target_preds, path_src, path_tar
 
 def source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, cen, args):
     # compute source weights

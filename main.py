@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 import torch.nn.functional as F
 from torch.autograd import Variable
-from models.model_construct import Model_Construct # for the model construction
+from models.model_construct import construct # for the model construction
 from trainer import train # for the training process
 from trainer import validate, validate_compute_cen # for the validation/test process
 from trainer import kernel_k_means # for K-means clustering and its variants
@@ -36,19 +36,16 @@ cond_best_test_prec1 = 0
 best_cluster_acc = 0
 best_cluster_acc_2 = 0
 counter = 0
+    
 
 def main():
     global args, best_prec1, best_test_prec1, cond_best_test_prec1, best_cluster_acc, best_cluster_acc_2, counter
 
     # define model
-    model = Model_Construct(args)
+    model = construct(args)
     model = torch.nn.DataParallel(model).cuda() # define multiple GPUs
 
     # define learnable cluster centers
-    learn_cen = Variable(torch.cuda.FloatTensor(args.num_classes, 2048).fill_(0))
-    learn_cen.requires_grad_(True)
-    learn_cen_2 = Variable(torch.cuda.FloatTensor(args.num_classes, 2048 // 4).fill_(0))
-    learn_cen_2.requires_grad_(True)
     p_label_tar = Variable(torch.cuda.FloatTensor(args.num_classes).fill_(0))
     p_label_src = Variable(torch.cuda.FloatTensor(args.num_classes).fill_(0))
     # Define loss function/criterion and optimizer
@@ -58,15 +55,15 @@ def main():
     torch.manual_seed(12)
 
     # apply different learning rates to different layer
+    fc_list = ['module.fc1.1.weight', 'module.fc1.1.bias', "module.fc2.weight", "module.fc2.bias"]
+    params = [i[1] for i in list(filter(lambda kv: kv[0] in fc_list, model.named_parameters()))]
+    base_params = [i[1] for i in list(filter(lambda kv: kv[0] not in fc_list, model.named_parameters()))]
+    learn_cen = Variable(torch.cuda.FloatTensor(args.num_classes, len(params[3])).fill_(0))
+    learn_cen.requires_grad_(True)
+
     optimizer = torch.optim.SGD([
-            {'params': model.module.conv1.parameters(), 'name': 'conv'},
-            {'params': model.module.bn1.parameters(), 'name': 'conv'},
-            {'params': model.module.layer1.parameters(), 'name': 'conv'},
-            {'params': model.module.layer2.parameters(), 'name': 'conv'},
-            {'params': model.module.layer3.parameters(), 'name': 'conv'},
-            {'params': model.module.layer4.parameters(), 'name': 'conv'},
+            {'params': base_params, 'name': 'conv'},
             {'params': learn_cen, 'name': 'cen'},
-            {'params': learn_cen_2, 'name': 'cen'},
         ],
                                     lr=args.lr,
                                     momentum=args.momentum,
@@ -74,19 +71,16 @@ def main():
                                     nesterov=args.nesterov)
 
     optimizer_cls = torch.optim.SGD([
-            {'params': model.module.fc1.parameters(), 'name': 'ca_cl'},
-            {'params': model.module.fc2.parameters(), 'name': 'ca_cl'},
-            {'params': learn_cen_2, 'name': 'cen'},
+            {'params': params, 'name': 'ca_cl'},
             {'params': learn_cen, 'name': 'cen'},
         ],
-                                    lr=args.lr,
+                                    lr=args.lr * 10,
                                     momentum=args.momentum,
                                     weight_decay=args.weight_decay,
                                     nesterov=args.nesterov)
 
     # resume
     epoch = 0
-    init_state_dict = model.state_dict()
     dict_th = defaultdict(list)
     dict_mu = defaultdict(list)
     dict_sd = defaultdict(list)
@@ -127,25 +121,20 @@ def main():
     for itern in range(epoch * batch_number, num_itern_total):
         # evaluate on the target training and test data
         if (itern == 0) or (count_itern_each_epoch == batch_number):
-            prec1, c_s, c_s_2, c_t, c_t_2, c_srctar, c_srctar_2, source_features, source_features_2, source_targets, \
-            target_features, target_features_2, target_targets, pseudo_labels, labels_src, labels_tar, path_src, path_tar = validate_compute_cen(val_loader_target_t, val_loader_source, model, criterion, epoch, args)
+            prec1, c_s, c_t, c_srctar, source_features, source_targets, \
+            target_features, target_targets, pseudo_labels, labels_src, labels_tar, path_src, path_tar = validate_compute_cen(val_loader_target_t, val_loader_source, model, criterion, epoch, args)
 
             test_acc, acc_for_each_class = validate(val_loader_target, model, criterion, epoch, args)
             test_flag = True
 
             # K-means clustering or its variants
             cen = c_t
-            cen_2 = c_t_2
             _, c_t = kernel_k_means(target_features, target_targets, pseudo_labels, train_loader_target, epoch, model, args, best_cluster_acc, change_target=False)
-            _, c_t_2 = kernel_k_means(target_features_2, target_targets, pseudo_labels, train_loader_target, epoch, model, args, best_cluster_acc_2, change_target=True)
 
             # Re-initialize learnable cluster centers
             cen = (c_t + c_s) / 2# or c_srctar
-            cen_2 = (c_t_2 + c_s_2) / 2# or c_srctar_2
 
             learn_cen.data = cen.data.clone()
-            learn_cen_2.data = cen_2.data.clone()
-            learn_cen_2.data = cen_2.data.clone()
             tar_prob_class = F.softmax(pseudo_labels, dim=1)
             tar_prob_class = F.softmax(pseudo_labels, dim=1)
             p_label_tar.data = tar_prob_class.mean(0).clone()
@@ -156,31 +145,26 @@ def main():
                 count_itern_each_epoch = 0
                 epoch += 1
 
-            src_cs = source_select(source_features_2, source_targets, target_features_2, pseudo_labels, train_loader_source, epoch, c_t_2.data.clone(), args)
-            tar_cs = source_select(target_features_2, target_targets, source_features_2, source_targets, train_loader_target, epoch, c_t_2.data.clone(), args)
+            src_cs = source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, c_t.data.clone(), args)
+            tar_cs = source_select(target_features, target_targets, source_features, source_targets, train_loader_target, epoch, c_t.data.clone(), args)
 
-            tsne_feature_2 = torch.cat([source_features_2, target_features_2], axis=0)
             tsne_feature = torch.cat([source_features, target_features], axis=0)
 
             tsne_true_label =torch.cat([source_targets, target_targets], axis=0).view(-1)
             tsne_pseudo_label =torch.cat([source_targets, pseudo_labels.max(1)[1].long()], axis=0).view(-1)
             path_tsne = path_src + path_tar
 
-
             tsne_embed_1 = TSNE(n_components=2).fit_transform(tsne_feature.cpu().numpy())
-            tsne_embed_2 = TSNE(n_components=2).fit_transform(tsne_feature_2.cpu().numpy())
 
             domain_label = [0 for i in range(source_features.shape[0])] + [1 for i in range(target_features.shape[0])]
 
             tsne_df = pd.DataFrame(tsne_embed_1)
-            tsne_df2 = pd.DataFrame(tsne_embed_2)
             label_df = pd.DataFrame({"True_label": tsne_true_label.cpu().numpy().tolist(),
                                      "Pseudo_label": tsne_pseudo_label.cpu().numpy().tolist(),
                                      "Domain label": domain_label,
                                      "Path": path_tsne})
 
             tsne_df.to_csv(f"{args.log}/tsne/tsne1_epoch{epoch}.csv")
-            tsne_df2.to_csv(f"{args.log}/tsne/tsne2_epoch{epoch}.csv")
             label_df.to_csv(f"{args.log}/tsne/label_epoch{epoch}.csv")
 
 
@@ -203,10 +187,8 @@ def main():
             train_loader_source_batch = enumerate(train_loader_source)
 
             del source_features
-            del source_features_2
             del source_targets
             del target_features
-            del target_features_2
             del target_targets
             del pseudo_labels
             gc.collect()
@@ -239,7 +221,6 @@ def main():
                     'arch': args.arch,
                     'state_dict': model.state_dict(),
                     'learn_cen': learn_cen,
-                    'learn_cen_2': learn_cen_2,
                     'best_prec1': best_prec1,
                     'best_test_prec1': best_test_prec1,
                     'cond_best_test_prec1': cond_best_test_prec1,
@@ -252,7 +233,9 @@ def main():
                 break
 
         # train for one iteration
-        train_loader_source_batch, train_loader_target_batch = train(train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, learn_cen, learn_cen_2, optimizer, optimizer_cls, itern, epoch, src_cs, tar_cs, args, p_label_src, p_label_tar, th)
+        train_loader_source_batch, train_loader_target_batch = train(
+            train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, 
+            learn_cen, optimizer, optimizer_cls, itern, epoch, src_cs, tar_cs, args, p_label_src, p_label_tar, th)
 
         model = model.cuda()
         count_itern_each_epoch += 1

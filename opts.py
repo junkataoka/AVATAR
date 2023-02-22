@@ -21,7 +21,7 @@ def opts():
     parser.add_argument('--epochs', type=int, default=200, help='number of epochs to train')
     parser.add_argument('--batch_size', type=int, default=64, help='batch size')
     parser.add_argument('--workers', type=int, default=8, metavar='N', help='number of data loading workers (default: 8)')
-    parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
+    parser.add_argument('--lr', type=float, default=0.0001, help='learning rate')
     parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
     parser.add_argument('--weight_decay', type=float, default=1e-2, help='weight decay (L2 penalty)')
     parser.add_argument('--nesterov', action='store_true', help='whether to use nesterov SGD')
