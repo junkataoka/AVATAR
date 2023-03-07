@@ -1,21 +1,26 @@
 import torch
 import torch.nn as nn
-from torchvision.models.resnet import resnet50
 from functools import partial
 import models.vision_transformer as vits
 
 
 dependencies = ["torch", "torchvision"]
 
+
 class MyViTs16(vits.VisionTransformer):
 
     def __init__(self, n_class):
-        super(MyViTs16, self).__init__(patch_size=16, embed_dim=384, depth=12, 
-        num_heads=6, mlp_ratio=4, qkv_bias=True, norm_layer=partial(nn.LayerNorm, eps=1e-6))
+        super(MyViTs16, self).__init__(
+            patch_size=16, embed_dim=384, depth=12,
+            num_heads=6, mlp_ratio=4, qkv_bias=True,
+            norm_layer=partial(nn.LayerNorm, eps=1e-6)
+            )
 
-        self.fc1 = nn.Sequential(nn.Linear(self.embed_dim, self.embed_dim),
-        nn.BatchNorm1d(self.embed_dim),
-        nn.ReLU(inplace=True))
+        self.fc1 = nn.Sequential(
+            nn.Linear(self.embed_dim, self.embed_dim),
+            nn.BatchNorm1d(self.embed_dim),
+            nn.ReLU(inplace=True)
+            )
         self.fc2 = nn.Linear(self.embed_dim, n_class+1)
 
     def forward(self, x):
@@ -30,15 +35,19 @@ class MyViTs16(vits.VisionTransformer):
         ca = self.fc2(x2)
         return x2, ca
         
+
 class MyViTs8(vits.VisionTransformer):
 
     def __init__(self, n_class):
-        super(MyViTs8, self).__init__(patch_size=8, embed_dim=384, depth=12, num_heads=6, mlp_ratio=4,
-        qkv_bias=True, norm_layer=partial(nn.LayerNorm, eps=1e-6))
+        super(MyViTs8, self).__init__(
+            patch_size=8, embed_dim=384, depth=12,
+            num_heads=6, mlp_ratio=4,
+            qkv_bias=True, norm_layer=partial(nn.LayerNorm, eps=1e-6))
 
-        self.fc1 = nn.Sequential(nn.Linear(self.embed_dim, self.embed_dim),
-        nn.BatchNorm1d(self.embed_dim),
-        nn.ReLU(inplace=True))
+        self.fc1 = nn.Sequential(
+            nn.Linear(self.embed_dim, self.embed_dim),
+            nn.BatchNorm1d(self.embed_dim),
+            nn.ReLU(inplace=True))
         self.fc2 = nn.Linear(self.embed_dim, n_class+1)
 
     def forward(self, x):
@@ -52,16 +61,20 @@ class MyViTs8(vits.VisionTransformer):
         x2 = self.fc1(x)
         ca = self.fc2(x2)
         return x2, ca
+
 
 class MyViTb16(vits.VisionTransformer):
 
     def __init__(self, n_class):
-        super(MyViTb16, self).__init__(patch_size=16, embed_dim=768, depth=12, 
-        num_heads=12, mlp_ratio=4, qkv_bias=True, norm_layer=partial(nn.LayerNorm, eps=1e-6))
+        super(MyViTb16, self).__init__(
+            patch_size=16, embed_dim=768, depth=12,
+            num_heads=12, mlp_ratio=4, qkv_bias=True,
+            norm_layer=partial(nn.LayerNorm, eps=1e-6))
 
-        self.fc1 = nn.Sequential(nn.Linear(self.embed_dim, self.embed_dim),
-        nn.BatchNorm1d(self.embed_dim),
-        nn.ReLU(inplace=True))
+        self.fc1 = nn.Sequential(
+            nn.Linear(self.embed_dim, self.embed_dim),
+            nn.BatchNorm1d(self.embed_dim),
+            nn.ReLU(inplace=True))
         self.fc2 = nn.Linear(self.embed_dim, n_class+1)
 
     def forward(self, x):
@@ -75,16 +88,20 @@ class MyViTb16(vits.VisionTransformer):
         x2 = self.fc1(x)
         ca = self.fc2(x2)
         return x2, ca
-        
+
+
 class MyViTb8(vits.VisionTransformer):
 
     def __init__(self, n_class):
-        super(MyViTb8, self).__init__(patch_size=8, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4,
-        qkv_bias=True, norm_layer=partial(nn.LayerNorm, eps=1e-6))
+        super(MyViTb8, self).__init__(
+            patch_size=8, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4,
+            qkv_bias=True, norm_layer=partial(nn.LayerNorm, eps=1e-6))
 
-        self.fc1 = nn.Sequential(nn.Linear(self.embed_dim, self.embed_dim),
-        nn.BatchNorm1d(self.embed_dim),
-        nn.ReLU(inplace=True))
+        self.fc1 = nn.Sequential(
+            nn.Linear(self.embed_dim, self.embed_dim),
+            nn.BatchNorm1d(self.embed_dim),
+            nn.ReLU(inplace=True))
+
         self.fc2 = nn.Linear(self.embed_dim, n_class+1)
 
     def forward(self, x):

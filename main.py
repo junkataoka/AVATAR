@@ -37,13 +37,12 @@ best_cluster_acc = 0
 best_cluster_acc_2 = 0
 counter = 0
     
-
 def main():
     global args, best_prec1, best_test_prec1, cond_best_test_prec1, best_cluster_acc, best_cluster_acc_2, counter
 
     # define model
     model = construct(args)
-    model = torch.nn.DataParallel(model).cuda() # define multiple GPUs
+    model = model.cuda() # define multiple GPUs
 
     # define learnable cluster centers
     p_label_tar = Variable(torch.cuda.FloatTensor(args.num_classes).fill_(0))
@@ -53,31 +52,30 @@ def main():
     np.random.seed(12)  # may fix test data
     random.seed(12)
     torch.manual_seed(12)
-
+    params = []
+    base_params = []
     # apply different learning rates to different layer
-    fc_list = ['module.fc1.1.weight', 'module.fc1.1.bias', "module.fc2.weight", "module.fc2.bias"]
-    params = [i[1] for i in list(filter(lambda kv: kv[0] in fc_list, model.named_parameters()))]
-    base_params = [i[1] for i in list(filter(lambda kv: kv[0] not in fc_list, model.named_parameters()))]
-    learn_cen = Variable(torch.cuda.FloatTensor(args.num_classes, len(params[3])).fill_(0))
-    learn_cen.requires_grad_(True)
 
-    optimizer = torch.optim.SGD([
-            {'params': base_params, 'name': 'conv'},
-            {'params': learn_cen, 'name': 'cen'},
-        ],
+    for k, v in model.named_parameters():
+        if not k.__contains__('fc'):
+            base_params += [{'params': v, 'name': "feature"}]
+        else:
+            params += [{'params': v, 'name': "ca_cl"}]
+
+    optimizer = torch.optim.SGD(base_params,
                                     lr=args.lr,
                                     momentum=args.momentum,
                                     weight_decay=args.weight_decay,
                                     nesterov=args.nesterov)
 
-    optimizer_cls = torch.optim.SGD([
-            {'params': params, 'name': 'ca_cl'},
-            {'params': learn_cen, 'name': 'cen'},
-        ],
+    optimizer_cls = torch.optim.SGD(params,
                                     lr=args.lr * 10,
                                     momentum=args.momentum,
                                     weight_decay=args.weight_decay,
                                     nesterov=args.nesterov)
+
+    learn_cen = Variable(torch.cuda.FloatTensor(args.num_classes, len(params[3])).fill_(0))
+    learn_cen.requires_grad_(False)
 
     # resume
     epoch = 0
@@ -112,7 +110,6 @@ def main():
 
     new_epoch_flag = False # if new epoch, new_epoch_flag=True
     test_flag = False # if test, test_flag=True
-
     src_cs = torch.cuda.FloatTensor(len(train_loader_source.dataset.tgts)).fill_(1) # initialize source weights
     tar_cs = torch.cuda.FloatTensor(len(train_loader_target.dataset.tgts)).fill_(1) # initialize source weights
 
@@ -272,7 +269,7 @@ def save_checkpoint(state, is_best, args):
     dir_save_file = os.path.join(args.log, filename)
     torch.save(state, dir_save_file)
     if is_best:
-        shutil.copyfile(dir_save_file, os.path.join(args.log, 'model_best.pth.tar'))
+        util.copyfile(dir_save_file, os.path.join(args.log, 'model_best.pth.tar'))
 
 
 if __name__ == '__main__':

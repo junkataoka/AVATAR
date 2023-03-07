@@ -47,12 +47,14 @@ def train(
         (input_source, target_source, index, path) = train_loader_source_batch.__next__()[1]
 
     target_source = target_source.cuda()
-    input_source_var = Variable(input_source)
     target_target = target_target.cuda()
-    input_target_var = Variable(input_target)
+    input_target = input_target.cuda()
+    input_source = input_source.cuda()
+    tar_index = tar_index.cuda()
+    index = index.cuda()
 
     loss = 0
-    f_t, ca_t = model(input_target_var)
+    f_t, ca_t = model(input_target)
 
     if args.domain_adv:
         d_t_loss = CondDiscriminatorLoss(epoch, ca_t, tar_index, tar_cs, src=False, dis_cls=False)
@@ -75,7 +77,7 @@ def train(
 
 
     # model forward on source
-    f_s, ca_s = model(input_source_var)
+    f_s, ca_s = model(input_source)
     if args.domain_adv:
         d_s_loss = CondDiscriminatorLoss(epoch, ca_s, index, src_cs, src=True, dis_cls=False)
         loss += weight_dis * d_s_loss
@@ -100,7 +102,7 @@ def train(
     # Update join classifier & discriminator
     loss = 0
 
-    f_t, ca_t = model(input_target_var)
+    f_t, ca_t = model(input_target)
     if args.domain_adv:
         d_t_loss = CondDiscriminatorLoss(epoch, ca_t, tar_index, tar_cs, src=False, dis_cls=True)
         loss += weight_dis * d_t_loss
@@ -120,7 +122,7 @@ def train(
         # tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs, p_label_src, p_label_tar, th, emb=True)
         # loss += weight_tar_cluster * tar_cluster_loss2
 
-    f_s, ca_s = model(input_source_var)
+    f_s, ca_s = model(input_source)
     # model forward on source
     if args.domain_adv:
         d_s_loss = CondDiscriminatorLoss(epoch, ca_s, index, src_cs, src=True, dis_cls=True)
@@ -201,7 +203,6 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, p_label_src, p
     else:
         prob_p_class = prob_p
 
-    prob_p_class = torch.clip(prob_p_class, min=1e-6, max=1.0)
 
     prob_q2 = prob_p_class / prob_p_class.sum(0, keepdim=True).pow(0.5)
     prob_q2 /= prob_q2.sum(1, keepdim=True)
@@ -243,8 +244,7 @@ def SrcClassifyLoss(args, epoch, output, target, index, src_cs, p_label_src, p_l
         prob_p_class = prob_p_class / (1-prob_p_dis)
     else:
         prob_p_class = prob_p
-    prob_p_class = torch.clip(prob_p_class, min=1e-6, max=1.0)
-    prob_q = Variable(torch.cuda.FloatTensor(prob_p_class.size()).fill_(0))
+    prob_q = torch.zeros(prob_p_class.size(), dtype=torch.float).cuda()
     prob_q.scatter_(1, target.unsqueeze(1), torch.ones(prob_p_class.size(0), 1).cuda())
 
     src_weights = src_cs[index].cuda()
@@ -268,9 +268,8 @@ def validate(val_loader, model, criterion, epoch, args):
     correct_vector = torch.FloatTensor(args.num_classes).fill_(0)
     end = time.time()
     for i, (input, target, _, temp) in enumerate(val_loader):
-        target = target.cuda()
-        input_var = Variable(input)
-        target_var = Variable(target)
+        target_var = target.cuda()
+        input_var = input.cuda()
 
         # forward
         with torch.no_grad():
@@ -279,7 +278,7 @@ def validate(val_loader, model, criterion, epoch, args):
             loss = criterion(output, target_var)
 
         # compute and record loss and accuracy
-        prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
+        prec1, prec5 = accuracy(output.data.cpu(), target, topk=(1, 5))
         total_vector, correct_vector = accuracy_for_each_class(output.data, target, total_vector, correct_vector) # compute class-wise accuracy
         losses.update(loss.data.item(), input.size(0))
         top1.update(prec1.item(), input.size(0))
@@ -330,7 +329,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
 
     if compute_cen:
         for i, (input, target, index, path) in enumerate(val_loader_source): # the iterarion in the source dataset
-            input_var = Variable(input)
+            input_var = input.cuda()
             target = target.cuda()
             with torch.no_grad():
                 feature, output = model(input_var)
@@ -360,7 +359,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     end = time.time()
     for i, (input, target, index, path) in enumerate(val_loader_target): # the iterarion in the target dataset
         data_time.update(time.time() - end)
-        input_var = Variable(input)
+        input_var = input.cuda()
         target = target.cuda()
         target_var = Variable(target)
 
@@ -501,7 +500,7 @@ def adjust_learning_rate(optimizer, epoch, args):
     """Adjust the learning rate according the epoch"""
     lr = args.lr / math.pow((1 + 10 * epoch / args.epochs), 0.75)
     for param_group in optimizer.param_groups:
-       if param_group['name'] == 'conv':
+       if param_group['name'] == 'feature':
            param_group['lr'] = lr
        elif param_group['name'] == 'ca_cl':
            param_group['lr'] = lr * 10

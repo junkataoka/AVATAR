@@ -1,0 +1,44 @@
+Traceback (most recent call last):
+  File "main.py", line 276, in <module>
+    main()
+  File "main.py", line 233, in main
+    train_loader_source_batch, train_loader_target_batch = train(
+  File "/data/home/jkataok1/AVATAR/trainer.py", line 111, in train
+    tardis_loss = TarDisClusterLoss(args, epoch, ca_t, target_target, tar_index, tar_cs, p_label_src, p_label_tar, th, emb=False)
+  File "/data/home/jkataok1/AVATAR/trainer.py", line 223, in TarDisClusterLoss
+    elif len(torch.unique(pos_mask)) == 2:
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/torch/_jit_internal.py", line 405, in fn
+    return if_false(*args, **kwargs)
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/torch/_jit_internal.py", line 405, in fn
+    return if_false(*args, **kwargs)
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/torch/functional.py", line 722, in _return_output
+    output, _, _ = _unique_impl(input, sorted, return_inverse, return_counts, dim)
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/site-packages/torch/functional.py", line 636, in _unique_impl
+    output, inverse_indices, counts = torch._unique2(
+RuntimeError: CUDA error: an illegal memory access was encountered
+CUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
+srun: error: compute130: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/multiprocessing/queues.py", line 245, in _feed
+    send_bytes(obj)
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/multiprocessing/connection.py", line 200, in send_bytes
+    self._send_bytes(m[offset:offset + size])
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/multiprocessing/connection.py", line 411, in _send_bytes
+    self._send(header + buf)
+  File "/data/home/jkataok1/.conda/envs/cyclegan/lib/python3.8/multiprocessing/connection.py", line 368, in _send
+    n = write(self._handle, buf)
+BrokenPipeError: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "main.py", line 276, in <module>
+    main()
+  File "main.py", line 233, in main
+    train_loader_source_batch, train_loader_target_batch = train(
+  File "/data/home/jkataok1/AVATAR/trainer.py", line 86, in train
+    src_dis_loss = SrcClassifyLoss(args, epoch, ca_s, target_source, index, src_cs, p_label_src, p_label_tar, emb=False)
+  File "/data/home/jkataok1/AVATAR/trainer.py", line 247, in SrcClassifyLoss
+    prob_q = torch.zeros(prob_p_class.size(), dtype=torch.float).cuda()
+RuntimeError: CUDA error: an illegal memory access was encountered
+CUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
+srun: error: compute131: task 0: Exited with exit code 1

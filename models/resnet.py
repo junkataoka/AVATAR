@@ -2,10 +2,8 @@ import torch.nn as nn
 import math
 import torch.utils.model_zoo as model_zoo
 import torch
-import torchvision
 import torchvision.models as models
 from torchvision.models.resnet import ResNet, BasicBlock, Bottleneck
-from torchvision.models.vision_transformer import VisionTransformer
 
 
 class MyResNet50(ResNet):

@@ -210,9 +210,12 @@ class VisionTransformer(nn.Module):
 
     def forward(self, x):
         x = self.prepare_tokens(x)
+        print("Tokenshape:", x.shape)
         for blk in self.blocks:
             x = blk(x)
         x = self.norm(x)
+        print("2:", x.shape)
+
         return x[:, 0]
 
     def get_last_selfattention(self, x):

@@ -52,7 +52,7 @@ else
 fi
 
 FILE=$( echo ${DATA##*/} )
-MODELPATH="/home/junkataoka/alexnet_resnet_finetune/checkpoints/${SRC}_to_${TAR}_${ARCH}_${FILE}.pkl" 
+MODELPATH="/data/home/jkataok1/alexnet_resnet_finetune/checkpoints/${SRC}_to_${TAR}_${ARCH}_${FILE}.pkl" 
 
 if [[ "$8" != "slurm" ]]; then
 
@@ -80,7 +80,6 @@ if [[ "$8" != "slurm" ]]; then
 
 else
     module load cuda11.1/toolkit/11.1.1
-    conda activate cyclegan
 
     srun -n1 --gpus=1 --exclusive -c1 python main.py \
     --arch $ARCH \
