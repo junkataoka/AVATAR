@@ -35,16 +35,16 @@ def train(
     end = time.time()
     # prepare target data
     try:
-        (input_target, target_target, tar_index, tar_path) = train_loader_target_batch.__next__()[1]
+        (input_target, target_target, tar_index) = train_loader_target_batch.__next__()[1]
     except StopIteration:
         train_loader_target_batch = enumerate(train_loader_target)
-        (input_target, target_target, tar_index, tar_path) = train_loader_target_batch.__next__()[1]
+        (input_target, target_target, tar_index) = train_loader_target_batch.__next__()[1]
 
     try:
-        (input_source, target_source, index, path) = train_loader_source_batch.__next__()[1]
+        (input_source, target_source, index) = train_loader_source_batch.__next__()[1]
     except StopIteration:
         train_loader_source_batch = enumerate(train_loader_source)
-        (input_source, target_source, index, path) = train_loader_source_batch.__next__()[1]
+        (input_source, target_source, index) = train_loader_source_batch.__next__()[1]
 
     target_source = target_source.cuda()
     target_target = target_target.cuda()
@@ -54,6 +54,7 @@ def train(
     index = index.cuda()
 
     loss = 0
+    model.zero_grad()
     f_t, ca_t = model(input_target)
 
     if args.domain_adv:
@@ -95,11 +96,11 @@ def train(
 
     losses.update(loss.data.item(), input_target.size(0))
     # loss backward and network update
-    model.zero_grad()
     loss.backward()
     optimizer.step()
 
     # Update join classifier & discriminator
+    model.zero_grad()
     loss = 0
 
     f_t, ca_t = model(input_target)
@@ -142,7 +143,6 @@ def train(
     prec1_s = accuracy(ca_s.data, target_source, topk=(1,))[0]
     top1_source.update(prec1_s.item(), input_source.size(0))
 
-    model.zero_grad()
     loss.backward()
     optimizer_cls.step()
 
@@ -267,7 +267,7 @@ def validate(val_loader, model, criterion, epoch, args):
     total_vector = torch.FloatTensor(args.num_classes).fill_(0)
     correct_vector = torch.FloatTensor(args.num_classes).fill_(0)
     end = time.time()
-    for i, (input, target, _, temp) in enumerate(val_loader):
+    for i, (input, target, _) in enumerate(val_loader):
         target_var = target.cuda()
         input_var = input.cuda()
 
@@ -325,10 +325,8 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     model.eval()
 
     # compute source class centroids
-    path_src = []
-
     if compute_cen:
-        for i, (input, target, index, path) in enumerate(val_loader_source): # the iterarion in the source dataset
+        for i, (input, target, index) in enumerate(val_loader_source): # the iterarion in the source dataset
             input_var = input.cuda()
             target = target.cuda()
             with torch.no_grad():
@@ -350,14 +348,12 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
 
             c_src += (feature.unsqueeze(1) * target_.unsqueeze(2)).sum(0)
             count_s += target_.sum(0).unsqueeze(1)
-            path_src += path
 
-    path_tar = []
     total_vector = torch.FloatTensor(args.num_classes).fill_(0)
     correct_vector = torch.FloatTensor(args.num_classes).fill_(0)
 
     end = time.time()
-    for i, (input, target, index, path) in enumerate(val_loader_target): # the iterarion in the target dataset
+    for i, (input, target, index) in enumerate(val_loader_target): # the iterarion in the target dataset
         data_time.update(time.time() - end)
         input_var = input.cuda()
         target = target.cuda()
@@ -376,7 +372,6 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
         target_features[index.cuda(), :] = feature.data.clone() # index:a tensor
         target_targets[index.cuda()] = target.clone()
         pseudo_labels[index.cuda(), :] = output.data.clone()
-        path_tar += path
 
         if compute_cen: # compute target class centroids
             pred = output.data.max(1)[1]
@@ -434,7 +429,7 @@ def validate_compute_cen(val_loader_target, val_loader_source, model, criterion,
     log.close()
 
     return acc_for_each_class.mean(), c_src, c_tar, c_srctar, source_features, source_targets, target_features, \
-        target_targets, pseudo_labels, labels_src, target_preds, path_src, path_tar
+        target_targets, pseudo_labels, labels_src, target_preds
 
 def source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, cen, args):
     # compute source weights
@@ -502,7 +497,7 @@ def adjust_learning_rate(optimizer, epoch, args):
     for param_group in optimizer.param_groups:
        if param_group['name'] == 'feature':
            param_group['lr'] = lr
-       elif param_group['name'] == 'ca_cl':
+       elif param_group['name'] == 'pred':
            param_group['lr'] = lr * 10
        elif param_group['name'] == 'cen':
            param_group['lr'] = lr * 10

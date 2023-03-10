@@ -16,12 +16,12 @@ class MyViTs16(vits.VisionTransformer):
             norm_layer=partial(nn.LayerNorm, eps=1e-6)
             )
 
-        self.fc1 = nn.Sequential(
+        self.pred1 = nn.Sequential(
             nn.Linear(self.embed_dim, self.embed_dim),
             nn.BatchNorm1d(self.embed_dim),
             nn.ReLU(inplace=True)
             )
-        self.fc2 = nn.Linear(self.embed_dim, n_class+1)
+        self.pred2 = nn.Linear(self.embed_dim, n_class+1)
 
     def forward(self, x):
 
@@ -29,10 +29,14 @@ class MyViTs16(vits.VisionTransformer):
         for blk in self.blocks:
             x = blk(x)
         x = self.norm(x)
+        print(x.shape)
         x = x[:, 0]
+        print(x.shape)
         x = torch.flatten(x, 1)
-        x2 = self.fc1(x)
-        ca = self.fc2(x2)
+        print(x.shape)
+        x2 = self.pred1(x)
+        print(x2.shape)
+        ca = self.pred2(x2)
         return x2, ca
         
 
@@ -44,11 +48,11 @@ class MyViTs8(vits.VisionTransformer):
             num_heads=6, mlp_ratio=4,
             qkv_bias=True, norm_layer=partial(nn.LayerNorm, eps=1e-6))
 
-        self.fc1 = nn.Sequential(
+        self.pred1 = nn.Sequential(
             nn.Linear(self.embed_dim, self.embed_dim),
             nn.BatchNorm1d(self.embed_dim),
             nn.ReLU(inplace=True))
-        self.fc2 = nn.Linear(self.embed_dim, n_class+1)
+        self.pred2 = nn.Linear(self.embed_dim, n_class+1)
 
     def forward(self, x):
 
@@ -58,8 +62,8 @@ class MyViTs8(vits.VisionTransformer):
         x = self.norm(x)
         x = x[:, 0]
         x = torch.flatten(x, 1)
-        x2 = self.fc1(x)
-        ca = self.fc2(x2)
+        x2 = self.pred1(x)
+        ca = self.pred2(x2)
         return x2, ca
 
 
@@ -71,11 +75,11 @@ class MyViTb16(vits.VisionTransformer):
             num_heads=12, mlp_ratio=4, qkv_bias=True,
             norm_layer=partial(nn.LayerNorm, eps=1e-6))
 
-        self.fc1 = nn.Sequential(
+        self.pred1 = nn.Sequential(
             nn.Linear(self.embed_dim, self.embed_dim),
             nn.BatchNorm1d(self.embed_dim),
             nn.ReLU(inplace=True))
-        self.fc2 = nn.Linear(self.embed_dim, n_class+1)
+        self.pred2 = nn.Linear(self.embed_dim, n_class+1)
 
     def forward(self, x):
 
@@ -83,10 +87,11 @@ class MyViTb16(vits.VisionTransformer):
         for blk in self.blocks:
             x = blk(x)
         x = self.norm(x)
-        x = x[:, 0]
+        x = x.sum(dim=1)
+        # x = x[:, 0]
         x = torch.flatten(x, 1)
-        x2 = self.fc1(x)
-        ca = self.fc2(x2)
+        x2 = self.pred1(x)
+        ca = self.pred2(x2)
         return x2, ca
 
 
@@ -97,12 +102,12 @@ class MyViTb8(vits.VisionTransformer):
             patch_size=8, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4,
             qkv_bias=True, norm_layer=partial(nn.LayerNorm, eps=1e-6))
 
-        self.fc1 = nn.Sequential(
+        self.pred1 = nn.Sequential(
             nn.Linear(self.embed_dim, self.embed_dim),
             nn.BatchNorm1d(self.embed_dim),
             nn.ReLU(inplace=True))
 
-        self.fc2 = nn.Linear(self.embed_dim, n_class+1)
+        self.pred2 = nn.Linear(self.embed_dim, n_class+1)
 
     def forward(self, x):
 
@@ -112,8 +117,8 @@ class MyViTb8(vits.VisionTransformer):
         x = self.norm(x)
         x = x[:, 0]
         x = torch.flatten(x, 1)
-        x2 = self.fc1(x)
-        ca = self.fc2(x2)
+        x2 = self.pred1(x)
+        ca = self.pred2(x2)
         return x2, ca
 
 def dino_vits16(args, **kwargs):

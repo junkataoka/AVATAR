@@ -19,12 +19,12 @@ if [[ "$1" == "slurm" ]]; then
     # sbatch train_avatar.sh vits8 webcam dslr 31 $home/AVATAR/data/datasets/office31 200 32 slurm
 
     # VITB16 on Office31
-    # sbatch train_avatar.sh vitb16 amazon webcam 31 $home/AVATAR/data/datasets/office31 200 8 slurm
-    sbatch train_avatar.sh vitb16 amazon dslr 31 $home/AVATAR/data/datasets/office31 200 8 slurm
-    sbatch train_avatar.sh vitb16 dslr webcam 31 $home/AVATAR/data/datasets/office31 200 8 slurm
-    sbatch train_avatar.sh vitb16 webcam amazon 31 $home/AVATAR/data/datasets/office31 200 8 slurm
-    sbatch train_avatar.sh vitb16 dslr amazon 31 $home/AVATAR/data/datasets/office31 200 8 slurm 
-    sbatch train_avatar.sh vitb16 webcam dslr 31 $home/AVATAR/data/datasets/office31 200 8 slurm
+    # sbatch train_avatar.sh vitb16 amazon webcam 31 $home/AVATAR/data/datasets/office31 200 32 slurm
+    # sbatch train_avatar.sh vitb16 amazon dslr 31 $home/AVATAR/data/datasets/office31 200 32 slurm
+    # sbatch train_avatar.sh vitb16 dslr webcam 31 $home/AVATAR/data/datasets/office31 200 32 slurm
+    # sbatch train_avatar.sh vitb16 webcam amazon 31 $home/AVATAR/data/datasets/office31 200 32 slurm
+    sbatch train_avatar.sh vitb16 dslr amazon 31 $home/AVATAR/data/datasets/office31 200 32 slurm 
+    sbatch train_avatar.sh vitb16 webcam dslr 31 $home/AVATAR/data/datasets/office31 200 32 slurm
 
     # VITB8 on Office31
     # sbatch train_avatar.sh vitb8 amazon webcam 31 $home/AVATAR/data/datasets/office31 200 32 slurm

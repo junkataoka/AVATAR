@@ -42,7 +42,7 @@ def main():
 
     # define model
     model = construct(args)
-    model = model.cuda() # define multiple GPUs
+    model = torch.nn.DataParallel(model).cuda() # define multiple GPUs
 
     # define learnable cluster centers
     p_label_tar = Variable(torch.cuda.FloatTensor(args.num_classes).fill_(0))
@@ -55,12 +55,16 @@ def main():
     params = []
     base_params = []
     # apply different learning rates to different layer
+    if "vit" in args.arch or "dino" in args.arch:
+        dfs_freeze_vit(model)
 
     for k, v in model.named_parameters():
-        if not k.__contains__('fc'):
+        if not k.__contains__('pred'):
+            print("Appeding to feature: ", k)
             base_params += [{'params': v, 'name': "feature"}]
         else:
-            params += [{'params': v, 'name': "ca_cl"}]
+            print("Appeding to predictor: ", k)
+            params += [{'params': v, 'name': "pred"}]
 
     optimizer = torch.optim.SGD(base_params,
                                     lr=args.lr,
@@ -119,7 +123,7 @@ def main():
         # evaluate on the target training and test data
         if (itern == 0) or (count_itern_each_epoch == batch_number):
             prec1, c_s, c_t, c_srctar, source_features, source_targets, \
-            target_features, target_targets, pseudo_labels, labels_src, labels_tar, path_src, path_tar = validate_compute_cen(val_loader_target_t, val_loader_source, model, criterion, epoch, args)
+            target_features, target_targets, pseudo_labels, labels_src, labels_tar = validate_compute_cen(val_loader_target_t, val_loader_source, model, criterion, epoch, args)
 
             test_acc, acc_for_each_class = validate(val_loader_target, model, criterion, epoch, args)
             test_flag = True
@@ -149,7 +153,6 @@ def main():
 
             tsne_true_label =torch.cat([source_targets, target_targets], axis=0).view(-1)
             tsne_pseudo_label =torch.cat([source_targets, pseudo_labels.max(1)[1].long()], axis=0).view(-1)
-            path_tsne = path_src + path_tar
 
             tsne_embed_1 = TSNE(n_components=2).fit_transform(tsne_feature.cpu().numpy())
 
@@ -158,8 +161,7 @@ def main():
             tsne_df = pd.DataFrame(tsne_embed_1)
             label_df = pd.DataFrame({"True_label": tsne_true_label.cpu().numpy().tolist(),
                                      "Pseudo_label": tsne_pseudo_label.cpu().numpy().tolist(),
-                                     "Domain label": domain_label,
-                                     "Path": path_tsne})
+                                     "Domain label": domain_label})
 
             tsne_df.to_csv(f"{args.log}/tsne/tsne1_epoch{epoch}.csv")
             label_df.to_csv(f"{args.log}/tsne/label_epoch{epoch}.csv")
@@ -270,6 +272,12 @@ def save_checkpoint(state, is_best, args):
     torch.save(state, dir_save_file)
     if is_best:
         util.copyfile(dir_save_file, os.path.join(args.log, 'model_best.pth.tar'))
+
+def dfs_freeze_vit(model):
+    for name1, child in model.named_children():
+        for name2, param in child.named_parameters():
+            if "fc" in name2 or "norm" in name2 or "patch_embed" in name1:
+                param.requires_grad = False
 
 
 if __name__ == '__main__':

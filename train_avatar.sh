@@ -79,7 +79,7 @@ if [[ "$8" != "slurm" ]]; then
 
 
 else
-    module load cuda11.1/toolkit/11.1.1
+    module load cuda11.3/toolkit/11.3.0                                         │
 
     srun -n1 --gpus=1 --exclusive -c1 python main.py \
     --arch $ARCH \
