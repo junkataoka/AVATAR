@@ -51,10 +51,34 @@ else
     BATCH=32
 fi
 
+if [[ "$7" != "" ]]; then
+    SRC_SUBSET=False
+else
+    SRC_SUBSET=True
+fi
+
+if [[ "$8" != "" ]]; then
+    TAR_SUBSET=False
+else
+    TAR_SUBSET=True
+fi
+
+if [[ "$9" != "" ]]; then
+    MAJORITY_CLASS=False
+else
+    MAJORITY_CLASS=True
+fi
+
+if [[ "$10" != "" ]]; then
+    MINORITY_CLASS_RATIO=0
+else
+    MINORITY_CLASS_RATIO=$10
+fi
+
 FILE=$( echo ${DATA##*/} )
 MODELPATH="/data/home/jkataok1/alexnet_resnet_finetune/checkpoints/${SRC}_to_${TAR}_${ARCH}_${FILE}.pkl" 
 
-if [[ "$8" != "slurm" ]]; then
+if [[ "$12" != "slurm" ]]; then
 
     python main.py \
     --arch $ARCH \
@@ -100,7 +124,11 @@ else
     --dis_tar \
     --conf_pseudo_label \
     --log ./checkpoints/$FILE \
-    --ID 3
+    --src_subset $SRC_SUBSET \
+    --tar_subset $TAR_SUBSET \
+    --majority_class $MAJORITY_CLASS \
+    --minority_class_ratio $MINORITY_CLASS_RATIO \
+    --ID 1
 
 
 fi

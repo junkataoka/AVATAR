@@ -11,6 +11,13 @@ def opts():
     parser.add_argument('--tar', type=str, default='webcam_half', help='target training set')
     parser.add_argument('--tar_t', type=str, default='webcam_half2', help='target test set')
     parser.add_argument('--num_classes', type=int, default=31, help='class number')
+    parser.add_argument('--src_subset', action="store_true", help='weather to use source subset sampling')
+    parser.add_argument('--tar_subset', action="store_true", help='weather to use target subset sampling')
+    parser.add_argument('--majority_class', type=int, default=0, help='majority class index')
+    parser.add_argument('--minority_class_ratio', type=float, default=1.0, help='minority class ratio')
+
+    
+    # Model specific
     parser.add_argument('--domain_adv', action='store_true', help='whether to used domain adversarial')
     parser.add_argument('--dis_src', action='store_true', help='whether to use source discriminative loss')
     parser.add_argument('--dis_tar', action='store_true', help='whether to use target discriminative loss')
@@ -82,8 +89,12 @@ def opts():
         ID = str(args.ID)
     else:
         ID = ""
+    if args.subset:
+        subset_name = "ratio" + str(args.minotiry_class_ratio)
+    else:
+        subset_name = ""
 
     args.log = args.log + '_adapt_' + args.src + '2' + args.tar + '_bs' + str(args.batch_size) + '_' + args.arch + '_lr' + str(args.lr) \
-        + domain_adv_flag + dis_src_flag + dis_tar_flag + dis_feat_src_flag + dis_feat_tar_flag + conf_pseudo_label_flag + "ID" + ID
+        + domain_adv_flag + dis_src_flag + dis_tar_flag + dis_feat_src_flag + dis_feat_tar_flag + conf_pseudo_label_flag + "_" + subset_name + "_" + "ID" + ID
 
     return args

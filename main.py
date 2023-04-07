@@ -216,10 +216,8 @@ def main():
 
                 log.write('\n                                                                                 best val acc till now: %3f' % best_prec1)
             else: counter += 1
-            is_cond_best = ((prec1 == best_prec1) and (test_acc > cond_best_test_prec1))
             if test_acc > best_test_prec1:
                 best_test_prec1 = test_acc
-            if test_acc > best_test_prec1:
                 save_checkpoint({
                     'epoch': epoch,
                     'arch': args.arch,
@@ -228,7 +226,7 @@ def main():
                     'best_prec1': best_prec1,
                     'best_test_prec1': best_test_prec1,
                     'cond_best_test_prec1': cond_best_test_prec1,
-                }, is_cond_best, args)
+                }, args)
 
             test_flag = False
 
@@ -271,12 +269,10 @@ def count_epoch_on_large_dataset(train_loader_target, train_loader_source, args)
     return batch_number
 
 
-def save_checkpoint(state, is_best, args):
+def save_checkpoint(state, args):
     filename = 'checkpoint.pth.tar'
     dir_save_file = os.path.join(args.log, filename)
     torch.save(state, dir_save_file)
-    if is_best:
-        util.copyfile(dir_save_file, os.path.join(args.log, 'model_best.pth.tar'))
 
 def dfs_freeze_vit(model):
     for name1, child in model.named_children():

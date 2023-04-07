@@ -5,13 +5,6 @@ if [[ "$1" == "slurm" ]]; then
     # resnet101 on Visda2017
     # sbatch train_avatar.sh resnet101 train validation 12 $home/AVATAR/data/datasets/visda2017 200 32 slurm
 
-    # resnet50 on CLEF
-    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 slurm
-    sbatch train_avatar.sh resnet50 i c 12 $home/AVATAR/data/datasets/image_CLEF 200 32 slurm
-    sbatch train_avatar.sh resnet50 p i 12 "$home"/AVATAR/data/datasets/image_CLEF 200 32 slurm
-    sbatch train_avatar.sh resnet50 p c 12 "$home"/AVATAR/data/datasets/image_CLEF 200 32 slurm
-    sbatch train_avatar.sh resnet50 c i 12 $home/AVATAR/data/datasets/image_CLEF 200 32 slurm
-    sbatch train_avatar.sh resnet50 c p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 slurm
 
     # # VITS16 on Office31
     # sbatch train_avatar.sh vits16 amazon webcam 31 $home/AVATAR/data/datasets/office31 200 32 slurm
@@ -74,18 +67,56 @@ if [[ "$1" == "slurm" ]]; then
     # sbatch train_avatar.sh vits8 real_world product 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
 
     # resnet50 on office_home
-    sbatch train_avatar.sh resnet50 art clipart 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
-    sbatch train_avatar.sh resnet50 art product 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
-    sbatch train_avatar.sh resnet50 art realworld 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
-    sbatch train_avatar.sh resnet50 clipart product 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
-    sbatch train_avatar.sh resnet50 clipart realworld 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
-    sbatch train_avatar.sh resnet50 clipart art 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
-    sbatch train_avatar.sh resnet50 product realworld 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
-    sbatch train_avatar.sh resnet50 product art 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
-    sbatch train_avatar.sh resnet50 product clipart 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
-    sbatch train_avatar.sh resnet50 realworld art 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
-    sbatch train_avatar.sh resnet50 realworld clipart 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
-    sbatch train_avatar.sh resnet50 realworld product 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+    # sbatch train_avatar.sh resnet50 art clipart 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+    # sbatch train_avatar.sh resnet50 art product 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+    # sbatch train_avatar.sh resnet50 art realworld 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+    # sbatch train_avatar.sh resnet50 clipart product 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+    # sbatch train_avatar.sh resnet50 clipart realworld 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+    # sbatch train_avatar.sh resnet50 clipart art 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+    # sbatch train_avatar.sh resnet50 product realworld 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+    # sbatch train_avatar.sh resnet50 product art 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+    # sbatch train_avatar.sh resnet50 product clipart 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+    # sbatch train_avatar.sh resnet50 realworld art 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+    # sbatch train_avatar.sh resnet50 realworld clipart 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+    # sbatch train_avatar.sh resnet50 realworld product 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
+
+    # resnet50 on CLEF
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 slurm
+    sbatch train_avatar.sh resnet50 i c 12 $home/AVATAR/data/datasets/image_CLEF 200 32 slurm
+    sbatch train_avatar.sh resnet50 p i 12 "$home"/AVATAR/data/datasets/image_CLEF 200 32 slurm
+    sbatch train_avatar.sh resnet50 p c 12 "$home"/AVATAR/data/datasets/image_CLEF 200 32 slurm
+    sbatch train_avatar.sh resnet50 c i 12 $home/AVATAR/data/datasets/image_CLEF 200 32 slurm
+    sbatch train_avatar.sh resnet50 c p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 slurm
+    # resnet50 on CLEF subsets
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.9 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.8 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.7 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.6 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.5 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.4 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.3 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.2 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.1 slurm
+
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.9 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.8 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.7 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.6 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.5 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.4 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.3 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.2 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True False 0 0.1 slurm
+
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True True 0 0.9 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True True 0 0.8 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True True 0 0.7 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True True 0 0.6 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True True 0 0.5 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True True 0 0.4 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True True 0 0.3 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True True 0 0.2 slurm
+    sbatch train_avatar.sh resnet50 i p 12 $home/AVATAR/data/datasets/image_CLEF 200 32 True True 0 0.1 slurm
 
     # VITB8 on office_home
     # sbatch train_avatar.sh vitb8 art clipart 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
