@@ -31,7 +31,7 @@ class MyResNet50(ResNet):
         x = torch.flatten(x, 1)
         x2 = self.fc1(x)
         ca = self.fc2(x2)
-        return x, x2, ca
+        return x2, ca
 
 class MyResNet101(ResNet):
     def __init__(self, n_class):
@@ -58,7 +58,7 @@ class MyResNet101(ResNet):
         x = torch.flatten(x, 1)
         x2 = self.fc1(x)
         ca = self.fc2(x2)
-        return x, x2, ca
+        return x2, ca
 
 
 def resnet50(args, **kwargs):
@@ -68,17 +68,20 @@ def resnet50(args, **kwargs):
     """
     model = MyResNet50(n_class=args.num_classes)
 
-    if args.pretrained:
-        if args.pretrained_path:
-            model_dict = model.state_dict()
-            pretrained_dict_temp = torch.load(args.pretrained_path)
-            pretrained_dict = {k: v for k, v in pretrained_dict_temp.items() if k in model_dict}
-            model.load_state_dict(pretrained_dict, strict=False)
-            print(args.pretrained_path)
-            print('Source pre-trained model has been loaded!')
+    if args.pretrained_path:
+        model_dict = model.state_dict()
+        pretrained_dict_temp = torch.load(args.pretrained_path)
+        pretrained_dict = {k: v for k, v in pretrained_dict_temp.items()}
 
-        else:
-            model.load_state_dict(models.resnet50(pretrained=True).state_dict(), strict=False)
+        for k1, k2 in zip(model_dict.keys(), pretrained_dict.keys()):
+            model_dict[k1] = pretrained_dict[k2]
+
+        model.load_state_dict(model_dict, strict=True)
+        print(args.pretrained_path)
+        print('Source pre-trained model has been loaded!')
+
+    else:
+        model.load_state_dict(models.resnet50(pretrained=True).state_dict(), strict=False)
 
     return model
 
@@ -89,17 +92,20 @@ def resnet101(args, **kwargs):
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
     model = MyResNet101(n_class=args.num_classes)
-    if args.pretrained:
-        if args.pretrained_path:
-            model_dict = model.state_dict()
-            pretrained_dict_temp = torch.load(args.pretrained_path)
-            pretrained_dict = {k: v for k, v in pretrained_dict_temp.items() if k in model_dict}
-            model.load_state_dict(pretrained_dict, strict=False)
-            print(args.pretrained_path)
-            print('Source pre-trained model has been loaded!')
+    if args.pretrained_path:
+        model_dict = model.state_dict()
+        pretrained_dict_temp = torch.load(args.pretrained_path)
+        pretrained_dict = {k: v for k, v in pretrained_dict_temp.items()}
 
-        else:
-            model.load_state_dict(models.resnet101(pretrained=True).state_dict(), strict=False)
+        for k1, k2 in zip(model_dict.keys(), pretrained_dict.keys()):
+            model_dict[k1] = pretrained_dict[k2]
+
+        model.load_state_dict(model_dict, strict=True)
+        print(args.pretrained_path)
+        print('Source pre-trained model has been loaded!')
+
+    else:
+        model.load_state_dict(models.resnet101(pretrained=True).state_dict(), strict=False)
 
     return model
 
@@ -110,7 +116,5 @@ def construct(args, **kwargs):
         return resnet50(args)
     elif args.arch == 'resnet101':
         return resnet101(args)
-    elif args.arch == 'dino':
-        return dino(args)
     else:
         raise ValueError('Unrecognized model architecture: ', args.arch)

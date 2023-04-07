@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=AVATAR
-#SBATCH --output=AVATAR_output.txt
-#SBATCH --error=AVATAR_error.log
+#SBATCH --job-name=AVATAR_OH
+#SBATCH --output=AVATAR_OH_output.txt
+#SBATCH --error=AVATAR_OH_error.log
 #SBATCH --mail-type=ALL
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --partition=gpucompute
-#SBATCH --mem=20GB
+#SBATCH --mem=60GB
 #SBATCH --gres=gpu:1
 
 
@@ -69,7 +69,7 @@ if [[ "$8" != "slurm" ]]; then
     --batch_size $BATCH \
     --epochs $EPOCH \
     --cluster_iter 100 \
-    --lr 0.0001 \
+    --lr 0.001 \
     --num_classes $NCLASS \
     --domain_adv \
     --dis_src \
@@ -80,7 +80,6 @@ if [[ "$8" != "slurm" ]]; then
 
 else
     module load cuda11.3/toolkit/11.3.0                                         │
-
     srun -n1 --gpus=1 --exclusive -c1 python main.py \
     --arch $ARCH \
     --data_path_source $DATA \
@@ -94,12 +93,14 @@ else
     --batch_size $BATCH \
     --epochs $EPOCH \
     --cluster_iter 100 \
-    --lr 0.0001 \
+    --lr 0.001 \
     --num_classes $NCLASS \
     --domain_adv \
     --dis_src \
     --dis_tar \
     --conf_pseudo_label \
-    --log ./checkpoints/$FILE
+    --log ./checkpoints/$FILE \
+    --ID 3
+
 
 fi

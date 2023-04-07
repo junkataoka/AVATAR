@@ -42,7 +42,7 @@ def main():
 
     # define model
     model = construct(args)
-    model = torch.nn.DataParallel(model).cuda() # define multiple GPUs
+    model = torch.nn.DataParallel(model.cuda()) # define multiple GPUs
 
     # define learnable cluster centers
     p_label_tar = Variable(torch.cuda.FloatTensor(args.num_classes).fill_(0))
@@ -57,14 +57,19 @@ def main():
     # apply different learning rates to different layer
     if "vit" in args.arch or "dino" in args.arch:
         dfs_freeze_vit(model)
+        for k, v in model.named_parameters():
+            if not k.__contains__('pred'):
+                base_params += [{'params': v, 'name': "feature"}]
+            else:
+                params += [{'params': v, 'name': "pred"}]
+                
+    elif "resnet" in args.arch:
+        for k, v in model.named_parameters():
+            if "fc" not in k:
+                base_params += [{'params': v, 'name': "feature"}]
+            else:
+                params += [{'params': v, 'name': "pred"}]
 
-    for k, v in model.named_parameters():
-        if not k.__contains__('pred'):
-            print("Appeding to feature: ", k)
-            base_params += [{'params': v, 'name': "feature"}]
-        else:
-            print("Appeding to predictor: ", k)
-            params += [{'params': v, 'name': "pred"}]
 
     optimizer = torch.optim.SGD(base_params,
                                     lr=args.lr,

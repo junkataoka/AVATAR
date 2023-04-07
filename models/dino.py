@@ -29,13 +29,10 @@ class MyViTs16(vits.VisionTransformer):
         for blk in self.blocks:
             x = blk(x)
         x = self.norm(x)
-        print(x.shape)
-        x = x[:, 0]
-        print(x.shape)
+        # x = x[:, 0]
+        x = x.sum(dim=1)
         x = torch.flatten(x, 1)
-        print(x.shape)
         x2 = self.pred1(x)
-        print(x2.shape)
         ca = self.pred2(x2)
         return x2, ca
         
