@@ -1,7 +1,9 @@
 # AVATAR2022
 Code release for AdVersarial self-superVised domain Adaptation network for TArget domain (AVATAR)
 
-> **Abstract:** *We propose an unsupervised domain adaption (UDA) method to predict unlabeled data on the target domain, given labeled data from the source domain. Mainstream UDA models aim to learn domain-invariant features from the two domains or improve target discrimination based on labeled source domain data. However, such methods risk misclassifying the target domain when a discrepancy between the source and target domain is large. To tackle this problem, we propose an Adversarial self-superVised domain Adaptation network for TARget domain (AVATAR) algorithm, which outperforms state-of-the-art UDA models by reducing the domain discrepancy while enhancing the discrimination by a domain adversarial learning, deep clustering, and confidence-based pseudo-labeling strategy. Our proposed model significantly outperforms the state-of-the-art methods in two UDA benchmarks, and extensive ablation studies show the effectiveness of the proposed approach.*
+> **Abstract:** 
+*This paper presents an unsupervised domain adaptation (UDA) method for predicting unlabeled target domain data, specific to complex UDA tasks where the domain gap is significant. Mainstream UDA models aim to learn from both domains and improve target discrimination by utilizing labeled source domain data. However, the performance boost may be limited when the discrepancy between the source and target domains is large, or the target domain contains outliers. To explicitly address this issue, we propose the Adversarial self-superVised domain Adaptation network for the TARget domain (AVATAR) algorithm. It outperforms state-of-the-art UDA models by concurrently reducing domain discrepancy while enhancing discrimination through domain adversarial learning, self-supervised learning, and sample selection strategy for the target domain, all guided by deep clustering. Our proposed model significantly outperforms state-of-the-art methods on three UDA benchmarks, and extensive ablation studies and experiments demonstrate the effectiveness of our approach.*
+
 
 # Table of Contents
   - [Architecture](#Architecture)
@@ -13,6 +15,7 @@ Code release for AdVersarial self-superVised domain Adaptation network for TArge
 
 # Architecture
 ![Model Architeuture](pics/avatar_architecture.png)
+*Green and blue arrows indicate computational flow for the source and target domain, respectively. The extracted features using the feature extractor are embedded into a domain-invariant space. Source and target weights are computed based on the cosine similarity between target cluster centroids and each sample in the domain-invariant feature space. A cluster-wise threshold is computed based on the target weight. Finally, each target domain sample is assigned as a negative or positive transfer sample based on the threshold value and target weight.*
 
 # Requirements
 - Python 3.8.5
