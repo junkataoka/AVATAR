@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=AVATAR_OH
-#SBATCH --output=AVATAR_OH_output.txt
-#SBATCH --error=AVATAR_OH_error.log
+#SBATCH --job-name=AVATAR
+#SBATCH --output=AVATAR_output.txt
+#SBATCH --error=AVATAR_error.log
 #SBATCH --mail-type=ALL
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=2
@@ -114,6 +114,3 @@ else
     --minority_class_ratio 0.01
 
 fi
-
-    # --conf_pseudo_label \
-    # --dis_tar \

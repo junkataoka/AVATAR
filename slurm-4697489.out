@@ -1,1 +1,0 @@
-slurmstepd: error: execve(): bad interpreter(/usr/bin/zsh -l): No such file or directory
