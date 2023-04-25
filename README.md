@@ -76,11 +76,11 @@ Replace arguments in run_avatar.sh with those in your system.
 
 # Performance
 ## Office 31
-![Office-31 performance](pics/office31_avatar.jpg)
+![Office-31 performance](pics/office31_performance.png)
 ## Office-home
-![Office-home performance](pics/office_home_avatar.jpg)
+![Office-home performance](pics/office_home_performance.png)
 ## Image-CLEF
-![Image-CLEFT performance](pics/office_home_avatar.jpg)
+![Image-CLEFT performance](pics/imageclef_performace.png)
 
 # Citations
 ```

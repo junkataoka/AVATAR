@@ -11,7 +11,6 @@ experiment
 tsne
 bin
 tests
-pics
 run_avatar.sh
 train_avatar.sh
 .pytest_cache
