@@ -12,7 +12,7 @@ Code release for AdVersarial self-superVised domain Adaptation network for TArge
   - [Citation](#Citation)
 
 # Architecture
-![Model Architeuture](pics/avatar_architecture.jpg)
+![Model Architeuture](pics/avatar_architecture.png)
 
 # Requirements
 - Python 3.8.5
@@ -21,6 +21,7 @@ Code release for AdVersarial self-superVised domain Adaptation network for TArge
 # Dataset
 ## [Office-31](https://drive.google.com/file/d/0B4IapRTv9pJ1WGZVd1VDMmhwdlE/view)
 ## [Office-home](https://drive.google.com/file/d/0B81rNlvomiwed0V1YUxQdC1uOTg/view?usp=sharing&resourcekey=0-2SNWq0CDAuWOBRRBL7ZZsw)
+
 The structure of the dataset should be like
 ```
 Office31
