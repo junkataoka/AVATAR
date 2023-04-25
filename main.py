@@ -93,8 +93,10 @@ def main():
     dict_sd = defaultdict(list)
     dict_acc = defaultdict(list)
     # make log directory
+    print(args.log)
     if not os.path.isdir(args.log):
         os.makedirs(args.log)
+        print("create new log directory")
     if not os.path.isdir(os.path.join(args.log, "tsne")):
         os.makedirs(os.path.join(args.log, "tsne"))
     log = open(os.path.join(args.log, 'log.txt'), 'a')
@@ -154,22 +156,22 @@ def main():
             src_cs = source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, c_t.data.clone(), args)
             tar_cs = source_select(target_features, target_targets, source_features, source_targets, train_loader_target, epoch, c_t.data.clone(), args)
 
-            tsne_feature = torch.cat([source_features, target_features], axis=0)
+            # tsne_feature = torch.cat([source_features, target_features], axis=0)
 
-            tsne_true_label =torch.cat([source_targets, target_targets], axis=0).view(-1)
-            tsne_pseudo_label =torch.cat([source_targets, pseudo_labels.max(1)[1].long()], axis=0).view(-1)
+            # tsne_true_label =torch.cat([source_targets, target_targets], axis=0).view(-1)
+            # tsne_pseudo_label =torch.cat([source_targets, pseudo_labels.max(1)[1].long()], axis=0).view(-1)
 
-            tsne_embed_1 = TSNE(n_components=2).fit_transform(tsne_feature.cpu().numpy())
+            # tsne_embed_1 = TSNE(n_components=2).fit_transform(tsne_feature.cpu().numpy())
 
-            domain_label = [0 for i in range(source_features.shape[0])] + [1 for i in range(target_features.shape[0])]
+            # domain_label = [0 for i in range(source_features.shape[0])] + [1 for i in range(target_features.shape[0])]
 
-            tsne_df = pd.DataFrame(tsne_embed_1)
-            label_df = pd.DataFrame({"True_label": tsne_true_label.cpu().numpy().tolist(),
-                                     "Pseudo_label": tsne_pseudo_label.cpu().numpy().tolist(),
-                                     "Domain label": domain_label})
+            # tsne_df = pd.DataFrame(tsne_embed_1)
+            # label_df = pd.DataFrame({"True_label": tsne_true_label.cpu().numpy().tolist(),
+            #                          "Pseudo_label": tsne_pseudo_label.cpu().numpy().tolist(),
+            #                          "Domain label": domain_label})
 
-            tsne_df.to_csv(f"{args.log}/tsne/tsne1_epoch{epoch}.csv")
-            label_df.to_csv(f"{args.log}/tsne/label_epoch{epoch}.csv")
+            # tsne_df.to_csv(f"{args.log}/tsne/tsne1_epoch{epoch}.csv")
+            # label_df.to_csv(f"{args.log}/tsne/label_epoch{epoch}.csv")
 
 
             # Create threthold
@@ -203,6 +205,15 @@ def main():
         dict_acc["test_acc"].append(test_acc)
         for i in range(len(acc_for_each_class)):
             dict_acc[f"test_acc_class_{i+1}"].append(acc_for_each_class[i].numpy())
+
+        df_sd = pd.DataFrame.from_dict(dict_sd)
+        df_mu = pd.DataFrame.from_dict(dict_mu)
+        df_th = pd.DataFrame.from_dict(dict_th)
+        df_acc = pd.DataFrame.from_dict(dict_acc)
+        df_mu.to_csv(os.path.join(args.log, "df_mu.csv"), index=None)
+        df_sd.to_csv(os.path.join(args.log, "df_sd.csv"), index=None)
+        df_th.to_csv(os.path.join(args.log, "df_th.csv"), index=None)
+        df_acc.to_csv(os.path.join(args.log, "acc.csv"), index=None)
 
         if test_flag:
             # record the best prec1 and save checkpoint
@@ -239,7 +250,7 @@ def main():
             train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, 
             learn_cen, optimizer, optimizer_cls, itern, epoch, src_cs, tar_cs, args, p_label_src, p_label_tar, th)
 
-        model = model.cuda()
+        #model = model.cuda()
         count_itern_each_epoch += 1
 
     log = open(os.path.join(args.log, 'log.txt'), 'a')
@@ -251,14 +262,6 @@ def main():
     log.write(time.asctime(time.localtime(time.time())))
     log.write('\n-------------------------------------------\n')
     log.close()
-    df_sd = pd.DataFrame.from_dict(dict_sd)
-    df_mu = pd.DataFrame.from_dict(dict_mu)
-    df_th = pd.DataFrame.from_dict(dict_th)
-    df_acc = pd.DataFrame.from_dict(dict_acc)
-    df_mu.to_csv(os.path.join(args.log, "df_mu.csv"), index=None)
-    df_sd.to_csv(os.path.join(args.log, "df_sd.csv"), index=None)
-    df_th.to_csv(os.path.join(args.log, "df_th.csv"), index=None)
-    df_acc.to_csv(os.path.join(args.log, "acc.csv"), index=None)
 
 def count_epoch_on_large_dataset(train_loader_target, train_loader_source, args):
     batch_number_t = len(train_loader_target)

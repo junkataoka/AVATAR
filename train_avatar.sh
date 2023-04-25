@@ -4,10 +4,10 @@
 #SBATCH --error=AVATAR_OH_error.log
 #SBATCH --mail-type=ALL
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
+#SBATCH --ntasks-per-node=2
 #SBATCH --partition=gpucompute
 #SBATCH --mem=60GB
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:2
 
 
 if [[ "$1" != "" ]]; then
@@ -51,34 +51,18 @@ else
     BATCH=32
 fi
 
-if [[ "$7" != "" ]]; then
-    SRC_SUBSET=False
-else
-    SRC_SUBSET=True
-fi
-
-if [[ "$8" != "" ]]; then
-    TAR_SUBSET=False
-else
-    TAR_SUBSET=True
-fi
-
 if [[ "$9" != "" ]]; then
-    MAJORITY_CLASS=False
+    ID=$9
 else
-    MAJORITY_CLASS=True
+    ID=1
 fi
+echo "$ID"
 
-if [[ "$10" != "" ]]; then
-    MINORITY_CLASS_RATIO=0
-else
-    MINORITY_CLASS_RATIO=$10
-fi
 
 FILE=$( echo ${DATA##*/} )
 MODELPATH="/data/home/jkataok1/alexnet_resnet_finetune/checkpoints/${SRC}_to_${TAR}_${ARCH}_${FILE}.pkl" 
 
-if [[ "$12" != "slurm" ]]; then
+if [[ "$8" != "slurm" ]]; then
 
     python main.py \
     --arch $ARCH \
@@ -103,8 +87,10 @@ if [[ "$12" != "slurm" ]]; then
 
 
 else
-    module load cuda11.3/toolkit/11.3.0                                         │
-    srun -n1 --gpus=1 --exclusive -c1 python main.py \
+    source ~/mlenv/bin/activate
+    module load cuda11.1/toolkit/11.1.1
+
+    srun -n1 --gpus=2 --exclusive -c1 python main.py \
     --arch $ARCH \
     --data_path_source $DATA \
     --src $SRC \
@@ -116,19 +102,18 @@ else
     --pretrained_path $MODELPATH \
     --batch_size $BATCH \
     --epochs $EPOCH \
-    --cluster_iter 100 \
+    --cluster_iter 5 \
     --lr 0.001 \
     --num_classes $NCLASS \
     --domain_adv \
     --dis_src \
-    --dis_tar \
-    --conf_pseudo_label \
     --log ./checkpoints/$FILE \
-    --src_subset $SRC_SUBSET \
-    --tar_subset $TAR_SUBSET \
-    --majority_class $MAJORITY_CLASS \
-    --minority_class_ratio $MINORITY_CLASS_RATIO \
-    --ID 1
-
+    --id $ID \
+    --tar_subset \
+    --majority_class 0 \
+    --minority_class_ratio 0.01
 
 fi
+
+    # --conf_pseudo_label \
+    # --dis_tar \

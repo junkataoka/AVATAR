@@ -24,7 +24,7 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
     KDD 2004.
     """
 
-    def __init__(self, n_clusters=3, max_iter=50, tol=1e-4, random_state=None,
+    def __init__(self, n_clusters=3, max_iter=10, tol=1e-4, random_state=None,
                  kernel="linear", gamma=None, degree=3, coef0=1,
                  kernel_params=None, verbose=0):
         self.n_clusters = n_clusters

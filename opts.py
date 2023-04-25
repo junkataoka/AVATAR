@@ -48,7 +48,7 @@ def opts():
     parser.add_argument('--pretrained_path', type=str, default="", help='path of pretrained model')
     parser.add_argument('--tsne', action='store_true', help='whether to use tsne')
     parser.add_argument('--warmup', type=float, default=5, help='warmup epoch size')
-    parser.add_argument('--ID', type=int, default=1, metavar='N', help='Training ID')
+    parser.add_argument('--id', type=int, default=1, help='Training ID')
 
     args = parser.parse_args()
     if args.domain_adv:
@@ -85,16 +85,22 @@ def opts():
     else:
         tsne_flag = ""
 
-    if args.ID:
-        ID = str(args.ID)
+    if args.id:
+        id = str(args.id)
     else:
-        ID = ""
-    if args.subset:
-        subset_name = "ratio" + str(args.minotiry_class_ratio)
+        id = ""
+
+    if args.src_subset:
+        src_subset_name = "_src_subset" + str(args.minority_class_ratio)
     else:
-        subset_name = ""
+        src_subset_name = ""
+
+    if args.tar_subset:
+        tar_subset_name = "_tar_subset" + str(args.minority_class_ratio)
+    else:
+        tar_subset_name = ""
 
     args.log = args.log + '_adapt_' + args.src + '2' + args.tar + '_bs' + str(args.batch_size) + '_' + args.arch + '_lr' + str(args.lr) \
-        + domain_adv_flag + dis_src_flag + dis_tar_flag + dis_feat_src_flag + dis_feat_tar_flag + conf_pseudo_label_flag + "_" + subset_name + "_" + "ID" + ID
+        + domain_adv_flag + dis_src_flag + dis_tar_flag + dis_feat_src_flag + dis_feat_tar_flag + conf_pseudo_label_flag + src_subset_name + tar_subset_name + "ID" + id
 
     return args
