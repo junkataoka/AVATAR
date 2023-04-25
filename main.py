@@ -54,6 +54,7 @@ def main():
     torch.manual_seed(12)
     params = []
     base_params = []
+
     # apply different learning rates to different layer
     if "vit" in args.arch or "dino" in args.arch:
         dfs_freeze_vit(model)
@@ -218,7 +219,6 @@ def main():
         if test_flag:
             # record the best prec1 and save checkpoint
             log = open(os.path.join(args.log, 'log.txt'), 'a')
-            log = open(os.path.join(args.log, 'log.txt'), 'a')
             if test_acc > best_prec1:
                 counter = 0
                 best_prec1 = test_acc
@@ -250,7 +250,6 @@ def main():
             train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, 
             learn_cen, optimizer, optimizer_cls, itern, epoch, src_cs, tar_cs, args, p_label_src, p_label_tar, th)
 
-        #model = model.cuda()
         count_itern_each_epoch += 1
 
     log = open(os.path.join(args.log, 'log.txt'), 'a')
@@ -286,6 +285,3 @@ def dfs_freeze_vit(model):
 
 if __name__ == '__main__':
     main()
-
-
-#
