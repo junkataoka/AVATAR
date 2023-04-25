@@ -12,7 +12,7 @@ Code release for AdVersarial self-superVised domain Adaptation network for TArge
   - [Citation](#Citation)
 
 # Architecture
-![Model Architeuture](pics/AVATAR_architecture.jpg)
+![Model Architeuture](pics/avatar_architecture.jpg)
 
 # Requirements
 - Python 3.8.5
@@ -71,20 +71,21 @@ Office31
 |_ ...
 ```
 # Training
-Replace arguments in a_to_w_run.sh with those in your system.
+Replace arguments in run_avatar.sh with those in your system.
 
 # Performance
 ## Office 31
 ![Office-31 performance](pics/office31_avatar.jpg)
 ## Office-home
 ![Office-home performance](pics/office_home_avatar.jpg)
+## Image-CLEF
+![Image-CLEFT performance](pics/office_home_avatar.jpg)
 
 # Citations
 ```
 @InProceedings{AVATAR,
   title={AdVersarial self-superVised domain Adaptation network for TArget domain (AVATAR)},
   author={Jun Kataoka and Hyunsoo Yoon},
-  booktitle={INFORMS 2022},
   year={2022},
 }
 ```
