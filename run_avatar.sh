@@ -106,6 +106,7 @@ if [[ "$1" == "slurm" ]]; then
     # sbatch train_avatar.sh vitb8 real_world product 65 $home/AVATAR/data/datasets/office_home 200 32 slurm
 else
     home="$home"
+
     # # VITS16 on Office31
     # source train_avatar.sh vits16 amazon webcam 31 $home/AVATAR/data/datasets/office31 200 32
     # source train_avatar.sh vits16 amazon dslr 31 $home/AVATAR/data/datasets/office31 200 32

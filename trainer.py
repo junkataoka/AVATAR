@@ -66,16 +66,10 @@ def train(
         loss += weight_tar_cls * tardis_loss
 
     if args.dis_feat_tar:
-    # Update target domain
         prob_pred = (1 + (f_t.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
-        # prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
 
         tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs, p_label_src, p_label_tar, th, emb=True)
         loss += weight_tar_cluster * tar_cluster_loss1
-
-        # tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs, p_label_src, p_label_tar, th, emb=True)
-        # loss += weight_tar_cluster * tar_cluster_loss2
-
 
     # model forward on source
     f_s, ca_s = model(input_source)
@@ -90,9 +84,6 @@ def train(
     if args.dis_feat_src:
         prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
         loss += weight_src_cluster * SrcClassifyLoss(args, epoch, prob_pred, target_source, index, src_cs, p_label_src, p_label_tar, emb=True)
-
-        # prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
-        # loss += weight_src_cluster * SrcClassifyLoss(args, epoch, prob_pred_2, target_source, index, src_cs, p_label_src, p_label_tar, emb=True)
 
     losses.update(loss.data.item(), input_target.size(0))
     # loss backward and network update
@@ -115,13 +106,9 @@ def train(
 
     if args.dis_feat_tar:
         prob_pred = (1 + (f_t.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
-        # prob_pred_2 = (1 + (f_t_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
 
         tar_cluster_loss1 = TarDisClusterLoss(args, epoch, prob_pred, target_target, tar_index, tar_cs, p_label_src, p_label_tar, th, emb=True)
         loss += weight_tar_cluster * tar_cluster_loss1
-
-        # tar_cluster_loss2 = TarDisClusterLoss(args, epoch, prob_pred_2, target_target, tar_index, tar_cs, p_label_src, p_label_tar, th, emb=True)
-        # loss += weight_tar_cluster * tar_cluster_loss2
 
     f_s, ca_s = model(input_source)
     # model forward on source
@@ -136,9 +123,6 @@ def train(
     if args.dis_feat_src:
         prob_pred = (1 + (f_s.unsqueeze(1) - learn_cen.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
         loss += weight_src_cluster * SrcClassifyLoss(args, epoch, prob_pred, target_source, index, src_cs, p_label_src, p_label_tar, emb=True)
-
-        # prob_pred_2 = (1 + (f_s_2.unsqueeze(1) - learn_cen_2.unsqueeze(0)).pow(2).sum(2)).pow(- (1) / 2)
-        # loss += weight_src_cluster * SrcClassifyLoss(args, epoch, prob_pred_2, target_source, index, src_cs, p_label_src, p_label_tar, emb=True)
 
     prec1_s = accuracy(ca_s.data, target_source, topk=(1,))[0]
     top1_source.update(prec1_s.item(), input_source.size(0))
