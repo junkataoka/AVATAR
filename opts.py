@@ -4,7 +4,7 @@ def opts():
     parser = argparse.ArgumentParser(description='AVATAR', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     #model
     # datasets
-    parser.add_argument('--data_path_source', type=str, default='./data/datasets/Office31/', help='root of source training set')
+    parser.add_argument('--data_path_source', type=str, default='./data/datasets/office31/', help='root of source training set')
     parser.add_argument('--data_path_target', type=str, default='./data/datasets/Office31/', help='root of target training set')
     parser.add_argument('--data_path_target_t', type=str, default='./data/datasets/Office31/', help='root of target test set')
     parser.add_argument('--src', type=str, default='amazon', help='source training set')

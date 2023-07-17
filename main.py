@@ -120,7 +120,6 @@ def main():
     batch_number = count_epoch_on_large_dataset(train_loader_target, train_loader_source, args)
     num_itern_total = args.epochs * batch_number
 
-    new_epoch_flag = False # if new epoch, new_epoch_flag=True
     test_flag = False # if test, test_flag=True
     src_cs = torch.cuda.FloatTensor(len(train_loader_source.dataset.tgts)).fill_(1) # initialize source weights
     tar_cs = torch.cuda.FloatTensor(len(train_loader_target.dataset.tgts)).fill_(1) # initialize source weights
@@ -131,7 +130,8 @@ def main():
         # evaluate on the target training and test data
         if (itern == 0) or (count_itern_each_epoch == batch_number):
             prec1, c_s, c_t, c_srctar, source_features, source_targets, \
-            target_features, target_targets, pseudo_labels, labels_src, labels_tar = validate_compute_cen(val_loader_target_t, val_loader_source, model, criterion, epoch, args)
+            target_features, target_targets, pseudo_labels, labels_src, labels_tar = validate_compute_cen(val_loader_target_t, 
+                                                                                                          val_loader_source, model, criterion, epoch, args)
 
             test_acc, acc_for_each_class = validate(val_loader_target, model, criterion, epoch, args)
             test_flag = True
@@ -155,31 +155,13 @@ def main():
                 epoch += 1
 
             src_cs = source_select(source_features, source_targets, target_features, pseudo_labels, train_loader_source, epoch, c_t.data.clone(), args)
-            tar_cs = source_select(target_features, target_targets, source_features, source_targets, train_loader_target, epoch, c_t.data.clone(), args)
-
-            # tsne_feature = torch.cat([source_features, target_features], axis=0)
-
-            # tsne_true_label =torch.cat([source_targets, target_targets], axis=0).view(-1)
-            # tsne_pseudo_label =torch.cat([source_targets, pseudo_labels.max(1)[1].long()], axis=0).view(-1)
-
-            # tsne_embed_1 = TSNE(n_components=2).fit_transform(tsne_feature.cpu().numpy())
-
-            # domain_label = [0 for i in range(source_features.shape[0])] + [1 for i in range(target_features.shape[0])]
-
-            # tsne_df = pd.DataFrame(tsne_embed_1)
-            # label_df = pd.DataFrame({"True_label": tsne_true_label.cpu().numpy().tolist(),
-            #                          "Pseudo_label": tsne_pseudo_label.cpu().numpy().tolist(),
-            #                          "Domain label": domain_label})
-
-            # tsne_df.to_csv(f"{args.log}/tsne/tsne1_epoch{epoch}.csv")
-            # label_df.to_csv(f"{args.log}/tsne/label_epoch{epoch}.csv")
-
+            tar_cs = source_select(target_features, labels_tar, source_features, source_targets, train_loader_target, epoch, c_t.data.clone(), args)
 
             # Create threthold
-            m = torch.zeros((target_targets.size(0), args.num_classes)).fill_(0).cuda()
-            sd = torch.zeros((target_targets.size(0), args.num_classes)).fill_(0).cuda()
-            m.scatter_(dim=1, index=target_targets.unsqueeze(1), src=tar_cs.unsqueeze(1).cuda()) # assigned pseudo labels
-            sd.scatter_(dim=1, index=target_targets.unsqueeze(1), src=tar_cs.unsqueeze(1).cuda()) # assigned pseudo labels
+            m = torch.zeros((labels_tar.size(0), args.num_classes)).fill_(0).cuda()
+            sd = torch.zeros((labels_tar.size(0), args.num_classes)).fill_(0).cuda()
+            m.scatter_(dim=1, index=labels_tar.unsqueeze(1), src=tar_cs.unsqueeze(1).cuda()) # assigned pseudo labels
+            sd.scatter_(dim=1, index=labels_tar.unsqueeze(1), src=tar_cs.unsqueeze(1).cuda()) # assigned pseudo labels
 
             for i in range(args.num_classes):
                 mu = m[m[:, i] != 0, i].mean()
@@ -188,10 +170,6 @@ def main():
                 dict_mu[i].append(mu.cpu().numpy())
                 dict_sd[i].append(sdv.cpu().numpy())
                 dict_th[i].append(th[i].cpu().numpy())
-
-            batch_number = count_epoch_on_large_dataset(train_loader_target, train_loader_source, args)
-            train_loader_target_batch = enumerate(train_loader_target)
-            train_loader_source_batch = enumerate(train_loader_source)
 
             del source_features
             del source_targets
@@ -246,6 +224,8 @@ def main():
                 break
 
         # train for one iteration
+        train_loader_target_batch = enumerate(train_loader_target)
+        train_loader_source_batch = enumerate(train_loader_source)
         train_loader_source_batch, train_loader_target_batch = train(
             train_loader_source, train_loader_source_batch, train_loader_target, train_loader_target_batch, model, 
             learn_cen, optimizer, optimizer_cls, itern, epoch, src_cs, tar_cs, args, p_label_src, p_label_tar, th)

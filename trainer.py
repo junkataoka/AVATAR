@@ -37,12 +37,14 @@ def train(
     try:
         (input_target, target_target, tar_index) = train_loader_target_batch.__next__()[1]
     except StopIteration:
+        print("target data is exhausted, re-loading target data")
         train_loader_target_batch = enumerate(train_loader_target)
         (input_target, target_target, tar_index) = train_loader_target_batch.__next__()[1]
 
     try:
         (input_source, target_source, index) = train_loader_source_batch.__next__()[1]
     except StopIteration:
+        print("source data is exhausted, re-loading source data")
         train_loader_source_batch = enumerate(train_loader_source)
         (input_source, target_source, index) = train_loader_source_batch.__next__()[1]
 
@@ -182,7 +184,7 @@ def TarDisClusterLoss(args, epoch, output, target, index, tar_cs, p_label_src, p
     if not emb:
         prob_p_dis = prob_p[:, -1].unsqueeze(1)
         prob_p_class = prob_p[:, :-1]
-        prob_p_class = prob_p_class / (1-prob_p_dis)
+        prob_p_class = prob_p_class / (1-prob_p_dis+1e-6)
 
     else:
         prob_p_class = prob_p
@@ -225,7 +227,7 @@ def SrcClassifyLoss(args, epoch, output, target, index, src_cs, p_label_src, p_l
     if not emb:
         prob_p_dis = prob_p[:, -1].unsqueeze(1)
         prob_p_class = prob_p[:, :-1]
-        prob_p_class = prob_p_class / (1-prob_p_dis)
+        prob_p_class = prob_p_class / (1-prob_p_dis+1e-6)
     else:
         prob_p_class = prob_p
     prob_q = torch.zeros(prob_p_class.size(), dtype=torch.float).cuda()

@@ -76,7 +76,7 @@ if [[ "$8" != "slurm" ]]; then
     --pretrained_path $MODELPATH \
     --batch_size $BATCH \
     --epochs $EPOCH \
-    --cluster_iter 100 \
+    --cluster_iter 10 \
     --lr 0.001 \
     --num_classes $NCLASS \
     --domain_adv \
@@ -102,15 +102,13 @@ else
     --pretrained_path $MODELPATH \
     --batch_size $BATCH \
     --epochs $EPOCH \
-    --cluster_iter 5 \
+    --cluster_iter 510\
     --lr 0.001 \
     --num_classes $NCLASS \
     --domain_adv \
     --dis_src \
+    --dis_tar \
+    --conf_pseudo_label \
     --log ./checkpoints/$FILE \
-    --id $ID \
-    --tar_subset \
-    --majority_class 0 \
-    --minority_class_ratio 0.01
 
 fi

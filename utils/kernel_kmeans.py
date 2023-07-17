@@ -4,7 +4,6 @@
 # License: BSD 3 clause
 
 import numpy as np
-
 from sklearn.base import BaseEstimator, ClusterMixin
 from sklearn.metrics.pairwise import pairwise_kernels
 from sklearn.utils import check_random_state
