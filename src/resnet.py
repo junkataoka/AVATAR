@@ -1,6 +1,4 @@
 import torch.nn as nn
-import math
-import torch.utils.model_zoo as model_zoo
 import torch
 import torchvision.models as models
 from torchvision.models.resnet import ResNet, BasicBlock, Bottleneck
@@ -13,7 +11,7 @@ class MyResNet50(ResNet):
         self.fc1 = nn.Sequential(nn.Linear(num_of_feature_map, num_of_feature_map//4),
         nn.BatchNorm1d(num_of_feature_map//4),
         nn.ReLU(inplace=True))
-        self.fc2 = nn.Linear(num_of_feature_map//4, n_class+1)
+        self.fc2 = nn.Sequential(nn.Linear(num_of_feature_map//4, n_class+1), nn.Softmax(dim=1))
 
     def forward(self, x):
         # change forward here
@@ -31,7 +29,7 @@ class MyResNet50(ResNet):
         x = torch.flatten(x, 1)
         x2 = self.fc1(x)
         ca = self.fc2(x2)
-        return x2, ca
+        return ca, x2
 
 class MyResNet101(ResNet):
     def __init__(self, n_class):

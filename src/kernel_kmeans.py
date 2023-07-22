@@ -4,13 +4,46 @@
 # License: BSD 3 clause
 
 import numpy as np
+
 from sklearn.base import BaseEstimator, ClusterMixin
 from sklearn.metrics.pairwise import pairwise_kernels
 from sklearn.utils import check_random_state
 
 import os
 import time
+import torch
+import gc
 
+
+def kernel_k_means_wrapper(target_features, target_targets, 
+                   pseudo_labels, epoch, args, best_prec):
+
+    # define kernel k-means clustering
+    kkm = KernelKMeans(n_clusters=args.num_classes, max_iter=10, 
+                       random_state=0, kernel="rbf", 
+                       gamma=None, verbose=1)
+    kkm.fit(np.array(target_features.cpu()), 
+            initial_label=np.array(pseudo_labels.cpu()), 
+            true_label=np.array(target_targets.cpu()), args=args, epoch=epoch)
+
+    idx_sim = torch.from_numpy(kkm.labels_).cuda()
+    c_tar = torch.cuda.FloatTensor(args.num_classes, target_features.size(1)).fill_(0)
+    count = torch.cuda.FloatTensor(args.num_classes, 1).fill_(0)
+    for i in range(target_targets.size(0)):
+        c_tar[idx_sim[i]] += target_features[i]
+        count[idx_sim[i]] += 1
+    c_tar /= (count + 1e-6)
+
+    prec1 = kkm.prec1_
+    is_best = prec1 > best_prec
+    if is_best:
+        best_prec = prec1
+
+    gc.collect()
+    torch.cuda.empty_cache()
+
+    # return cluster center and best precision and prediction from k-means
+    return c_tar, idx_sim, best_prec
 
 class KernelKMeans(BaseEstimator, ClusterMixin):
     """
