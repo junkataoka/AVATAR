@@ -2,6 +2,7 @@ checkpoints/*
 .neptune
 .ipynb_checkpoints
 data/*
+checkpoints/*
 *srum.sh
 env
 figures/
@@ -11,7 +12,8 @@ experiment
 tsne
 bin
 tests
-run_avatar.sh
-train_avatar.sh
 .pytest_cache
 .vscode
+src_models/*
+wandb
+log/*

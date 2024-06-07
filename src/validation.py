@@ -3,12 +3,10 @@ import torch
 from helper import sort_list
 
 
-def validate(model, src_dataloader, tar_dataloader, num_classes, logger):
+def validate(model, src_dataloader, tar_dataloader, num_classes):
     model.eval()
     s_cls_metric = torchmetrics.Accuracy(task="multiclass", num_classes=num_classes)
     t_cls_metric = torchmetrics.Accuracy(task="multiclass", num_classes=num_classes)
-    s_domain_metric = torchmetrics.Accuracy(task="binary", num_classes=2) 
-    t_domain_metric = torchmetrics.Accuracy(task="binary", num_classes=2)
 
     out_dict = {
         "src_label": [],
@@ -32,15 +30,17 @@ def validate(model, src_dataloader, tar_dataloader, num_classes, logger):
         for i, (idx, src_input, src_target) in enumerate(src_dataloader):
 
             src_input = src_input.float().cuda()
-            src_target = src_target.long().cuda()
-            src_cls_p, src_dis_p, src_feature = model(src_input)
+            src_target = src_target.unsqueeze(-1).long().cuda()
+            src_cls_p, _, src_feature = model(src_input)
 
             if i == 0:
                 c_src = torch.cuda.FloatTensor(num_classes, src_feature.shape[-1]).fill_(0)
                 count_s = torch.cuda.FloatTensor(num_classes, 1).fill_(0)
             
             src_onehot = torch.cuda.FloatTensor(src_cls_p.size()).fill_(0)
+
             src_onehot.scatter_(1, src_target, torch.ones(src_cls_p.size(0), 1).cuda())
+            #src_onehot[i][src_target[i][j]] = torch.ones(src_cls_p.size(0), 1).cuda()[i][j]
 
             c_src += (src_feature.unsqueeze(1) * src_onehot.unsqueeze(2)).sum(0)
             count_s += src_onehot.sum(0).unsqueeze(1)
@@ -53,14 +53,14 @@ def validate(model, src_dataloader, tar_dataloader, num_classes, logger):
 
         c_src /= count_s
         s_acc_all = s_cls_metric.compute()  
-        out_dict["src_center"] = c_src
+        out_dict["src_center"] = c_src.cpu()
         out_dict["src_acc"] = s_acc_all
 
         for i, (idx, tar_input, tar_target) in enumerate(tar_dataloader):
 
             tar_input = tar_input.float().cuda()
-            tar_target = tar_target.long().cuda()
-            tar_cls_p, tar_dis_p, tar_feature = model(tar_input)
+            tar_target = tar_target.unsqueeze(-1).long().cuda()
+            tar_cls_p, _, tar_feature = model(tar_input)
 
             if i == 0:
                 c_tar = torch.cuda.FloatTensor(num_classes, tar_feature.shape[-1]).fill_(0)
@@ -81,15 +81,16 @@ def validate(model, src_dataloader, tar_dataloader, num_classes, logger):
 
 
         c_tar /= count_t
-        out_dict["tar_center"] = c_tar
+        out_dict["tar_center"] = c_tar.cpu()
         out_dict["tar_acc"] = t_cls_metric.compute()  
 
-    out_dict = {k: torch.concat(v, dim=0) if type(v) is list else v for k, v in out_dict.items()}
-    out_dict["src_label"] = sort_list(out_dict["src_label"], key=out_dict["src_index"], dtype=torch.long)
-    out_dict["src_feature"] = sort_list(out_dict["src_feature"], key=out_dict["src_index"], dtype=torch.float32)
-    out_dict["tar_label"] = sort_list(out_dict["tar_label"], key=out_dict["tar_index"], dtype=torch.long)
-    out_dict["tar_label_ps"] = sort_list(out_dict["tar_label_ps"], key=out_dict["tar_index"], dtype=torch.long)
-    out_dict["tar_feature"] = sort_list(out_dict["tar_feature"], key=out_dict["tar_index"], dtype=torch.float32)
+    out_dict = {k: torch.concat(v, dim=0).cpu() if type(v) is list else v for k, v in out_dict.items()}
+    out_dict["src_label"] = sort_list(out_dict["src_label"].cpu(), key=out_dict["src_index"], dtype=torch.long)
+    out_dict["src_feature"] = sort_list(out_dict["src_feature"].cpu(), key=out_dict["src_index"], dtype=torch.float32)
+    out_dict["tar_label"] = sort_list(out_dict["tar_label"].cpu(), key=out_dict["tar_index"], dtype=torch.long)
+    out_dict["tar_label_ps"] = sort_list(out_dict["tar_label_ps"].cpu(), key=out_dict["tar_index"], dtype=torch.long)
+    out_dict["tar_feature"] = sort_list(out_dict["tar_feature"].cpu(), key=out_dict["tar_index"], dtype=torch.float32)
+    # Send the dict to cpu
     
     return out_dict
 

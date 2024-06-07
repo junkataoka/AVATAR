@@ -29,8 +29,6 @@ def generate_dataset(data_dir, src_data, tar_data, src_domain, tar_domain):
     # Data loading code
     traindir = os.path.join(data_dir, src_data, src_domain)
     traindir_t = os.path.join(data_dir, tar_data, tar_domain)
-    valdir = os.path.join(data_dir, tar_data, tar_domain)
-    valdir_t = os.path.join(data_dir, tar_data, tar_domain)
 
     if not os.path.isdir(traindir):
         raise ValueError ('the require data path is not exist, please download the dataset')
@@ -62,7 +60,6 @@ def generate_dataset(data_dir, src_data, tar_data, src_domain, tar_domain):
     source_train_dataset = ImageFolder(root=traindir, transform=src_data_transform_train)
     source_test_dataset = ImageFolder(root=traindir, transform=data_transform_test)
     target_train_dataset = ImageFolder(root=traindir_t, transform=tar_data_transform_train)
-    target_test_dataset = ImageFolder(root=valdir, transform=data_transform_test)
-    target_test_dataset_t = ImageFolder(root=valdir_t, transform=tar_data_transform_train)
+    target_test_dataset = ImageFolder(root=traindir_t, transform=data_transform_test)
 
-    return source_train_dataset, source_test_dataset, target_train_dataset, target_test_dataset, target_test_dataset_t
+    return source_train_dataset, source_test_dataset, target_train_dataset, target_test_dataset

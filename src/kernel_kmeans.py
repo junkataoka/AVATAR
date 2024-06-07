@@ -26,9 +26,9 @@ def kernel_k_means_wrapper(target_features, target_targets,
             initial_label=np.array(pseudo_labels.cpu()), 
             true_label=np.array(target_targets.cpu()), args=args, epoch=epoch)
 
-    idx_sim = torch.from_numpy(kkm.labels_).cuda()
-    c_tar = torch.cuda.FloatTensor(args.num_classes, target_features.size(1)).fill_(0)
-    count = torch.cuda.FloatTensor(args.num_classes, 1).fill_(0)
+    idx_sim = torch.from_numpy(kkm.labels_)
+    c_tar = torch.FloatTensor(args.num_classes, target_features.size(1)).fill_(0)
+    count = torch.FloatTensor(args.num_classes, 1).fill_(0)
     for i in range(target_targets.size(0)):
         c_tar[idx_sim[i]] += target_features[i]
         count[idx_sim[i]] += 1

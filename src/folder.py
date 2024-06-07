@@ -133,13 +133,13 @@ class DatasetFolder(data.Dataset):
             sample = self.transform(sample)
 
         if (self.transform_gray is not None) and (self.transform_aug is not None):
-            return sample, sample_aug, sample_gray, target, index
+            return index, sample, sample_aug, sample_gray, target
         elif (self.transform_aug is not None):
-            return sample, sample_aug, target, index
+            return index, sample, sample_aug, target
         elif (self.transform_gray is not None):
-            return sample, sample_gray, target, index
+            return index, sample, sample_gray, target
         else:
-            return sample, target, index
+            return index, sample, target
 
     def __len__(self):
         return len(self.samples)

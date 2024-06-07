@@ -61,74 +61,23 @@ test: loadmodule
 # PROJECT RULES                                                                 #
 #################################################################################
 ## Pretrain
-.PHONY: pretrain_CWRU2CWRU
-pretrain_CWRU2CWRU: loadmodule
-	# sbatch pretrain_slurm_CWRU2CWRU.sh 1 0; \
-	# sbatch pretrain_slurm_CWRU2CWRU.sh 2 0; \
-	# sbatch pretrain_slurm_CWRU2CWRU.sh 3 0; \
+.PHONY: pretrain_office31
+pretrain_office31: loadmodule
+	sbatch pretrain_avatar_office31.sh amazon webcam; \
+	sbatch pretrain_avatar_office31.sh amazon dslr; \
+	sbatch pretrain_avatar_office31.sh dslr amazon; \
+	sbatch pretrain_avatar_office31.sh dslr webcam; \
+	sbatch pretrain_avatar_office31.sh webcam amazon; \
+	sbatch pretrain_avatar_office31.sh webcam dslr; \
 
-	# sbatch pretrain_slurm_CWRU2CWRU.sh 0 1; \
-	# sbatch pretrain_slurm_CWRU2CWRU.sh 3 1; \
-	# sbatch pretrain_slurm_CWRU2CWRU.sh 2 1; \
-
-	# sbatch pretrain_slurm_CWRU2CWRU.sh 0 2; \
-	# sbatch pretrain_slurm_CWRU2CWRU.sh 1 2; \
-	# sbatch pretrain_slurm_CWRU2CWRU.sh 3 2; \
-
-	# sbatch pretrain_slurm_CWRU2CWRU.sh 0 3; \
-	# sbatch pretrain_slurm_CWRU2CWRU.sh 1 3; \
-	# sbatch pretrain_slurm_CWRU2CWRU.sh 2 3; \
-	sbatch pretrain_slurm_CWRU2CWRU.sh all all; \
-
-.PHONY: train_CWRU2CWRU
-train_CWRU2CWRU: loadmodule
-	# sbatch train_slurm_CWRU2CWRU.sh 1 0; \
-	# sbatch train_slurm_CWRU2CWRU.sh 2 0; \
-	# sbatch train_slurm_CWRU2CWRU.sh 3 0; \
-
-	# sbatch train_slurm_CWRU2CWRU.sh 0 1; \
-	# sbatch train_slurm_CWRU2CWRU.sh 3 1; \
-	# sbatch train_slurm_CWRU2CWRU.sh 2 1; \
-
-	# sbatch train_slurm_CWRU2CWRU.sh 0 2; \
-	# sbatch train_slurm_CWRU2CWRU.sh 1 2; \
-	# sbatch train_slurm_CWRU2CWRU.sh 3 2; \
-
-	# sbatch train_slurm_CWRU2CWRU.sh 0 3; \
-	# sbatch train_slurm_CWRU2CWRU.sh 1 3; \
-	# sbatch train_slurm_CWRU2CWRU.sh 2 3; \
-
-.PHONY: pretrain_CWRU2IMS
-pretrain_CWRU2IMS: loadmodule
-	sbatch pretrain_slurm_CWRU2IMS.sh 0 0; \
-	sbatch pretrain_slurm_CWRU2IMS.sh 1 0; \
-	sbatch pretrain_slurm_CWRU2IMS.sh 2 0; \
-	sbatch pretrain_slurm_CWRU2IMS.sh 3 0; \
-	sbatch pretrain_slurm_CWRU2IMS.sh all 0; \
-	
-.PHONY: train_CWRU2IMS
-train_CWRU2IMS: loadmodule
-	sbatch train_slurm_CWRU2IMS.sh 0 0; \
-	sbatch train_slurm_CWRU2IMS.sh 1 0; \
-	sbatch train_slurm_CWRU2IMS.sh 2 0; \
-	sbatch train_slurm_CWRU2IMS.sh 3 0; \
-	sbatch train_slurm_CWRU2IMS.sh all 0; \
-
-.PHONY: pretrain_IMS2CWRU
-pretrain_IMS2CWRU: loadmodule
-	#sbatch pretrain_slurm_IMS2CWRU.sh 0 0; \
-	#sbatch pretrain_slurm_IMS2CWRU.sh 0 1; \
-	#sbatch pretrain_slurm_IMS2CWRU.sh 0 2; \
-	#sbatch pretrain_slurm_IMS2CWRU.sh 0 3; \
-	sbatch pretrain_slurm_IMS2CWRU.sh 0 all; \
-	
-.PHONY: train_IMS2CWRU
-train_IMS2CWRU: loadmodule
-	sbatch train_slurm_IMS2CWRU.sh 0 0; \
-	sbatch train_slurm_IMS2CWRU.sh 0 1; \
-	sbatch train_slurm_IMS2CWRU.sh 0 2; \
-	sbatch train_slurm_IMS2CWRU.sh 0 3; \
-	sbatch train_slurm_IMS2CWRU.sh 0 all; \
+.PHONY: train_office31
+train_office31: loadmodule
+	sbatch train_avatar_office31.sh amazon webcam; \
+	#sbatch train_avatar_office31.sh amazon dslr; \
+	sbatch train_avatar_office31.sh dslr amazon; \
+	sbatch train_avatar_office31.sh dslr webcam; \
+	sbatch train_avatar_office31.sh webcam amazon; \
+	sbatch train_avatar_office31.sh webcam dslr; \
 
 #################################################################################
 # Self Documenting Commands                                                     #

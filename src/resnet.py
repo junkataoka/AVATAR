@@ -8,10 +8,16 @@ class MyResNet50(ResNet):
     def __init__(self, n_class):
         super(MyResNet50, self).__init__(Bottleneck, [3, 4, 6, 3])
         num_of_feature_map = self.fc.in_features
-        self.fc1 = nn.Sequential(nn.Linear(num_of_feature_map, num_of_feature_map//4),
+
+        #self.encoder_fc = nn.Sequential(nn.Linear(num_of_feature_map, num_of_feature_map),
+        #nn.BatchNorm1d(num_of_feature_map),
+        #nn.ReLU(inplace=True))
+
+        self.cls_fc1 = nn.Sequential(nn.Linear(num_of_feature_map, num_of_feature_map//4),
         nn.BatchNorm1d(num_of_feature_map//4),
         nn.ReLU(inplace=True))
-        self.fc2 = nn.Sequential(nn.Linear(num_of_feature_map//4, n_class+1), nn.Softmax(dim=1))
+
+        self.cls_fc2 = nn.Sequential(nn.Linear(num_of_feature_map//4, n_class+1), nn.Softmax(dim=1))
 
     def forward(self, x):
         # change forward here
@@ -27,9 +33,15 @@ class MyResNet50(ResNet):
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        x2 = self.fc1(x)
-        ca = self.fc2(x2)
-        return ca, x2
+
+        ca = self.cls_fc1(x)
+        ca = self.cls_fc2(ca)
+
+        prob_p_dis = ca[:, -1].unsqueeze(1)
+        prob_p_class = ca[:, :-1]
+        prob_p_class = prob_p_class / (1-prob_p_dis+1e-8)
+
+        return prob_p_class, prob_p_dis, x
 
 class MyResNet101(ResNet):
     def __init__(self, n_class):

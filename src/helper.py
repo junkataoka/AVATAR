@@ -182,11 +182,14 @@ def adjust_learning_rate(optimizer, lr, cur_epoch, epochs):
 
 def get_params(model, param_name):
     params = list()
+    params_other = list()
     for p in param_name:
         for k, v in model.named_parameters():
             if p in k:
-                params += [{'params': v, 'name': p}]
-    return params
+                params += [{'params': v, 'name': k}]
+            else:
+                params_other += [{'params': v, 'name': k}]
+    return params, params_other
 
 
 def compute_weights(features, targets, cen):
@@ -204,10 +207,10 @@ def compute_weights(features, targets, cen):
 
 def compute_threthold(weights, targets, num_classes):
 
-    m = torch.zeros((targets.size(0), num_classes)).fill_(0).cuda()
-    sd = torch.zeros((targets.size(0), num_classes)).fill_(0).cuda()
-    m.scatter_(dim=1, index=targets.unsqueeze(1), src=weights.unsqueeze(1).cuda()) # assigned pseudo labels
-    sd.scatter_(dim=1, index=targets.unsqueeze(1), src=weights.unsqueeze(1).cuda()) # assigned pseudo labels
+    m = torch.zeros((targets.size(0), num_classes)).fill_(0)
+    sd = torch.zeros((targets.size(0), num_classes)).fill_(0)
+    m.scatter_(dim=1, index=targets.unsqueeze(1), src=weights.unsqueeze(1)) # assigned pseudo labels
+    sd.scatter_(dim=1, index=targets.unsqueeze(1), src=weights.unsqueeze(1)) # assigned pseudo labels
     th = torch.zeros(num_classes).cuda()
 
     for i in range(num_classes):
